@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { signupApi, loginApi, refreshApi } from "../api/authApi";
 
-// SIGNUP
 export const signupUser = createAsyncThunk(
   "auth/signup",
   async (data, { rejectWithValue }) => {
@@ -14,7 +13,6 @@ export const signupUser = createAsyncThunk(
   }
 );
 
-// LOGIN
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (data, { rejectWithValue }) => {
@@ -27,13 +25,12 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// REFRESH TOKEN
 export const refreshToken = createAsyncThunk(
   "auth/refresh",
   async (_, { rejectWithValue }) => {
     try {
       const res = await refreshApi();
-      return res.data; // { accessToken, user }
+      return res.data; 
     } catch {
       return rejectWithValue("Session expired");
     }
@@ -56,7 +53,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // SIGNUP
       .addCase(signupUser.pending, (state) => {
         state.loading = true;
       })
@@ -69,19 +65,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // LOGIN
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
-      })
-
-      // REFRESH
-      .addCase(refreshToken.fulfilled, (state, action) => {
+      }).addCase(refreshToken.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
-      })
-      .addCase(refreshToken.rejected, (state) => {
+      }).addCase(refreshToken.rejected, (state) => {
         state.user = null;
         state.accessToken = null;
       });

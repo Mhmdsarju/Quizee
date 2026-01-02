@@ -2,6 +2,9 @@ import userModel from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { genarateToken } from "../utils/genarateToken.js";
+import OTP from "../models/otpModel.js";
+import { genarateOtp } from "../utils/OtpHelper.js";
+import { sendOTPEmail } from "../utils/emailService.js";
 
 const signup = async ({ name, email, password, referredBy }) => {
   if (!name || !email || !password) {
@@ -24,13 +27,22 @@ const signup = async ({ name, email, password, referredBy }) => {
     email,
     password: hash,
     role: "user",
-    referredBy: referredBy || null, 
+    referredBy: referredBy || null,
+    isVerified: false
   });
 
-  const tokens = genarateToken(user);
-  return { user, ...tokens };
-};
+  const otp = genarateOtp();
 
+  await OTP.deleteMany({ email });
+  await OTP.create({ email, otp });
+
+  await sendOTPEmail(email, otp);
+
+  return {
+    user,
+    message: "OTP sent to your email"
+  };
+};
 
 const login = async ({ email, password }) => {
   if (!email || !password) {
@@ -39,7 +51,14 @@ const login = async ({ email, password }) => {
 
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) throw new Error("Invalid credentials");
-  if (user.isBlocked) throw new Error("Account blocked");
+
+  if (!user.isVerified) {
+    throw new Error("Please verify your email first");
+  }
+
+  if (user.isBlocked) {
+    throw new Error("Account blocked");
+  }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
@@ -59,4 +78,30 @@ const refresh = async (token) => {
   return genarateToken(user);
 };
 
-export default { signup, login, refresh };
+const verifyOtp = async ({ email, otp }) => {
+  if (!email || !otp) {
+    throw new Error("Email and OTP required");
+  }
+
+  const record = await OTP.findOne({ email, otp });
+  if (!record) {
+    throw new Error("OTP expired or invalid");
+  }
+
+  const user = await userModel.findOneAndUpdate(
+    { email },
+    { isVerified: true },
+    { new: true }
+  );
+
+  await OTP.deleteMany({ email });
+
+  const tokens = genarateToken(user);
+
+  return {
+    user,
+    ...tokens
+  };
+};
+
+export default { signup, login, refresh, verifyOtp };
