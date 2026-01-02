@@ -48,12 +48,12 @@ export default function Signup() {
             Welcome to the Quiz community
           </p>
 
-          {/* Form */}
+          
           <form
             onSubmit={submit}
             className="mt-6 space-y-4 bg-blue-quiz p-7 rounded-xl shadow-2xl"
           >
-            {/* Name */}
+            
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Name
@@ -70,7 +70,6 @@ export default function Signup() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Email
@@ -86,8 +85,6 @@ export default function Signup() {
                 required
               />
             </div>
-
-            {/* Password with Eye Toggle */}
             <div className="relative">
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Password
@@ -113,7 +110,6 @@ export default function Signup() {
               </button>
             </div>
 
-            {/* Referral */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Referral (optional)
@@ -129,14 +125,11 @@ export default function Signup() {
               />
             </div>
 
-            {/* Error */}
             {error && (
               <p className="text-sm text-red-500 text-center">
                 {error}
               </p>
             )}
-
-            {/* Signup Button */}
             <button
               type="submit"
               disabled={loading}
@@ -149,14 +142,12 @@ export default function Signup() {
               {loading ? "Creating account..." : "Create Account"}
             </button>
 
-            {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-white/30" />
               <span className="text-xs text-quiz-main">OR</span>
               <div className="flex-1 h-px bg-white/30" />
             </div>
 
-            {/* Google Signup */}
             <button
               type="button"
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
@@ -166,7 +157,6 @@ export default function Signup() {
             </button>
           </form>
 
-          {/* Footer */}
           <p className="text-center text-sm text-gray-500 mt-4">
             Already have an account?{" "}
             <Link

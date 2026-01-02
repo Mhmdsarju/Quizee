@@ -3,12 +3,13 @@ import {
   FaSearch,
   FaBars,
   FaTimes,
-  FaUserCircle,
-  FaBell
+  FaRegUser,
+  FaBell,
 } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
+import { logoutApi } from "../api/authApi"; // ✅ ADD THIS
 import logo from "../assets/logo1.png";
 
 const Navbar = () => {
@@ -32,8 +33,21 @@ const Navbar = () => {
     setOpenMenu(false);
   };
 
-  const activeClass = "opacity-100 font-semibold border-b border-white pb-0.5";
+  // ✅ PROPER LOGOUT HANDLER
+  const handleLogout = async () => {
+    try {
+      await logoutApi(); // 🔥 backend clears refresh cookie
+    } catch (err) {
+      console.log(err);
+    } finally {
+      dispatch(logout()); // redux clear
+      setOpenProfile(false);
+      navigate("/login", { replace: true });
+    }
+  };
 
+  const activeClass =
+    "opacity-100 font-semibold border-b border-white pb-0.5";
   const normalClass = "opacity-60 hover:opacity-100 transition";
 
   const isActive = (path) => {
@@ -45,6 +59,7 @@ const Navbar = () => {
     <div className="container mx-auto mt-4 px-4">
       <nav className="relative bg-blue-quiz px-5 py-2.5 text-quiz-main shadow-xl md:rounded-full">
         <div className="flex items-center justify-between">
+          {/* LOGO */}
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleNavClick("/")}
@@ -53,6 +68,7 @@ const Navbar = () => {
             <span className="text-sm font-semibold">Quizee.</span>
           </div>
 
+          {/* DESKTOP MENU */}
           <ul className="hidden md:flex items-center gap-10 text-xs font-medium uppercase">
             <li>
               <button
@@ -65,7 +81,9 @@ const Navbar = () => {
             <li>
               <button
                 onClick={() => handleNavClick("/user/quiz")}
-                className={isActive("/user/quiz") ? activeClass : normalClass}
+                className={
+                  isActive("/user/quiz") ? activeClass : normalClass
+                }
               >
                 Quiz
               </button>
@@ -73,17 +91,17 @@ const Navbar = () => {
             <li>
               <button
                 onClick={() => handleNavClick("/user/contest")}
-                className={isActive("/user/contest") ? activeClass : normalClass}
+                className={
+                  isActive("/user/contest") ? activeClass : normalClass
+                }
               >
                 Contest
               </button>
             </li>
           </ul>
 
-          {/* RIGHT ACTIONS */}
+          {/* RIGHT SIDE */}
           <div className="hidden md:flex items-center gap-4 relative">
-
-            {/* SEARCH */}
             {openSearch ? (
               <input
                 ref={inputRef}
@@ -98,10 +116,8 @@ const Navbar = () => {
               </button>
             )}
 
-            {/* SEPARATOR */}
-            <span className="opacity-40">|</span>
+            <span className="opacity-40 text-sm">|</span>
 
-            {/* AUTH SECTION */}
             {!accessToken ? (
               <>
                 <Link to="/login">Login</Link>
@@ -114,19 +130,15 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center gap-3 relative">
-
-                {/* NOTIFICATION */}
                 <button
                   onClick={() => navigate("/user/notifications")}
                   className="relative"
                 >
-                  <FaBell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+                  <FaBell className="h-4 w-5" />
                 </button>
 
-                {/* PROFILE */}
                 <button onClick={() => setOpenProfile(!openProfile)}>
-                  <FaUserCircle className="h-6 w-6" />
+                  <FaRegUser className="h-4 w-6" />
                 </button>
 
                 {/* PROFILE DROPDOWN */}
@@ -136,11 +148,7 @@ const Navbar = () => {
                       {user?.name}
                     </div>
                     <button
-                      onClick={() => {
-                        dispatch(logout());
-                        setOpenProfile(false);
-                        navigate("/login");
-                      }}
+                      onClick={handleLogout} // ✅ UPDATED
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
                     >
                       Logout
@@ -174,13 +182,17 @@ const Navbar = () => {
               </button>
               <button
                 onClick={() => handleNavClick("/user/quiz")}
-                className={isActive("/user/quiz") ? activeClass : normalClass}
+                className={
+                  isActive("/user/quiz") ? activeClass : normalClass
+                }
               >
                 Quiz
               </button>
               <button
                 onClick={() => handleNavClick("/user/contest")}
-                className={isActive("/user/contest") ? activeClass : normalClass}
+                className={
+                  isActive("/user/contest") ? activeClass : normalClass
+                }
               >
                 Contest
               </button>
@@ -188,10 +200,16 @@ const Navbar = () => {
 
             {!accessToken && (
               <div className="mt-4 flex gap-3">
-                <Link to="/login" className="flex-1 text-center border py-1 rounded-full">
+                <Link
+                  to="/login"
+                  className="flex-1 text-center border py-1 rounded-full"
+                >
                   Login
                 </Link>
-                <Link to="/signup" className="flex-1 text-center bg-quiz-main text-blue-quiz py-1 rounded-full">
+                <Link
+                  to="/signup"
+                  className="flex-1 text-center bg-quiz-main text-blue-quiz py-1 rounded-full"
+                >
                   Signup
                 </Link>
               </div>

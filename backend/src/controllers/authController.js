@@ -38,11 +38,23 @@ const login = async (req, res) => {
 const refresh = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
-    const { accessToken } = await authService.refresh(token);
-    res.json({ accessToken });
+    const { accessToken, user } = await authService.refresh(token);
+
+    res.json({ accessToken, user });
   } catch (error) {
     res.status(statusCode.FORBIDDEN).json({ message: error.message });
   }
 };
 
-export default { signup, login, refresh };
+
+const logout=async(req,res)=>{
+
+  res.clearCookie("refreshToken",{
+    httpOnly:true,
+    secure:false,
+    sameSite:"lax"
+  })
+   res.status(statusCode.OK).json({message:"logged out Successfully"});
+}
+
+export default { signup, login, refresh,logout};

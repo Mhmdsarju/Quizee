@@ -32,10 +32,14 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-
+    profileImage: {
+      type: String,
+      default: null,
+    },
     walletBalance: {
       type: Number,
-      default: 0
+      default: 0,
+      min:[0,"wallet balance cannot be negative"]
     },
 
     isBlocked: {
@@ -47,6 +51,10 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null
+    },
+    isVerified:{
+      type:Boolean,
+      default:false
     }
   },
   {
