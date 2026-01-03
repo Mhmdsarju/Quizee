@@ -16,6 +16,6 @@ const otpModel=new mongoose.Schema({
     }
 })
 
-otpModel.index({ email: 1, userType: 1 });
+otpModel.index({ email: 1});
 const OTP = mongoose.model('OTP', otpModel);
 export default OTP;

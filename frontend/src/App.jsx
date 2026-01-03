@@ -5,18 +5,22 @@ import UserLayout from "./layout/userLayout";
 import HomeUser from "./pages/user/home";
 import userRoutes from "./routes/userRoutes";
 import adminRoutes from "./routes/adminRoutes";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { refreshToken } from "./redux/authSlice";
+import VerifyOtp from "./pages/VerifyOtp";
 
 
 function App() {
 
-const dispatch=useDispatch();
+const dispatch=useDispatch()
+const { accessToken } = useSelector((state) => state.auth);
 
-useEffect(()=>{
-  dispatch(refreshToken())
-},[dispatch])
+useEffect(() => {
+  if (!accessToken) {
+    dispatch(refreshToken());
+  }
+}, [dispatch, accessToken]);
 
 
 
@@ -33,7 +37,7 @@ useEffect(()=>{
 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
+        <Route path="/verify-otp" element={<VerifyOtp/>}/>
       </Routes>
     </BrowserRouter>
   );

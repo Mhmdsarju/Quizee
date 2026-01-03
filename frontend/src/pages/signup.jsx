@@ -26,7 +26,7 @@ export default function Signup() {
   const res = await dispatch(signupUser(form));
 
   if (signupUser.fulfilled.match(res)) {
-    navigate("/", { replace: true }); 
+    navigate("/verify-otp", { state:{email:form.email }}); 
   }
 };
 
