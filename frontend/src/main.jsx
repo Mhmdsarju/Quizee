@@ -8,7 +8,6 @@ import "./index.css";
 
 setupInterceptors(store);
 
-
 createRoot(document.getElementById('root')).render(
     <Provider store={store}>
     <App />

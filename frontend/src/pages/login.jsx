@@ -43,7 +43,6 @@ export default function Login() {
 
   return (
     <>
-      {/* Decorative image – desktop only */}
       <img
         src={quizImg}
         alt="Quiz"
@@ -53,7 +52,6 @@ export default function Login() {
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl p-6">
 
-          {/* Title */}
           <h2 className="text-2xl font-bold text-center text-blue-quiz">
             Welcome Back
           </h2>
@@ -61,12 +59,10 @@ export default function Login() {
             Login to continue your quiz journey
           </p>
 
-          {/* Form */}
           <form
             onSubmit={submit}
             className="mt-6 space-y-4 bg-blue-quiz p-7 rounded-xl shadow-xl"
           >
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Email
@@ -82,8 +78,6 @@ export default function Login() {
                 required
               />
             </div>
-
-            {/* Password */}
             <div className="relative">
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Password
@@ -108,8 +102,6 @@ export default function Login() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-
-            {/* Forgot Password */}
             <div className="text-right">
               <Link
                 to="/forgot-password"
@@ -118,15 +110,11 @@ export default function Login() {
                 Forgot password?
               </Link>
             </div>
-
-            {/* Error */}
             {error && (
               <p className="text-sm text-red-500 text-center">
                 {error}
               </p>
             )}
-
-            {/* Login Button */}
             <button
               type="submit"
               disabled={loading}
@@ -139,14 +127,12 @@ export default function Login() {
               {loading ? "Logging in..." : "Login"}
             </button>
 
-            {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-white/30" />
               <span className="text-xs text-quiz-main">OR</span>
               <div className="flex-1 h-px bg-white/30" />
             </div>
 
-            {/* Google Login */}
             <button
               type="button"
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
@@ -155,8 +141,6 @@ export default function Login() {
               Continue with Google
             </button>
           </form>
-
-          {/* Footer */}
           <p className="text-center text-sm text-gray-500 mt-4">
             Don’t have an account?{" "}
             <Link

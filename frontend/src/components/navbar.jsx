@@ -9,7 +9,7 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
-import { logoutApi } from "../api/authApi"; // ✅ ADD THIS
+import { logoutApi } from "../api/authApi"; 
 import logo from "../assets/logo1.png";
 
 const Navbar = () => {
@@ -59,7 +59,7 @@ const Navbar = () => {
     <div className="container mx-auto mt-4 px-4">
       <nav className="relative bg-blue-quiz px-5 py-2.5 text-quiz-main shadow-xl md:rounded-full">
         <div className="flex items-center justify-between">
-          {/* LOGO */}
+     
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleNavClick("/")}
@@ -68,7 +68,6 @@ const Navbar = () => {
             <span className="text-sm font-semibold">Quizee.</span>
           </div>
 
-          {/* DESKTOP MENU */}
           <ul className="hidden md:flex items-center gap-10 text-xs font-medium uppercase">
             <li>
               <button
@@ -100,7 +99,6 @@ const Navbar = () => {
             </li>
           </ul>
 
-          {/* RIGHT SIDE */}
           <div className="hidden md:flex items-center gap-4 relative">
             {openSearch ? (
               <input
@@ -141,14 +139,13 @@ const Navbar = () => {
                   <FaRegUser className="h-4 w-6" />
                 </button>
 
-                {/* PROFILE DROPDOWN */}
                 {openProfile && (
                   <div className="absolute right-0 top-10 w-40 bg-white text-black rounded-xl shadow-lg overflow-hidden">
                     <div className="px-4 py-2 text-sm font-semibold">
                       {user?.name}
                     </div>
                     <button
-                      onClick={handleLogout} // ✅ UPDATED
+                      onClick={handleLogout} 
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
                     >
                       Logout
@@ -159,7 +156,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* MOBILE ICONS */}
           <div className="flex md:hidden items-center gap-4">
             <button onClick={() => setOpenSearch(!openSearch)}>
               <FaSearch />
@@ -169,8 +165,6 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-
-        {/* MOBILE MENU */}
         {openMenu && (
           <div className="mt-4 md:hidden bg-blue-quiz px-5 py-4 shadow-lg">
             <ul className="flex flex-col gap-4 text-sm uppercase">

@@ -1,22 +1,18 @@
 import mongoose from "mongoose";
 
 const otpModel = new mongoose.Schema({
-  email: {
+  email: String,
+  otp: String,
+  purpose: {
     type: String,
+    enum: ["signup", "forgot"],
     required: true
   },
-  otp: {
-    type: String,
-    required: true
-  },
-  attempts: {
-    type: Number,
-    default: 0
-  },
+  attempts: { type: Number, default: 0 },
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 60
+    expires: 60   
   }
 });
 

@@ -19,10 +19,9 @@ const signup = async ({ name, email, password, referredBy }) => {
   }
 
   const exists = await userModel.findOne({ email });
-  if (exists) {
-    if (exists.isVerified) {
-      throw new Error("User already exists and verified");
-    }
+
+  if (exists && exists.isVerified) {
+    throw new Error("User already exists and verified");
   }
 
   const hash = await bcrypt.hash(password, 10);
@@ -38,17 +37,15 @@ const signup = async ({ name, email, password, referredBy }) => {
     });
   }
 
-  await OTP.deleteMany({ email });
+  await OTP.deleteMany({ email, purpose: "signup" });
 
-  const otp = genarateOtp(); 
-  const otpHash = crypto
-    .createHash("sha256")
-    .update(otp)
-    .digest("hex");
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
   await OTP.create({
     email,
     otp: otpHash,
+    purpose: "signup",
     attempts: 0
   });
 
@@ -58,80 +55,59 @@ const signup = async ({ name, email, password, referredBy }) => {
 };
 
 const verifyOtp = async ({ email, otp }) => {
-  if (!email || !otp) {
-    throw new Error("Email and OTP required");
-  }
+  if (!email || !otp) throw new Error("Email and OTP required");
 
   const user = await userModel.findOne({ email });
-  if (!user) {
-    throw new Error("User not found");
-  }
+  if (!user) throw new Error("User not found");
+  if (user.isVerified) throw new Error("Email already verified");
 
-  if (user.isVerified) {
-    throw new Error("Email already verified");
-  }
-
-  const record = await OTP.findOne({ email });
-  if (!record) {
-    throw new Error("OTP expired or invalid");
-  }
+  const record = await OTP.findOne({ email, purpose: "signup" });
+  if (!record) throw new Error("OTP expired or invalid");
 
   if (record.attempts >= MAX_ATTEMPTS) {
-    await OTP.deleteMany({ email });
-    throw new Error("Too many wrong attempts. Please resend OTP");
+    await OTP.deleteMany({ email, purpose: "signup" });
+    throw new Error("Too many attempts. Resend OTP");
   }
 
-  const otpHash = crypto
-    .createHash("sha256")
-    .update(otp)
-    .digest("hex");
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
   if (otpHash !== record.otp) {
     record.attempts += 1;
     await record.save();
-
     throw new Error(
       `Invalid OTP. ${MAX_ATTEMPTS - record.attempts} attempts left`
     );
   }
 
-  await OTP.deleteMany({ email });
+  await OTP.deleteMany({ email, purpose: "signup" });
 
   user.isVerified = true;
   await user.save();
 
   const tokens = genarateToken(user);
-  return { user, ...tokens };
-};
 
+  return {
+    user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken
+  };
+};
 const resendOtp = async ({ email }) => {
-  if (!email) {
-    throw new Error("Email is required");
-  }
+  if (!email) throw new Error("Email is required");
 
   const user = await userModel.findOne({ email });
-  if (!user) {
-    throw new Error("User not found");
-  }
+  if (!user) throw new Error("User not found");
+  if (user.isVerified) throw new Error("Email already verified");
 
-  if (user.isVerified) {
-    throw new Error("Email already verified");
-  }
-
-  const existing = await OTP.findOne({ email });
-  if (existing) {
-    throw new Error("Please wait before resending OTP");
-  }
+  await OTP.deleteMany({ email, purpose: "signup" });
 
   const otp = genarateOtp();
-  const otpHash = crypto
-    .createHash("sha256")
-    .update(otp)
-    .digest("hex");
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
   await OTP.create({
     email,
     otp: otpHash,
+    purpose: "signup",
     attempts: 0
   });
 
@@ -141,42 +117,104 @@ const resendOtp = async ({ email }) => {
 };
 
 const login = async ({ email, password }) => {
-  if (!email || !password) {
-    throw new Error("Email and password required");
-  }
+  if (!email || !password) throw new Error("Email and password required");
 
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) throw new Error("Invalid credentials");
-
-  if (!user.isVerified) {
-    throw new Error("Please verify your email first");
-  }
-
-  if (user.isBlocked) {
-    throw new Error("Account blocked");
-  }
+  if (!user.isVerified) throw new Error("Verify email first");
+  if (user.isBlocked) throw new Error("Account blocked");
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
 
   const tokens = genarateToken(user);
-  return { user, ...tokens };
-};
 
+  return {
+    user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken
+  };
+};
 const refresh = async (token) => {
   if (!token) throw new Error("No refresh token");
 
   const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
   const user = await userModel.findById(decoded.id).select("-password");
-
   if (!user || user.isBlocked) throw new Error("Unauthorized");
 
   const tokens = genarateToken(user);
 
   return {
-    user,             
+    user,
     accessToken: tokens.accessToken
   };
 };
+const forgotPassword = async ({ email }) => {
+  if (!email) throw new Error("Email required");
 
-export default {signup,verifyOtp,resendOtp,login,refresh};
+  const user = await userModel.findOne({ email });
+  if (!user) throw new Error("User not found");
+  if (!user.isVerified) throw new Error("Email not verified");
+
+  await OTP.deleteMany({ email, purpose: "forgot" });
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose: "forgot",
+    attempts: 0
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "Password reset OTP sent" };
+};
+
+const verifyForgotOtp = async ({ email, otp }) => {
+  if (!email || !otp) throw new Error("Email & OTP required");
+
+  const record = await OTP.findOne({ email, purpose: "forgot" });
+  if (!record) throw new Error("OTP expired");
+
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  if (otpHash !== record.otp) {
+    record.attempts += 1;
+    await record.save();
+    throw new Error("Invalid OTP");
+  }
+
+  await OTP.deleteMany({ email, purpose: "forgot" });
+  return { message: "OTP verified" };
+};
+
+const resetPassword = async ({ email, password }) => {
+  if (!email || !password) throw new Error("Email & password required");
+
+  const hash = await bcrypt.hash(password, 10);
+  await userModel.findOneAndUpdate({ email }, { password: hash });
+
+  return { message: "Password reset successful" };
+};
+const resendForgotOtp = async ({ email }) => {
+  await OTP.deleteMany({ email, purpose: "forgot" });
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose: "forgot",
+    attempts: 0
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP resent" };
+};
+
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,resendForgotOtp};
