@@ -1,5 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { signupApi, loginApi, refreshApi, otpVerify } from "../api/authApi";
+import {
+  signupApi,
+  loginApi,
+  refreshApi,
+  otpVerify
+} from "../api/authApi";
+import api from "../api/axios";
 
 /* ================= SIGNUP ================= */
 export const signupUser = createAsyncThunk(
@@ -27,7 +33,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-/* ================= REFRESH (SILENT) ================= */
+/* ================= REFRESH ================= */
 export const refreshToken = createAsyncThunk(
   "auth/refresh",
   async (_, { rejectWithValue }) => {
@@ -35,7 +41,6 @@ export const refreshToken = createAsyncThunk(
       const res = await refreshApi();
       return res.data;
     } catch {
-      // 🔥 silent fail (normal for logged-out users)
       return rejectWithValue(null);
     }
   }
@@ -47,10 +52,25 @@ export const verifyOtp = createAsyncThunk(
   async (data, thunkApi) => {
     try {
       const res = await otpVerify(data);
-      return res.data; // 🔥 VERY IMPORTANT
+      return res.data;
     } catch (error) {
       return thunkApi.rejectWithValue(
         error.response?.data?.message || "OTP verification failed"
+      );
+    }
+  }
+);
+
+/* ================= RESEND OTP ✅ ================= */
+export const resendOtp = createAsyncThunk(
+  "auth/resendOtp",
+  async (data, thunkApi) => {
+    try {
+      const res = await api.post("/auth/resend-otp", data);
+      return res.data.message;
+    } catch (error) {
+      return thunkApi.rejectWithValue(
+        error.response?.data?.message || "Failed to resend OTP"
       );
     }
   }
@@ -79,9 +99,8 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(signupUser.fulfilled, (state, action) => {
+      .addCase(signupUser.fulfilled, (state) => {
         state.loading = false;
-        state.user = action.payload.user;
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
@@ -108,9 +127,6 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
       })
-      .addCase(refreshToken.rejected, (state) => {
-        // ❌ do nothing – silent fail
-      })
 
       /* verify otp */
       .addCase(verifyOtp.pending, (state) => {
@@ -123,6 +139,19 @@ const authSlice = createSlice({
         state.accessToken = action.payload.accessToken;
       })
       .addCase(verifyOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      /* resend otp */
+      .addCase(resendOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resendOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resendOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -1,10 +1,13 @@
 import userModel from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { genarateToken } from "../utils/genarateToken.js";
 import OTP from "../models/otpModel.js";
 import { genarateOtp } from "../utils/OtpHelper.js";
 import { sendOTPEmail } from "../utils/emailService.js";
+
+const MAX_ATTEMPTS = 5;
 
 const signup = async ({ name, email, password, referredBy }) => {
   if (!name || !email || !password) {
@@ -17,31 +20,124 @@ const signup = async ({ name, email, password, referredBy }) => {
 
   const exists = await userModel.findOne({ email });
   if (exists) {
-    throw new Error("User already exists");
+    if (exists.isVerified) {
+      throw new Error("User already exists and verified");
+    }
   }
 
   const hash = await bcrypt.hash(password, 10);
 
-  const user = await userModel.create({
-    name,
-    email,
-    password: hash,
-    role: "user",
-    referredBy: referredBy || null,
-    isVerified: false
-  });
-
-  const otp = genarateOtp();
+  if (!exists) {
+    await userModel.create({
+      name,
+      email,
+      password: hash,
+      role: "user",
+      referredBy: referredBy || null,
+      isVerified: false
+    });
+  }
 
   await OTP.deleteMany({ email });
-  await OTP.create({ email, otp });
+
+  const otp = genarateOtp(); 
+  const otpHash = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    attempts: 0
+  });
 
   await sendOTPEmail(email, otp);
 
-  return {
-    user,
-    message: "OTP sent to your email"
-  };
+  return { message: "OTP sent to your email" };
+};
+
+const verifyOtp = async ({ email, otp }) => {
+  if (!email || !otp) {
+    throw new Error("Email and OTP required");
+  }
+
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.isVerified) {
+    throw new Error("Email already verified");
+  }
+
+  const record = await OTP.findOne({ email });
+  if (!record) {
+    throw new Error("OTP expired or invalid");
+  }
+
+  if (record.attempts >= MAX_ATTEMPTS) {
+    await OTP.deleteMany({ email });
+    throw new Error("Too many wrong attempts. Please resend OTP");
+  }
+
+  const otpHash = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  if (otpHash !== record.otp) {
+    record.attempts += 1;
+    await record.save();
+
+    throw new Error(
+      `Invalid OTP. ${MAX_ATTEMPTS - record.attempts} attempts left`
+    );
+  }
+
+  await OTP.deleteMany({ email });
+
+  user.isVerified = true;
+  await user.save();
+
+  const tokens = genarateToken(user);
+  return { user, ...tokens };
+};
+
+const resendOtp = async ({ email }) => {
+  if (!email) {
+    throw new Error("Email is required");
+  }
+
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.isVerified) {
+    throw new Error("Email already verified");
+  }
+
+  const existing = await OTP.findOne({ email });
+  if (existing) {
+    throw new Error("Please wait before resending OTP");
+  }
+
+  const otp = genarateOtp();
+  const otpHash = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    attempts: 0
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP resent successfully" };
 };
 
 const login = async ({ email, password }) => {
@@ -71,37 +167,16 @@ const refresh = async (token) => {
   if (!token) throw new Error("No refresh token");
 
   const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
-  const user = await userModel.findById(decoded.id);
+  const user = await userModel.findById(decoded.id).select("-password");
 
   if (!user || user.isBlocked) throw new Error("Unauthorized");
-
-  return genarateToken(user);
-};
-
-const verifyOtp = async ({ email, otp }) => {
-  if (!email || !otp) {
-    throw new Error("Email and OTP required");
-  }
-
-  const record = await OTP.findOne({ email, otp });
-  if (!record) {
-    throw new Error("OTP expired or invalid");
-  }
-
-  const user = await userModel.findOneAndUpdate(
-    { email },
-    { isVerified: true },
-    { new: true }
-  );
-
-  await OTP.deleteMany({ email });
 
   const tokens = genarateToken(user);
 
   return {
-    user,
-    ...tokens
+    user,             
+    accessToken: tokens.accessToken
   };
 };
 
-export default { signup, login, refresh, verifyOtp };
+export default {signup,verifyOtp,resendOtp,login,refresh};

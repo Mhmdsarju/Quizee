@@ -9,36 +9,31 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { refreshToken } from "./redux/authSlice";
 import VerifyOtp from "./pages/VerifyOtp";
-
+import PublicRoute from "./routes/publicRoutes"; 
 
 function App() {
+  const dispatch = useDispatch();
+  const { accessToken } = useSelector((state) => state.auth);
 
-const dispatch=useDispatch()
-const { accessToken } = useSelector((state) => state.auth);
-
-useEffect(() => {
-  if (!accessToken) {
-    dispatch(refreshToken());
-  }
-}, [dispatch, accessToken]);
-
-
+  useEffect(() => {
+    if (!accessToken) {
+      dispatch(refreshToken());
+    }
+  }, [dispatch, accessToken]);
 
   return (
     <BrowserRouter>
       <Routes>
-
         <Route element={<UserLayout />}>
           <Route path="/" element={<HomeUser />} />
         </Route>
 
         {userRoutes}
         {adminRoutes}
-
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/verify-otp" element={<VerifyOtp/>}/>
-      </Routes>
+          
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>}/>
+        <Route path="/signup"element={<PublicRoute><Signup /></PublicRoute>}/>
+        <Route path="/verify-otp"element={<PublicRoute><VerifyOtp /></PublicRoute>}/></Routes>
     </BrowserRouter>
   );
 }
