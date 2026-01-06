@@ -141,16 +141,27 @@ const refresh = async (token) => {
   if (!token) throw new Error("No refresh token");
 
   const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
-  const user = await userModel.findById(decoded.id).select("-password");
-  if (!user || user.isBlocked) throw new Error("Unauthorized");
+
+  const user = await userModel.findById(decoded.id);
+  if (!user) throw new Error("Unauthorized");
+
+  if (user.isBlocked) {
+    throw new Error("Account blocked");
+  }
 
   const tokens = genarateToken(user);
 
   return {
-    user,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role 
+    },
     accessToken: tokens.accessToken
   };
 };
+
 const forgotPassword = async ({ email }) => {
   if (!email) throw new Error("Email required");
 

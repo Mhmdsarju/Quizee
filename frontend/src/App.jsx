@@ -38,7 +38,7 @@ function App() {
           <Route path="/" element={<HomeUser />} />
         </Route>
 
-        <Route path="/user"element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
+        <Route path="/user"element={<ProtectedRoute role="user"><UserLayout /></ProtectedRoute>}>
           <Route path="quiz" element={<QuizPage />} />
           <Route path="contest" element={<ContestPage />} />
         </Route>
