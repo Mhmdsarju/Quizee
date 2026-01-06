@@ -1,41 +1,46 @@
 import { useDispatch, useSelector } from "react-redux";
 import { signupUser } from "../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
 import quizImg from "../assets/quiz1.webp";
 import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useState } from "react";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema } from "../schema/signupSchema";
 
 export default function Signup() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { error, loading } = useSelector((state) => state.auth);
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    referral: "",
-  });
-
   const [showPassword, setShowPassword] = useState(false);
 
-  const submit = async (e) => {
-  e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(signupSchema),
+  });
 
-  const res = await dispatch(signupUser(form));
+  const submit = async (data) => {
+    const res = await dispatch(signupUser(data));
 
-  if (signupUser.fulfilled.match(res)) {
-    navigate("/verify-otp", { state:{email:form.email }}); 
-  }
-};
+    if (signupUser.fulfilled.match(res)) {
+      navigate("/verify-otp", {
+        state: { email: data.email },
+      });
+    }
+  };
 
   return (
     <>
       <img
         src={quizImg}
         alt="Quiz"
-        className="hidden md:block h-[120px] absolute -rotate-12 opacity-70 "
+        className="hidden md:block h-[120px] absolute -rotate-12 opacity-70"
       />
 
       <div className="min-h-screen flex items-center justify-center px-4">
@@ -48,12 +53,11 @@ export default function Signup() {
             Welcome to the Quiz community
           </p>
 
-          
           <form
-            onSubmit={submit}
+            onSubmit={handleSubmit(submit)}
             className="mt-6 space-y-4 bg-blue-quiz p-7 rounded-xl shadow-2xl"
           >
-            
+            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Name
@@ -61,15 +65,17 @@ export default function Signup() {
               <input
                 type="text"
                 placeholder="Your name"
+                {...register("name")}
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
-                value={form.name}
-                onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
-                }
-                required
               />
+              {errors.name && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
+            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Email
@@ -77,14 +83,17 @@ export default function Signup() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                {...register("email")}
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
-                value={form.email}
-                onChange={(e) =>
-                  setForm({ ...form, email: e.target.value })
-                }
-                required
               />
+              {errors.email && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
+
+            {/* Password */}
             <div className="relative">
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Password
@@ -93,12 +102,8 @@ export default function Signup() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
+                {...register("password")}
                 className="w-full rounded-lg border px-4 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
-                value={form.password}
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
-                required
               />
 
               <button
@@ -108,8 +113,15 @@ export default function Signup() {
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
+
+              {errors.password && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
+            {/* Referral */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Referral (optional)
@@ -117,19 +129,19 @@ export default function Signup() {
               <input
                 type="text"
                 placeholder="Referral code"
+                {...register("referral")}
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
-                value={form.referral}
-                onChange={(e) =>
-                  setForm({ ...form, referral: e.target.value })
-                }
               />
             </div>
 
+            {/* API Error */}
             {error && (
               <p className="text-sm text-red-500 text-center">
                 {error}
               </p>
             )}
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -142,12 +154,14 @@ export default function Signup() {
               {loading ? "Creating account..." : "Create Account"}
             </button>
 
+            {/* OR */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-white/30" />
               <span className="text-xs text-quiz-main">OR</span>
               <div className="flex-1 h-px bg-white/30" />
             </div>
 
+            {/* Google */}
             <button
               type="button"
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"

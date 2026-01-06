@@ -1,10 +1,14 @@
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../redux/authSlice";
 import { useNavigate, Link, Navigate } from "react-router-dom";
-import { useState } from "react";
 import quizImg from "../assets/quiz1.webp";
 import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useState } from "react";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../schema/loginSchema";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -14,32 +18,28 @@ export default function Login() {
     (state) => state.auth
   );
 
-  const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
-
   const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
   if (accessToken) {
     return <Navigate to="/" replace />;
   }
 
-  const submit = async (e) => {
-  e.preventDefault();
+  const submit = async (data) => {
+    const res = await dispatch(loginUser(data));
 
-  const res = await dispatch(loginUser(data));
-
-  if (res.meta.requestStatus === "fulfilled") {
-    const role = res.payload.user.role;
-
-    if (role === "admin") {
-      navigate("/admin", { replace: true });
-    } else {
-      navigate("/", { replace: true }); 
+    if (res.meta.requestStatus === "fulfilled") {
+      const role = res.payload.user.role;
+      navigate(role === "admin" ? "/admin" : "/", { replace: true });
     }
-  }
-};
+  };
 
   return (
     <>
@@ -60,7 +60,7 @@ export default function Login() {
           </p>
 
           <form
-            onSubmit={submit}
+            onSubmit={handleSubmit(submit)}
             className="mt-6 space-y-4 bg-blue-quiz p-7 rounded-xl shadow-xl"
           >
             <div>
@@ -70,13 +70,14 @@ export default function Login() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                {...register("email")}
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
-                value={data.email}
-                onChange={(e) =>
-                  setData({ ...data, email: e.target.value })
-                }
-                required
               />
+              {errors.email && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="relative">
               <label className="block text-sm font-medium text-quiz-main mb-1">
@@ -86,12 +87,8 @@ export default function Login() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
+                {...register("password")}
                 className="w-full rounded-lg border px-4 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
-                value={data.password}
-                onChange={(e) =>
-                  setData({ ...data, password: e.target.value })
-                }
-                required
               />
 
               <button
@@ -101,7 +98,14 @@ export default function Login() {
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
+
+              {errors.password && (
+                <p className="text-xs text-red-400 mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
+
             <div className="text-right">
               <Link
                 to="/forgot-password"
@@ -110,11 +114,13 @@ export default function Login() {
                 Forgot password?
               </Link>
             </div>
+
             {error && (
               <p className="text-sm text-red-500 text-center">
                 {error}
               </p>
             )}
+
             <button
               type="submit"
               disabled={loading}
@@ -141,6 +147,7 @@ export default function Login() {
               Continue with Google
             </button>
           </form>
+
           <p className="text-center text-sm text-gray-500 mt-4">
             Don’t have an account?{" "}
             <Link
