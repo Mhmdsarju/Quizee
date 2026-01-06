@@ -17,13 +17,7 @@ export default function Signup() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(signupSchema),
-  });
+  const { register,handleSubmit,formState: { errors }, } = useForm({resolver: zodResolver(signupSchema),});
 
   const submit = async (data) => {
     const res = await dispatch(signupUser(data));
@@ -57,7 +51,6 @@ export default function Signup() {
             onSubmit={handleSubmit(submit)}
             className="mt-6 space-y-4 bg-blue-quiz p-7 rounded-xl shadow-2xl"
           >
-            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Name
@@ -75,7 +68,6 @@ export default function Signup() {
               )}
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Email
@@ -93,7 +85,6 @@ export default function Signup() {
               )}
             </div>
 
-            {/* Password */}
             <div className="relative">
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Password
@@ -121,7 +112,6 @@ export default function Signup() {
               )}
             </div>
 
-            {/* Referral */}
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Referral (optional)
@@ -134,14 +124,12 @@ export default function Signup() {
               />
             </div>
 
-            {/* API Error */}
             {error && (
               <p className="text-sm text-red-500 text-center">
                 {error}
               </p>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -154,14 +142,12 @@ export default function Signup() {
               {loading ? "Creating account..." : "Create Account"}
             </button>
 
-            {/* OR */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-white/30" />
               <span className="text-xs text-quiz-main">OR</span>
               <div className="flex-1 h-px bg-white/30" />
             </div>
 
-            {/* Google */}
             <button
               type="button"
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"

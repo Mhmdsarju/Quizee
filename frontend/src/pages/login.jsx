@@ -20,13 +20,7 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(loginSchema),
-  });
+  const {register,handleSubmit,formState: { errors },} = useForm({resolver: zodResolver(loginSchema), });
 
   if (accessToken) {
     return <Navigate to="/" replace />;
