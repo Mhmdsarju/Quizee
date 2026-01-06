@@ -150,6 +150,9 @@ export default function Signup() {
 
             <button
               type="button"
+              onClick={() => {
+                window.location.href = "http://localhost:5005/api/auth/google";
+              }}
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
             >
               <FcGoogle className="text-xl" />

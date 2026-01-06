@@ -14,13 +14,11 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, accessToken } = useSelector(
-    (state) => state.auth
-  );
+  const { loading, error, accessToken } = useSelector((state) => state.auth);
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const {register,handleSubmit,formState: { errors },} = useForm({resolver: zodResolver(loginSchema), });
+  const {register,handleSubmit,formState: { errors },} = useForm({ resolver: zodResolver(loginSchema) });
 
   if (accessToken) {
     return <Navigate to="/" replace />;
@@ -45,7 +43,6 @@ export default function Login() {
 
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl p-6">
-
           <h2 className="text-2xl font-bold text-center text-blue-quiz">
             Welcome Back
           </h2>
@@ -110,9 +107,7 @@ export default function Login() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-500 text-center">
-                {error}
-              </p>
+              <p className="text-sm text-red-500 text-center">{error}</p>
             )}
 
             <button
@@ -135,6 +130,9 @@ export default function Login() {
 
             <button
               type="button"
+              onClick={() => {
+                window.location.href = "http://localhost:5005/api/auth/google";
+              }}
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
             >
               <FcGoogle className="text-xl" />

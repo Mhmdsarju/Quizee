@@ -54,6 +54,20 @@ const signup = async ({ name, email, password, referredBy }) => {
   return { message: "OTP sent to your email" };
 };
 
+export const googleLogin = async (user) => {
+  const tokens = genarateToken(user);
+
+  return {
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
+};
 const verifyOtp = async ({ email, otp, purpose }) => {
   if (!email || !otp || !purpose) {
     throw new Error("Email, OTP and purpose required");
@@ -284,4 +298,4 @@ const resendForgotOtp = async ({ email }) => {
   return { message: "OTP resent" };
 };
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,resendForgotOtp,sendOtp };
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,resendForgotOtp,sendOtp ,googleLogin};

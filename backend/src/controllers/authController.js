@@ -10,6 +10,25 @@ const signup = async (req, res) => {
   }
 };
 
+export const googleCallback = async (req, res) => {
+  try {
+    const { user, accessToken, refreshToken } =
+      await authService.googleLogin(req.user);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false, 
+    });
+
+    res.redirect(
+      `http://localhost:5173/google-success?token=${accessToken}`
+    );
+  } catch (err) {
+    res.redirect("http://localhost:5173/login");
+  }
+};
+
 const verifyotp = async (req, res) => {
   try {
     const { user, accessToken, refreshToken } =
@@ -127,4 +146,4 @@ const logout = async (req, res) => {
   res.json({ message: "Logged out successfully" });
 };
 
-export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp};
+export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback};
