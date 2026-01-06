@@ -1,11 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  FaSearch,
-  FaBars,
-  FaTimes,
-  FaRegUser,
-  FaBell,
-} from "react-icons/fa";
+import {FaSearch,FaBars,FaTimes,FaRegUser,FaBell,} from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
@@ -33,14 +27,13 @@ const Navbar = () => {
     setOpenMenu(false);
   };
 
-  // ✅ PROPER LOGOUT HANDLER
   const handleLogout = async () => {
     try {
-      await logoutApi(); // 🔥 backend clears refresh cookie
+      await logoutApi(); 
     } catch (err) {
       console.log(err);
     } finally {
-      dispatch(logout()); // redux clear
+      dispatch(logout());
       setOpenProfile(false);
       navigate("/login", { replace: true });
     }
@@ -62,8 +55,7 @@ const Navbar = () => {
      
           <div
             className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleNavClick("/")}
-          >
+            onClick={() => handleNavClick("/")}>
             <img src={logo} alt="Quizee" className="h-7 w-7" />
             <span className="text-sm font-semibold">Quizee.</span>
           </div>

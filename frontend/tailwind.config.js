@@ -8,6 +8,7 @@ export default {
       colors: {
         "blue-quiz": "#211842",
         "quiz-main":"#E6CFA7",
+        "quiz-admin":"#E6CFA7"
       },
     },
   },

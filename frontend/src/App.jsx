@@ -17,13 +17,18 @@ import ProtectedRoute from "./routes/protectedRoute";
 import PublicRoute from "./routes/publicRoutes";
 import { refreshToken } from "./redux/authSlice";
 
+import QuizzesManagement from "./pages/admin/QuizzesManagement";
+import ContestManagement from "./pages/admin/ContestManagement";
+import TransactionManagement from "./pages/admin/TransactionManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import CategoryManagement from "./pages/admin/CategoryManagement"
+
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
   dispatch(refreshToken());
 }, [dispatch]);
-
 
   return (
     <BrowserRouter>
@@ -40,6 +45,12 @@ function App() {
 
         <Route path="/admin" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement/>} />
+          <Route path="categories" element={<CategoryManagement/>} />
+          <Route path="quizzes" element={<QuizzesManagement/>} />
+          <Route path="contests" element={<ContestManagement/>} />
+          <Route path="transactions" element={<TransactionManagement/>} />
         </Route>
 
         <Route path="/login"element={<PublicRoute><Login /></PublicRoute>}/>

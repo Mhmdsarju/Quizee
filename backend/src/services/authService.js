@@ -60,7 +60,9 @@ const verifyOtp = async ({ email, otp }) => {
   const user = await userModel.findOne({ email });
   if (!user) throw new Error("User not found");
   if (user.isVerified) throw new Error("Email already verified");
-
+if (user.isBlocked) {
+  throw new Error("Your account is blocked by admin");
+}
   const record = await OTP.findOne({ email, purpose: "signup" });
   if (!record) throw new Error("OTP expired or invalid");
 
