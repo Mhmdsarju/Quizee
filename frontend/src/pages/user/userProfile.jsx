@@ -1,7 +1,10 @@
 import { useSelector } from "react-redux";
 import { FaUser, FaEnvelope, FaShieldAlt } from "react-icons/fa";
+import { useState } from "react";
+import EditProfileModal from "./EditProfileModal";
 
 export default function ProfilePage() {
+  const [openEdit, setOpenEdit] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
   if (!user) {
@@ -14,12 +17,21 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 px-4">
-      <h1 className="text-sm sm:text-base md:text-lg font-semibold text-blue-quiz mb-6">
+      <h1 className="text-sm sm:text-base md:text-lg font-semibold text-blue-quiz mb-6 flex items-center justify-between">
         My Profile
+        <button
+          onClick={() => setOpenEdit(true)}
+          className="text-xs px-3 py-1 rounded-md bg-quiz-main text-blue-quiz"
+        >
+           Edit
+        </button>
       </h1>
 
+      {openEdit && (
+        <EditProfileModal user={user} onClose={() => setOpenEdit(false)} />
+      )}
+
       <div className="bg-[#241d3b] rounded-xl p-6 shadow-lg space-y-6">
-        
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-full bg-purple-600 flex items-center justify-center text-xl font-semibold text-white">
             {user.name?.charAt(0).toUpperCase()}
@@ -31,7 +43,6 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          
           <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3">
             <FaUser className="text-gray-400" />
             <div>
@@ -55,7 +66,6 @@ export default function ProfilePage() {
               <p className="text-white capitalize">{user.role}</p>
             </div>
           </div>
-
         </div>
       </div>
     </div>

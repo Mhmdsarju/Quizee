@@ -54,54 +54,71 @@ const signup = async ({ name, email, password, referredBy }) => {
   return { message: "OTP sent to your email" };
 };
 
-const verifyOtp = async ({ email, otp }) => {
-  if (!email || !otp) throw new Error("Email and OTP required");
-
-  const user = await userModel.findOne({ email });
-  if (!user) throw new Error("User not found");
-  if (user.isVerified) throw new Error("Email already verified");
-if (user.isBlocked) {
-  throw new Error("Your account is blocked by admin");
-}
-  const record = await OTP.findOne({ email, purpose: "signup" });
-  if (!record) throw new Error("OTP expired or invalid");
-
-  if (record.attempts >= MAX_ATTEMPTS) {
-    await OTP.deleteMany({ email, purpose: "signup" });
-    throw new Error("Too many attempts. Resend OTP");
+const verifyOtp = async ({ email, otp, purpose }) => {
+  if (!email || !otp || !purpose) {
+    throw new Error("Email, OTP and purpose required");
   }
+
+  const record = await OTP.findOne({ email, purpose });
+  if (!record) throw new Error("OTP expired or invalid");
 
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
   if (otpHash !== record.otp) {
     record.attempts += 1;
     await record.save();
-    throw new Error(
-      `Invalid OTP. ${MAX_ATTEMPTS - record.attempts} attempts left`
-    );
+    throw new Error("Invalid OTP");
   }
 
-  await OTP.deleteMany({ email, purpose: "signup" });
+  let user;
+  if (purpose === "email-change") {
+    if (!record.data || !record.data.userId) {
+      throw new Error("Unauthorized");
+    }
 
-  user.isVerified = true;
-  await user.save();
+    user = await userModel.findById(record.data.userId);
+    if (!user) throw new Error("User not found");
+
+    user.email = email;
+    await user.save();
+  }
+
+  if (purpose === "signup") {
+    user = await userModel.findOne({ email });
+    if (!user) throw new Error("User not found");
+
+    user.isVerified = true;
+    await user.save();
+  }
+
+  await OTP.deleteMany({ _id: record._id });
 
   const tokens = genarateToken(user);
 
   return {
     user,
     accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken
+    refreshToken: tokens.refreshToken,
   };
 };
-const resendOtp = async ({ email }) => {
-  if (!email) throw new Error("Email is required");
 
-  const user = await userModel.findOne({ email });
-  if (!user) throw new Error("User not found");
-  if (user.isVerified) throw new Error("Email already verified");
+const resendOtp = async ({ email, purpose }) => {
+  if (!email || !purpose) {
+    throw new Error("Email and purpose required");
+  }
 
-  await OTP.deleteMany({ email, purpose: "signup" });
+  let data = {};
+
+  if (purpose === "email-change") {
+    const existingOtp = await OTP.findOne({ email, purpose });
+    if (!existingOtp || !existingOtp.data?.userId) {
+      throw new Error("Unauthorized");
+    }
+
+    data = { userId: existingOtp.data.userId };
+  }
+
+  await OTP.deleteMany({ email, purpose });
 
   const otp = genarateOtp();
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
@@ -109,14 +126,16 @@ const resendOtp = async ({ email }) => {
   await OTP.create({
     email,
     otp: otpHash,
-    purpose: "signup",
-    attempts: 0
+    purpose,
+    attempts: 0,
+    data,
   });
 
   await sendOTPEmail(email, otp);
 
   return { message: "OTP resent successfully" };
 };
+
 
 const login = async ({ email, password }) => {
   if (!email || !password) throw new Error("Email and password required");
@@ -161,6 +180,41 @@ const refresh = async (token) => {
     accessToken: tokens.accessToken
   };
 };
+
+const sendOtp = async ({ email, purpose, userId }) => {
+  if (!email || !purpose) {
+    throw new Error("Email and purpose required");
+  }
+
+  let data = {};
+
+  if (purpose === "email-change") {
+    if (!userId) throw new Error("Unauthorized");
+    data.userId = userId;
+
+    await OTP.deleteMany({ purpose, "data.userId": userId });
+  } else {
+    await OTP.deleteMany({ email, purpose });
+  }
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose,
+    attempts: 0,
+    data,
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP sent successfully" };
+};
+
+
+
 
 const forgotPassword = async ({ email }) => {
   if (!email) throw new Error("Email required");
@@ -230,4 +284,4 @@ const resendForgotOtp = async ({ email }) => {
   return { message: "OTP resent" };
 };
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,resendForgotOtp};
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,resendForgotOtp,sendOtp };

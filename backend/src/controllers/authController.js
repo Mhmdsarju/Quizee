@@ -53,6 +53,25 @@ const login = async (req, res) => {
   }
 };
 
+const sendOtp = async (req, res) => {
+  try {
+    const result = await authService.sendOtp({
+      email: req.body.email,
+      purpose: req.body.purpose,
+      userId:
+        req.body.purpose === "email-change"
+          ? req.user?.id
+          : null,
+    });
+
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+
+
+
 const forgotPassword = async (req, res) => {
   try {
     const result = await authService.forgotPassword(req.body);
@@ -108,4 +127,4 @@ const logout = async (req, res) => {
   res.json({ message: "Logged out successfully" });
 };
 
-export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword};
+export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp};

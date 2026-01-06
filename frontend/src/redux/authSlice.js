@@ -1,14 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  signupApi,
-  loginApi,
-  refreshApi,
-  otpVerify,
-  verifyForgotOtpApi,
-  forgotPasswordApi,
-  resetPasswordApi,
-  resendForgotOtpApi,
-} from "../api/authApi";
+import {signupApi,loginApi,refreshApi,otpVerify,verifyForgotOtpApi,forgotPasswordApi,resetPasswordApi,resendForgotOtpApi,} from "../api/authApi";
 import api from "../api/axios";
 
 export const signupUser = createAsyncThunk(
@@ -46,6 +37,7 @@ export const refreshToken = createAsyncThunk(
     }
   }
 );
+
 export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
   async (data, thunkApi) => {
@@ -129,23 +121,51 @@ export const resendForgotOtp = createAsyncThunk(
     }
   }
 );
-
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
     accessToken: null,
-    loading: true,
+    loading: false,
     error: null,
   },
   reducers: {
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
+      state.loading = false;
+      state.error = null;
+    },
+    updateUser: (state, action) => {
+      state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.accessToken = action.payload.accessToken;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(signupUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signupUser.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(signupUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(verifyOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -159,18 +179,18 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(loginUser.pending, (state) => {
+      .addCase(refreshToken.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(refreshToken.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(refreshToken.rejected, (state) => {
         state.loading = false;
-        state.error = action.payload;
+        state.user = null;
+        state.accessToken = null;
       })
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
@@ -194,6 +214,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -204,22 +225,9 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
-      .addCase(refreshToken.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-      })
-      .addCase(refreshToken.rejected, (state) => {
-        state.loading = false;
-        state.user = null;
-        state.accessToken = null;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, updateUser } = authSlice.actions;
 export default authSlice.reducer;

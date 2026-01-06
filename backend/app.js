@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoute.js"
 import adminRoutes from './src/routes/adminRoutes.js';
+import userRoutes from './src/routes/userRoutes.js'
 
 dotenv.config();
 connectDB();
@@ -17,7 +18,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/api/auth',authRoutes);
-app.use('/api/admin',adminRoutes)
+app.use('/api/admin',adminRoutes);
+app.use("/api/user",userRoutes)
+
 
 
 app.listen(5005, () =>

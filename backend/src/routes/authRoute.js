@@ -1,9 +1,11 @@
 import express from "express";
 import authController from "../controllers/authController.js";
+import { optionalProtect } from "../middleware/optionalProtect.js";
 
 const router = express.Router();
 
 router.post("/signup", authController.signup);
+router.post("/send-otp",optionalProtect, authController.sendOtp);
 router.post("/verify-otp", authController.verifyotp);
 router.post("/resend-otp", authController.resendotp);
 router.post("/forgot-password", authController.forgotPassword);

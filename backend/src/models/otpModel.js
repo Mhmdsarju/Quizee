@@ -5,8 +5,12 @@ const otpModel = new mongoose.Schema({
   otp: String,
   purpose: {
     type: String,
-    enum: ["signup", "forgot"],
+    enum: ["signup", "forgot","email-change"],
     required: true
+  },
+  data: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
   attempts: { type: Number, default: 0 },
   createdAt: {
