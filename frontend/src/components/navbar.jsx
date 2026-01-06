@@ -1,18 +1,17 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import {FaSearch,FaBars,FaTimes,FaRegUser,FaBell,} from "react-icons/fa";
+import { FaSearch, FaBars, FaTimes, FaRegUser, FaBell } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
-import { logoutApi } from "../api/authApi"; 
+import { logoutApi } from "../api/authApi";
 import logo from "../assets/logo1.png";
 
 const Navbar = () => {
   const [openSearch, setOpenSearch] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
-  const [openProfile, setOpenProfile] = useState(false);
   const inputRef = useRef(null);
 
-  const { accessToken, user } = useSelector((state) => state.auth);
+  const { accessToken } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,12 +28,11 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutApi(); 
+      await logoutApi();
     } catch (err) {
       console.log(err);
     } finally {
       dispatch(logout());
-      setOpenProfile(false);
       navigate("/login", { replace: true });
     }
   };
@@ -52,14 +50,16 @@ const Navbar = () => {
     <div className="container mx-auto mt-4 px-4">
       <nav className="relative bg-blue-quiz px-5 py-2.5 text-quiz-main shadow-xl md:rounded-full">
         <div className="flex items-center justify-between">
-     
+          {/* Logo */}
           <div
             className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleNavClick("/")}>
+            onClick={() => handleNavClick("/")}
+          >
             <img src={logo} alt="Quizee" className="h-7 w-7" />
             <span className="text-sm font-semibold">Quizee.</span>
           </div>
 
+          {/* Desktop menu */}
           <ul className="hidden md:flex items-center gap-10 text-xs font-medium uppercase">
             <li>
               <button
@@ -91,7 +91,8 @@ const Navbar = () => {
             </li>
           </ul>
 
-          <div className="hidden md:flex items-center gap-4 relative">
+          {/* Desktop right */}
+          <div className="hidden md:flex items-center gap-4">
             {openSearch ? (
               <input
                 ref={inputRef}
@@ -119,35 +120,28 @@ const Navbar = () => {
                 </Link>
               </>
             ) : (
-              <div className="flex items-center gap-3 relative">
-                <button
-                  onClick={() => navigate("/user/notifications")}
-                  className="relative"
-                >
+              <div className="flex items-center gap-3">
+                <button onClick={() => navigate("/user/notifications")}>
                   <FaBell className="h-4 w-5" />
                 </button>
 
-                <button onClick={() => setOpenProfile(!openProfile)}>
+                {/* 🔹 DIRECT PROFILE PAGE */}
+                <button onClick={() => navigate("/user/profile")}>
                   <FaRegUser className="h-4 w-6" />
                 </button>
 
-                {openProfile && (
-                  <div className="absolute right-0 top-10 w-40 bg-white text-black rounded-xl shadow-lg overflow-hidden">
-                    <div className="px-4 py-2 text-sm font-semibold">
-                      {user?.name}
-                    </div>
-                    <button
-                      onClick={handleLogout} 
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                {/* 🔹 LOGOUT */}
+                {/* <button
+                  onClick={handleLogout}
+                  className="text-xs text-red-400"
+                >
+                  Logout
+                </button> */}
               </div>
             )}
           </div>
 
+          {/* Mobile buttons */}
           <div className="flex md:hidden items-center gap-4">
             <button onClick={() => setOpenSearch(!openSearch)}>
               <FaSearch />
@@ -157,6 +151,8 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile menu */}
         {openMenu && (
           <div className="mt-4 md:hidden bg-blue-quiz px-5 py-4 shadow-lg">
             <ul className="flex flex-col gap-4 text-sm uppercase">
@@ -184,20 +180,20 @@ const Navbar = () => {
               </button>
             </ul>
 
-            {!accessToken && (
-              <div className="mt-4 flex gap-3">
-                <Link
-                  to="/login"
-                  className="flex-1 text-center border py-1 rounded-full"
+            {accessToken && (
+              <div className="mt-4 flex flex-col gap-3">
+                <button
+                  onClick={() => navigate("/user/account/profile")}
+                  className="border py-1 rounded-full"
                 >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="flex-1 text-center bg-quiz-main text-blue-quiz py-1 rounded-full"
+                  Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-900 text-red-400 py-1 rounded-full"
                 >
-                  Signup
-                </Link>
+                  Logout
+                </button>
               </div>
             )}
           </div>
