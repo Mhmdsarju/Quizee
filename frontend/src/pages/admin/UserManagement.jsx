@@ -19,9 +19,7 @@ export default function UserManagement() {
   }, [data]);
 
   const handleBlockToggleUI = (id) => {
-    setUsers((prev) =>
-      prev.map((u) => (u._id === id ? { ...u, isBlocked: !u.isBlocked } : u))
-    );
+    setUsers((prev) => prev.map((u) => (u._id === id ? { ...u, isBlocked: !u.isBlocked } : u)));
   };
 
   return (
