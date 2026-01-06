@@ -6,10 +6,11 @@ import Pagination from "../../components/Pagination";
 import UserRow from "./rows/UserRow";
 
 export default function UserManagement() {
-  const {data,loading,pagination,search,setSearch,page,setPage,} = useAdminList({
-    endpoint: "/admin/users",
-    limit: 10,
-  });
+  const { data, loading, pagination, search, setSearch, page, setPage } =
+    useAdminList({
+      endpoint: "/admin/users",
+      limit: 10,
+    });
 
   const [users, setUsers] = useState([]);
 
@@ -19,16 +20,14 @@ export default function UserManagement() {
 
   const handleBlockToggleUI = (id) => {
     setUsers((prev) =>
-      prev.map((u) =>
-        u._id === id ? { ...u, isBlocked: !u.isBlocked } : u
-      )
+      prev.map((u) => (u._id === id ? { ...u, isBlocked: !u.isBlocked } : u))
     );
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-9 mt-8">
-        <h1 className="text-xl font-semibold text-blue-quiz">
+        <h1 className="text-sm sm:text-base md:text-lg font-semibold text-blue-quiz">
           User Management
         </h1>
 
@@ -44,11 +43,9 @@ export default function UserManagement() {
 
       <AdminList
         headers={["ID", "User Info", "Role", "Status", "Actions"]}
-        data={users}
+        data={users.filter((u)=>u.role!="admin")}
         loading={loading}
-        renderRow={(u) => (
-          <UserRow {...u} onRefresh={handleBlockToggleUI} />
-        )}
+        renderRow={(u) => <UserRow {...u} onRefresh={handleBlockToggleUI} />}
       />
 
       {pagination && (
@@ -57,6 +54,12 @@ export default function UserManagement() {
           totalPages={pagination.totalPages}
           onPageChange={setPage}
         />
+      )}
+      {!loading && users.length === 0 && search && (
+        <div className="mt-6 text-center text-blue-quiz text-sm">
+          No users found for
+          <span className="text-red-500 font-medium"> "{search}"</span>
+        </div>
       )}
     </div>
   );
