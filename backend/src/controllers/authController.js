@@ -127,6 +127,7 @@ const refresh = async (req, res) => {
     res.status(statusCode.FORBIDDEN).json({ message: e.message });
   }
 };
+
 const resendForgotOtp = async (req, res) => {
   try {
     const result = await authService.resendForgotOtp(req.body);

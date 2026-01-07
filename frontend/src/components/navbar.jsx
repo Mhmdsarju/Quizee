@@ -50,7 +50,6 @@ const Navbar = () => {
     <div className="container mx-auto mt-4 px-4">
       <nav className="relative bg-blue-quiz px-5 py-2.5 text-quiz-main shadow-xl md:rounded-full">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleNavClick("/")}
@@ -58,8 +57,6 @@ const Navbar = () => {
             <img src={logo} alt="Quizee" className="h-7 w-7" />
             <span className="text-sm font-semibold">Quizee.</span>
           </div>
-
-          {/* Desktop menu */}
           <ul className="hidden md:flex items-center gap-10 text-xs font-medium uppercase">
             <li>
               <button
@@ -90,8 +87,6 @@ const Navbar = () => {
               </button>
             </li>
           </ul>
-
-          {/* Desktop right */}
           <div className="hidden md:flex items-center gap-4">
             {openSearch ? (
               <input
@@ -124,24 +119,13 @@ const Navbar = () => {
                 <button onClick={() => navigate("/user/notifications")}>
                   <FaBell className="h-4 w-5" />
                 </button>
-
-                {/* 🔹 DIRECT PROFILE PAGE */}
                 <button onClick={() => navigate("/user/profile")}>
                   <FaRegUser className="h-4 w-6" />
                 </button>
 
-                {/* 🔹 LOGOUT */}
-                {/* <button
-                  onClick={handleLogout}
-                  className="text-xs text-red-400"
-                >
-                  Logout
-                </button> */}
               </div>
             )}
           </div>
-
-          {/* Mobile buttons */}
           <div className="flex md:hidden items-center gap-4">
             <button onClick={() => setOpenSearch(!openSearch)}>
               <FaSearch />
@@ -151,8 +135,6 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-
-        {/* Mobile menu */}
         {openMenu && (
           <div className="mt-4 md:hidden bg-blue-quiz px-5 py-4 shadow-lg">
             <ul className="flex flex-col gap-4 text-sm uppercase">

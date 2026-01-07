@@ -104,11 +104,7 @@ export default function EditProfileModal({ user, onClose }) {
       </div>
 
       {openOtp && (
-        <VerifyEmailModal
-          email={email}
-          name={name}
-          onClose={onClose}
-        />
+        <VerifyEmailModal email={email} name={name} onClose={onClose} />
       )}
     </>
   );

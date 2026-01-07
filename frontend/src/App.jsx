@@ -75,7 +75,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/forgot-password/verify-otp" element={<ForgotOtp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-
+       
       </Routes>
     </BrowserRouter>
   );

@@ -9,7 +9,7 @@ passport.use(
       clientSecret: process.env.GOOGLESECRET,
       callbackURL: "/api/auth/google/callback",
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (profile, done) => {
       try {
         const email = profile.emails[0].value;
 

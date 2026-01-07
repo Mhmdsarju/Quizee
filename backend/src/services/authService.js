@@ -170,6 +170,7 @@ const login = async ({ email, password }) => {
     refreshToken: tokens.refreshToken
   };
 };
+
 const refresh = async (token) => {
   if (!token) throw new Error("No refresh token");
 

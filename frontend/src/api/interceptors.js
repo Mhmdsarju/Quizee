@@ -19,18 +19,14 @@ export const setupInterceptors = (store) => {
       const originalRequest = error.config;
 
       if (
-        error.response?.status === 401 &&
-        !originalRequest._retry
+        error.response?.status === 401 && !originalRequest._retry
       ) {
         originalRequest._retry = true;
 
         try {
           const res = await store.dispatch(refreshToken());
           const newToken = res.payload;
-
-          originalRequest.headers.Authorization =
-            `Bearer ${newToken}`;
-
+          originalRequest.headers.Authorization =`Bearer ${newToken}`;
           return api(originalRequest); 
         } catch {
           store.dispatch(logout());
