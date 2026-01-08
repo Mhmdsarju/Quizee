@@ -171,6 +171,38 @@ const refresh = async (token) => {
   };
 };
 
+const sendOtp = async ({ email, purpose, userId }) => {
+  if (!email || !purpose) {
+    throw new Error("Email and purpose required");
+  }
+
+  let data = {};
+
+  if (purpose === "email-change") {
+    if (!userId) throw new Error("Unauthorized");
+    data.userId = userId;
+
+    await OTP.deleteMany({ purpose, "data.userId": userId });
+  } else {
+    await OTP.deleteMany({ email, purpose });
+  }
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose,
+    attempts: 0,
+    data,
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP sent successfully" };
+};
+
 const forgotPassword = async ({ email }) => {
   const user = await userModel.findOne({ email });
   if (!user) throw new Error("User not found");
@@ -224,4 +256,4 @@ export const googleLogin = async (user) => {
   };
 };
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin};
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin,sendOtp};
