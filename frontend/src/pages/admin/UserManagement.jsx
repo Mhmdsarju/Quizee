@@ -6,12 +6,7 @@ import Pagination from "../../components/Pagination";
 import UserRow from "./rows/UserRow";
 
 export default function UserManagement() {
-  const { data, loading, pagination, search, setSearch, page, setPage } =
-    useAdminList({
-      endpoint: "/admin/users",
-      limit: 5,
-    });
-
+  const { data, loading, pagination, search, setSearch, page, setPage } = useAdminList({endpoint: "/admin/users",limit: 5});
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
