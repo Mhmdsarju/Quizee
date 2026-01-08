@@ -1,5 +1,5 @@
 import { statusCode } from "../../constant/constants.js";
-import { createCategoryService, deleteCategoryService, getAllCategoryService, updateCategoryService } from "../../services/categoryService";
+import { createCategoryService, deleteCategoryService, getAllCategoryService, updateCategoryService } from "../../services/categoryService.js";
 
 export const createCategory = async (req, res) => {
   try {

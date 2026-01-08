@@ -1,6 +1,6 @@
 import express from "express";
-import { createCategory, deleteCategory, getAllCategory, updateCategory } from "../controllers/admin/categoryController";
-import { adminOnly, protect } from "../middleware/authMiddleware";
+import { createCategory, deleteCategory, getAllCategory, updateCategory } from "../controllers/admin/categoryController.js";
+import { adminOnly, protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
