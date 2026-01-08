@@ -121,6 +121,7 @@ export const resendForgotOtp = createAsyncThunk(
     }
   }
 );
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -140,8 +141,8 @@ const authSlice = createSlice({
       state.user = action.payload;
     },
     setCredentials: (state, action) => {
-    state.accessToken = action.payload.accessToken;
-  },
+      state.accessToken = action.payload.accessToken;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -182,8 +183,19 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(resendOtp.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(resendOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resendOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(refreshToken.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.loading = false;
@@ -217,7 +229,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -228,9 +239,19 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(resendForgotOtp.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(resendForgotOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resendForgotOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { logout, updateUser,setCredentials } = authSlice.actions;
+export const { logout, updateUser, setCredentials } = authSlice.actions;
 export default authSlice.reducer;

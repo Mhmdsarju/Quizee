@@ -72,7 +72,8 @@ export default function VerifyOtp() {
     dispatch(
       verifyOtp({
         email,
-        otp: finalOtp
+        otp: finalOtp,
+        purpose: "signup"
       })
     );
   };

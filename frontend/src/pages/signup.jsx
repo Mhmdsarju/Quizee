@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "../schema/signupSchema";
+import Loader from "../components/Loader";
 
 export default function Signup() {
   const dispatch = useDispatch();
@@ -16,7 +17,13 @@ export default function Signup() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register,handleSubmit,formState: { errors }, } = useForm({resolver: zodResolver(signupSchema),});
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(signupSchema),
+  });
 
   const submit = async (data) => {
     const res = await dispatch(signupUser(data));
@@ -30,6 +37,12 @@ export default function Signup() {
 
   return (
     <>
+      {loading && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+          <Loader />
+        </div>
+      )}
+
       <img
         src={quizImg}
         alt="Quiz"
@@ -66,7 +79,6 @@ export default function Signup() {
                 </p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Email
@@ -83,7 +95,6 @@ export default function Signup() {
                 </p>
               )}
             </div>
-
             <div className="relative">
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Password
@@ -110,7 +121,6 @@ export default function Signup() {
                 </p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-quiz-main mb-1">
                 Referral (optional)
@@ -122,13 +132,11 @@ export default function Signup() {
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
               />
             </div>
-
             {error && (
               <p className="text-sm text-red-500 text-center">
                 {error}
               </p>
             )}
-
             <button
               type="submit"
               disabled={loading}
@@ -150,7 +158,8 @@ export default function Signup() {
             <button
               type="button"
               onClick={() => {
-                window.location.href = "http://localhost:5005/api/auth/google";
+                window.location.href =
+                  "http://localhost:5005/api/auth/google";
               }}
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
             >

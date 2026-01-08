@@ -9,7 +9,7 @@ export default function UserManagement() {
   const { data, loading, pagination, search, setSearch, page, setPage } =
     useAdminList({
       endpoint: "/admin/users",
-      limit: 10,
+      limit: 5,
     });
 
   const [users, setUsers] = useState([]);

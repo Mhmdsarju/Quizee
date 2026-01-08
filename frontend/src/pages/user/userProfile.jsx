@@ -58,14 +58,6 @@ export default function ProfilePage() {
               <p className="text-white">{user.email}</p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3">
-            <FaShieldAlt className="text-gray-400" />
-            <div>
-              <p className="text-gray-400 text-xs">Role</p>
-              <p className="text-white capitalize">{user.role}</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

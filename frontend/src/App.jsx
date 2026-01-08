@@ -41,7 +41,7 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        <Route element={<UserLayout />}>
+        <Route element={<ProtectedRoute role="user"><UserLayout/></ProtectedRoute>}>
           <Route path="/" element={<HomeUser />} />
         </Route>
 

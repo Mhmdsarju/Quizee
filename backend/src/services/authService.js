@@ -19,26 +19,10 @@ const signup = async ({ name, email, password, referredBy }) => {
   }
 
   const exists = await userModel.findOne({ email });
-
-  if (exists && exists.isVerified) {
-    throw new Error("User already exists and verified");
+  if (exists) {
+    throw new Error("User already exists");
   }
-
-  const hash = await bcrypt.hash(password, 10);
-
-  if (!exists) {
-    await userModel.create({
-      name,
-      email,
-      password: hash,
-      role: "user",
-      referredBy: referredBy || null,
-      isVerified: false
-    });
-  }
-
   await OTP.deleteMany({ email, purpose: "signup" });
-
   const otp = genarateOtp();
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
@@ -46,7 +30,12 @@ const signup = async ({ name, email, password, referredBy }) => {
     email,
     otp: otpHash,
     purpose: "signup",
-    attempts: 0
+    attempts: 0,
+    data: {
+      name,
+      password, 
+      referredBy: referredBy || null,
+    },
   });
 
   await sendOTPEmail(email, otp);
@@ -54,20 +43,6 @@ const signup = async ({ name, email, password, referredBy }) => {
   return { message: "OTP sent to your email" };
 };
 
-export const googleLogin = async (user) => {
-  const tokens = genarateToken(user);
-
-  return {
-    user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-  };
-};
 const verifyOtp = async ({ email, otp, purpose }) => {
   if (!email || !otp || !purpose) {
     throw new Error("Email, OTP and purpose required");
@@ -75,6 +50,11 @@ const verifyOtp = async ({ email, otp, purpose }) => {
 
   const record = await OTP.findOne({ email, purpose });
   if (!record) throw new Error("OTP expired or invalid");
+
+  if (record.attempts >= MAX_ATTEMPTS) {
+    await OTP.deleteOne({ _id: record._id });
+    throw new Error("Too many attempts. Please resend OTP");
+  }
 
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
@@ -85,10 +65,25 @@ const verifyOtp = async ({ email, otp, purpose }) => {
   }
 
   let user;
-  if (purpose === "email-change") {
-    if (!record.data || !record.data.userId) {
-      throw new Error("Unauthorized");
+  if (purpose === "signup") {
+    const { name, password, referredBy } = record.data || {};
+    if (!name || !password) {
+      throw new Error("Signup data missing");
     }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    user = await userModel.create({
+      name,
+      email,
+      password: hash,
+      role: "user",
+      referredBy,
+      isVerified: true,
+    });
+  }
+  if (purpose === "email-change") {
+    if (!record.data?.userId) throw new Error("Unauthorized");
 
     user = await userModel.findById(record.data.userId);
     if (!user) throw new Error("User not found");
@@ -97,15 +92,7 @@ const verifyOtp = async ({ email, otp, purpose }) => {
     await user.save();
   }
 
-  if (purpose === "signup") {
-    user = await userModel.findOne({ email });
-    if (!user) throw new Error("User not found");
-
-    user.isVerified = true;
-    await user.save();
-  }
-
-  await OTP.deleteMany({ _id: record._id });
+  await OTP.deleteOne({ _id: record._id });
 
   const tokens = genarateToken(user);
 
@@ -121,16 +108,8 @@ const resendOtp = async ({ email, purpose }) => {
     throw new Error("Email and purpose required");
   }
 
-  let data = {};
-
-  if (purpose === "email-change") {
-    const existingOtp = await OTP.findOne({ email, purpose });
-    if (!existingOtp || !existingOtp.data?.userId) {
-      throw new Error("Unauthorized");
-    }
-
-    data = { userId: existingOtp.data.userId };
-  }
+  const existing = await OTP.findOne({ email, purpose });
+  if (!existing) throw new Error("OTP expired, please signup again");
 
   await OTP.deleteMany({ email, purpose });
 
@@ -142,14 +121,13 @@ const resendOtp = async ({ email, purpose }) => {
     otp: otpHash,
     purpose,
     attempts: 0,
-    data,
+    data: existing.data,
   });
 
   await sendOTPEmail(email, otp);
 
   return { message: "OTP resent successfully" };
 };
-
 
 const login = async ({ email, password }) => {
   if (!email || !password) throw new Error("Email and password required");
@@ -167,7 +145,7 @@ const login = async ({ email, password }) => {
   return {
     user,
     accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken
+    refreshToken: tokens.refreshToken,
   };
 };
 
@@ -175,13 +153,10 @@ const refresh = async (token) => {
   if (!token) throw new Error("No refresh token");
 
   const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
-
   const user = await userModel.findById(decoded.id);
-  if (!user) throw new Error("Unauthorized");
 
-  if (user.isBlocked) {
-    throw new Error("Account blocked");
-  }
+  if (!user) throw new Error("Unauthorized");
+  if (user.isBlocked) throw new Error("Account blocked");
 
   const tokens = genarateToken(user);
 
@@ -190,50 +165,13 @@ const refresh = async (token) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role 
+      role: user.role,
     },
-    accessToken: tokens.accessToken
+    accessToken: tokens.accessToken,
   };
 };
 
-const sendOtp = async ({ email, purpose, userId }) => {
-  if (!email || !purpose) {
-    throw new Error("Email and purpose required");
-  }
-
-  let data = {};
-
-  if (purpose === "email-change") {
-    if (!userId) throw new Error("Unauthorized");
-    data.userId = userId;
-
-    await OTP.deleteMany({ purpose, "data.userId": userId });
-  } else {
-    await OTP.deleteMany({ email, purpose });
-  }
-
-  const otp = genarateOtp();
-  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
-
-  await OTP.create({
-    email,
-    otp: otpHash,
-    purpose,
-    attempts: 0,
-    data,
-  });
-
-  await sendOTPEmail(email, otp);
-
-  return { message: "OTP sent successfully" };
-};
-
-
-
-
 const forgotPassword = async ({ email }) => {
-  if (!email) throw new Error("Email required");
-
   const user = await userModel.findOne({ email });
   if (!user) throw new Error("User not found");
   if (!user.isVerified) throw new Error("Email not verified");
@@ -247,56 +185,43 @@ const forgotPassword = async ({ email }) => {
     email,
     otp: otpHash,
     purpose: "forgot",
-    attempts: 0
+    attempts: 0,
   });
 
   await sendOTPEmail(email, otp);
 
   return { message: "Password reset OTP sent" };
 };
-
 const verifyForgotOtp = async ({ email, otp }) => {
-  if (!email || !otp) throw new Error("Email & OTP required");
-
   const record = await OTP.findOne({ email, purpose: "forgot" });
   if (!record) throw new Error("OTP expired");
 
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+  if (otpHash !== record.otp) throw new Error("Invalid OTP");
 
-  if (otpHash !== record.otp) {
-    record.attempts += 1;
-    await record.save();
-    throw new Error("Invalid OTP");
-  }
-
-  await OTP.deleteMany({ email, purpose: "forgot" });
+  await OTP.deleteOne({ _id: record._id });
   return { message: "OTP verified" };
 };
 
 const resetPassword = async ({ email, password }) => {
-  if (!email || !password) throw new Error("Email & password required");
-
   const hash = await bcrypt.hash(password, 10);
   await userModel.findOneAndUpdate({ email }, { password: hash });
-
   return { message: "Password reset successful" };
 };
-const resendForgotOtp = async ({ email }) => {
-  await OTP.deleteMany({ email, purpose: "forgot" });
 
-  const otp = genarateOtp();
-  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+export const googleLogin = async (user) => {
+  const tokens = genarateToken(user);
 
-  await OTP.create({
-    email,
-    otp: otpHash,
-    purpose: "forgot",
-    attempts: 0
-  });
-
-  await sendOTPEmail(email, otp);
-
-  return { message: "OTP resent" };
+  return {
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
 };
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,resendForgotOtp,sendOtp ,googleLogin};
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin};

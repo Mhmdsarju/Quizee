@@ -1,15 +1,18 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import Loader from "../components/Loader";
 
 const PublicRoute = ({ children }) => {
-  const { accessToken, loading } = useSelector((state) => state.auth);
+  const { accessToken, user, loading } = useSelector(
+    (state) => state.auth
+  );
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return <Loader />;
 
-  if (accessToken) {
-    return <Navigate to="/" replace />;
+  if (accessToken && user) {
+    return user.role === "admin"
+      ? <Navigate to="/admin/dashboard" replace />
+      : <Navigate to="/" replace />;
   }
 
   return children;
