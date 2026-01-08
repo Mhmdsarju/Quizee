@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/authSlice";
+import Loader from "../../components/Loader";
 
 export default function VerifyEmailModal({ email, name, onClose }) {
   const dispatch = useDispatch();
@@ -109,7 +110,7 @@ export default function VerifyEmailModal({ email, name, onClose }) {
               {verifying && (
                 <span className="h-3 w-3 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
               )}
-              {verifying ? "Verifying..." : "Verify"}
+              {verifying ? <Loader/> : "Verify"}
             </button>
           </div>
         </div>

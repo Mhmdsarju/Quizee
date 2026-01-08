@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../schema/loginSchema";
+import Loader from "../components/Loader";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -119,7 +120,7 @@ export default function Login() {
                   : "bg-quiz-main text-blue-quiz hover:opacity-90"
               }`}
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? <Loader/> : "Login"}
             </button>
 
             <div className="flex items-center gap-3">

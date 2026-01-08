@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetPassword } from "../redux/authSlice";
-import { Eye, EyeOff } from "lucide-react"; // 👈 icon
+import { Eye, EyeOff } from "lucide-react"; 
+import Loader from "../components/Loader";
+
 
 export default function ResetPassword() {
   const { state } = useLocation();
@@ -64,7 +66,7 @@ export default function ResetPassword() {
           disabled={loading}
           className="w-full bg-quiz-main text-blue-quiz py-2 rounded disabled:opacity-60"
         >
-          {loading ? "Resetting..." : "Reset Password"}
+          {loading ? <Loader/> : "Reset Password"}
         </button>
       </form>
     </div>
