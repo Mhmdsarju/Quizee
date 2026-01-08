@@ -8,6 +8,7 @@ import adminRoutes from './src/routes/adminRoutes.js';
 import userRoutes from './src/routes/userRoutes.js'
 import passport from "passport";
 import "./src/config/passport.js";
+import categoryRoutes from './src/routes/categoryRoutes.js'
 
 
 dotenv.config();
@@ -24,7 +25,7 @@ app.use(passport.initialize());
 app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
 app.use("/api/user",userRoutes)
-
+app.use("/api/admin/categories",categoryRoutes);
 
 
 app.listen(5005, () =>
