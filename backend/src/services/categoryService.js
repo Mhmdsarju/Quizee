@@ -1,16 +1,14 @@
 import categoryModel from "../models/categoryModel.js";
 
 export const createCategoryService= async(name)=>{
-    const exists= await categoryModel.find({name});
-    if(exists){
-        throw new Error("Category alredy exists");
-    }
+ const normalizedName = name.trim().toLowerCase();
 
-    return await categoryModel.create({name});
-}
+  const exists = await categoryModel.findOne({ name: normalizedName });
+  if (exists) {
+    throw new Error("Category already exists");
+  }
 
-export const getAllCategoryService=async()=>{
-    return await categoryModel.find().sort({created:-1});
+  return await categoryModel.create({ name: normalizedName });
 }
 
 export const updateCategoryService=async(id,name)=>{

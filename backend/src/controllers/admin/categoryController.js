@@ -1,5 +1,7 @@
 import { statusCode } from "../../constant/constants.js";
-import { createCategoryService, deleteCategoryService, getAllCategoryService, updateCategoryService } from "../../services/categoryService.js";
+import categoryModel from "../../models/categoryModel.js";
+import { createCategoryService, deleteCategoryService, updateCategoryService } from "../../services/categoryService.js";
+import { paginateAndSearch } from "../../utils/paginateAndSearch.js";
 
 export const createCategory = async (req, res) => {
   try {
@@ -11,14 +13,24 @@ export const createCategory = async (req, res) => {
   }
 };
 
-export const getAllCategory=async(req,res)=>{
-    try {
-        const category = await getAllCategoryService();
-        res.status(statusCode.OK).json(category);
-    } catch (error) {
-        res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:error.message});
-    }
-}
+export const getAllCategory = async (req, res) => {
+  try {
+    const { search = "", page = 1, limit = 10 } = req.query;
+
+    const result = await paginateAndSearch({
+      model: categoryModel,
+      search,
+      searchFields: ["name"], 
+      page: Number(page),
+      limit: Number(limit),
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error("ADMIN CATEGORY ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch categories" });
+  }
+};
 
 
 export const updateCategory = async (req, res) => {

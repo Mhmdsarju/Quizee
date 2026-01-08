@@ -4,10 +4,12 @@ export default function AdminList({title,headers,data,renderRow,loading,}) {
   }
 
   return (
-    <div className="text-quiz-main shadow-2xl border-black">
-      <h1 className="text-xl font-semibold mb-3 text-blue-quiz">
-        {title}
-      </h1>
+    <div className="text-quiz-main shadow-2xl">
+      {title && (
+        <h1 className="text-xl font-semibold mb-3 text-blue-quiz">
+          {title}
+        </h1>
+      )}
 
       <div className="bg-blue-quiz/90 rounded-md shadow-md px-4 py-3 space-y-2">
 

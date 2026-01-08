@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useAdminList from "../../hooks/fetchUsers";
+import useAdminList from "../../hooks/fetchData";
 import AdminList from "../../components/AdminList";
 import SearchBar from "../../components/SearchBar";
 import Pagination from "../../components/Pagination";
