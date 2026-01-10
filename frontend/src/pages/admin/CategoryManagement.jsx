@@ -7,14 +7,7 @@ import CategoryRow from "./rows/CategoryRow";
 import AddCategoryModal from "./AddCategoryModal";
 
 export default function CategoryManagement() {
-  const {
-    data,
-    loading,
-    pagination,
-    search,
-    setSearch,
-    page,
-    setPage,
+  const {data,loading,pagination,search,setSearch,page,setPage,
   } = useAdminList({
     endpoint: "/admin/categories",
     limit: 5,
@@ -28,8 +21,6 @@ export default function CategoryManagement() {
       setCategories(data);
     }
   }, [data]);
-
-  // ✅ toggle active/inactive
   const handleToggleUI = (id) => {
     setCategories((prev) =>
       prev.map((c) =>
@@ -37,8 +28,6 @@ export default function CategoryManagement() {
       )
     );
   };
-
-  // ✅ edit success handler
   const handleEditSuccess = (updatedCategory) => {
     setCategories((prev) =>
       prev.map((c) =>
