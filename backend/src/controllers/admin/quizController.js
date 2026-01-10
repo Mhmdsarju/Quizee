@@ -1,4 +1,4 @@
-import { createQuizService, getAllQuizService, getQuizByIdService, QuizStatusService, updateQuizService } from "../../services/quizService";
+import { createQuizService, getAllQuizService, getQuizByIdService, QuizStatusService, updateQuizService } from "../../services/quizService.js";
 import { statusCode } from "../../constant/constants.js";
 
 export const createQuiz = async (req, res) => {
@@ -25,10 +25,20 @@ export const createQuiz = async (req, res) => {
 
 export const getAllQuiz = async (req, res) => {
   try {
-    const quizzes = await getAllQuizService();
-    res.json(quizzes);
+    const { search = "", page = 1, limit = 10 } = req.query;
+
+    const result = await getAllQuizService({
+      search,
+      page,
+      limit,
+    });
+
+    res.json(result);
   } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    console.error("ADMIN QUIZ ERROR:", err);
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: "Failed to fetch quizzes" });
   }
 };
 

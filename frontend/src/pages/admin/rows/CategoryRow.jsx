@@ -3,13 +3,7 @@ import Swal from "sweetalert2";
 import { deleteCategories } from "../../../api/categoryApi";
 import EditCategoryModal from "../EditCategoryModal";
 
-export default function CategoryRow({
-  _id,
-  name,
-  isActive,
-  onRefresh,
-  onEdit,
-}) {
+export default function CategoryRow({_id,name,isActive,onRefresh,onEdit,}) {
   const [openEdit, setOpenEdit] = useState(false);
 
   const handleToggleStatus = async () => {
@@ -36,8 +30,6 @@ export default function CategoryRow({
         timer: 1200,
         showConfirmButton: false,
       });
-
-      // ✅ instant UI toggle
       onRefresh(_id);
     } catch (err) {
       Swal.fire(
@@ -99,7 +91,7 @@ export default function CategoryRow({
           currentName={name}
           onClose={() => setOpenEdit(false)}
           onSuccess={(updatedCategory) => {
-            onEdit(updatedCategory); // ✅ update parent list
+            onEdit(updatedCategory); 
             setOpenEdit(false);
           }}
         />

@@ -1,16 +1,30 @@
-import quizModel from "../models/quizModel";
+import quizModel from "../models/quizModel.js";
+import { paginateAndSearch } from "../utils/paginateAndSearch.js";
+
 
 export const createQuizService=async(data)=>{
 return await quizModel.create(data);
 }
 
-export const getAllQuizService=async()=>{
-return await quizModel.find().populate("category","name").sort({createdAt:-1});
-}
+export const getAllQuizService = async ({search = "",page = 1,limit = 10,}) => {
+  return await paginateAndSearch({
+    model: quizModel,
+    search,
+    searchFields: ["title"],
+    page: Number(page),
+    limit: Number(limit),
+    populate: { path: "category", select: "name" },
+    sort: { createdAt: -1 },
+  });
+};
+
 
 export const getQuizByIdService = async (id) => {
-  return await quizModel.findById(id);
+  return await quizModel
+    .findById(id)
+    .populate("category", "name");
 };
+
 
 export const updateQuizService = async (id, data) => {
   return await quizModel.findByIdAndUpdate(id, data, { new: true });

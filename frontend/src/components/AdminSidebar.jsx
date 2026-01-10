@@ -32,7 +32,7 @@ export default function AdminSidebar() {
 
   return (
     <>
-      
+      {/* Mobile menu button */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 text-blue-quiz"
         onClick={() => setOpen(true)}
@@ -40,6 +40,7 @@ export default function AdminSidebar() {
         <FaBars size={20} />
       </button>
 
+      {/* Overlay */}
       {open && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -47,18 +48,22 @@ export default function AdminSidebar() {
         />
       )}
 
+      {/* Sidebar */}
       <aside
         className={`fixed md:static z-50
-        top-0 left-0 h-screen w-64 bg-blue-quiz
-        flex flex-col justify-between
+        top-0 left-0 w-64 bg-blue-quiz
+        min-h-screen
+        flex flex-col
         transform transition-transform duration-300
+        overflow-y-auto
         ${open ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0`}
       >
+        {/* TOP */}
         <div>
           <div className="flex px-9 py-3 items-center border-b border-gray-700">
             <img src={logo} alt="Quizee" className="h-7 w-7" />
-            <span className="text-sm font-semibold text-quiz-main">
+            <span className="text-sm font-semibold text-quiz-main ml-2">
               Quizee.
             </span>
           </div>
@@ -85,7 +90,8 @@ export default function AdminSidebar() {
           </nav>
         </div>
 
-        <div className="border-t border-gray-700 p-4 bg-black space-y-3">
+        {/* BOTTOM */}
+        <div className="border-t border-gray-700 p-4 bg-black space-y-3 mt-auto">
           <div className="flex items-center space-x-2">
             <h3 className="text-white bg-gray-600 inline p-2 rounded-full">
               AD
