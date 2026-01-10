@@ -165,7 +165,7 @@ const Navbar = () => {
             {accessToken && (
               <div className="mt-4 flex flex-col gap-3">
                 <button
-                  onClick={() => navigate("/user/account/profile")}
+                  onClick={() => navigate("/user/profile")}
                   className="border py-1 rounded-full"
                 >
                   Profile
