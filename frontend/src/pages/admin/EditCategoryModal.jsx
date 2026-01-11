@@ -2,12 +2,7 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import { updateCategories } from "../../api/categoryApi";
 
-export default function EditCategoryModal({
-  id,
-  currentName,
-  onClose,
-  onSuccess,
-}) {
+export default function EditCategoryModal({id,currentName,onClose,onSuccess,}) {
   const [name, setName] = useState(currentName);
   const [loading, setLoading] = useState(false);
 
@@ -27,15 +22,13 @@ export default function EditCategoryModal({
         timer: 1200,
         showConfirmButton: false,
       });
-
-      // ✅ SAFE updated category object (fallback added)
       const updatedCategory = data?.category ?? {
         _id: id,
         name,
       };
 
-      onSuccess(updatedCategory); // ✅ always valid
-      onClose(); // ✅ modal close
+      onSuccess(updatedCategory); 
+      onClose(); 
     } catch (err) {
       Swal.fire(
         "Error",

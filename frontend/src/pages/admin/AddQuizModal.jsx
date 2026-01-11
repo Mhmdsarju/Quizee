@@ -7,17 +7,16 @@ export default function AddQuizModal({ onClose, onSuccess }) {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [timeLimit, setTimeLimit] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await api.get("/admin/categories");
-        setCategories(res.data.data || res.data); 
+        setCategories(res.data.data || res.data);
       } catch (err) {
         console.error("Category fetch failed", err);
       }
@@ -25,49 +24,55 @@ export default function AddQuizModal({ onClose, onSuccess }) {
     fetchCategories();
   }, []);
 
-  // 🔹 submit quiz
   const handleSubmit = async () => {
-    if (!title || !category || !timeLimit) {
-      return Swal.fire("Error", "Required fields missing", "error");
+  if (!title || !category || !timeLimit) {
+    return Swal.fire("Error", "Required fields missing", "error");
+  }
+
+  try {
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("timeLimit", timeLimit);
+
+    if (image) {
+      formData.append("image", image);
     }
 
-    try {
-      setLoading(true);
-      const res = await api.post("/admin/quiz", {
-        title,
-        description,
-        category,
-        timeLimit,
-        image: image || null,
-      });
+    const res = await api.post("/admin/quiz", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      Swal.fire("Success", "Quiz added successfully", "success");
-      onSuccess(res.data.quiz);
-    } catch (err) {
-      Swal.fire(
-        "Error",
-        err.response?.data?.message || "Quiz creation failed",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    Swal.fire("Success", "Quiz added successfully", "success");
+    onSuccess(res.data.quiz);
+    onClose(); 
+  } catch (err) {
+    Swal.fire(
+      "Error",
+      err.response?.data?.message || "Quiz creation failed",
+      "error"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white w-full max-w-lg rounded-lg p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-base font-semibold text-blue-quiz">
-            Add Quiz
-          </h2>
+          <h2 className="text-base font-semibold text-blue-quiz">Add Quiz</h2>
           <button onClick={onClose} className="text-gray-500 text-sm">
             ✕
           </button>
         </div>
 
-        {/* Form */}
         <div className="space-y-4">
           <input
             type="text"
@@ -85,11 +90,9 @@ export default function AddQuizModal({ onClose, onSuccess }) {
           />
 
           <input
-            type="text"
-            placeholder="Image URL (optional)"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
           />
 
           <select
@@ -114,7 +117,6 @@ export default function AddQuizModal({ onClose, onSuccess }) {
           />
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}

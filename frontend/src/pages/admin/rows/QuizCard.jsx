@@ -5,18 +5,7 @@ import api from "../../../api/axios";
 import EditQuizModal from "../EditQuizModal";
 import QuizImg from "../../../assets/quiz.jpg";
 
-export default function QuizCard({
-  _id,
-  title,
-  description,
-  category,
-  timeLimit,
-  image,
-  isActive,
-  onToggle,
-  onEdit,
-  questionCount,
-}) {
+export default function QuizCard({_id,title,description,category,timeLimit,image,isActive,onToggle,onEdit,questionCount,}) {
   const [openEdit, setOpenEdit] = useState(false);
   const navigate = useNavigate();
 

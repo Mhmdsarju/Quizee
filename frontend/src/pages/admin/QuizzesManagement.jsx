@@ -6,15 +6,7 @@ import QuizCard from "./rows/QuizCard";
 import AddQuizModal from "./AddQuizModal";
 
 export default function QuizManagement() {
-  const {
-    data,
-    loading,
-    pagination,
-    search,
-    setSearch,
-    page,
-    setPage,
-  } = useAdminList({
+  const {data,loading,pagination,search,setSearch,page,setPage, } = useAdminList({
     endpoint: "/admin/quiz",
     limit: 6,
   });
@@ -44,15 +36,20 @@ export default function QuizManagement() {
     );
   };
 
-  const handleAddSuccess = (newQuiz) => {
-    setQuizzes((prev) => [newQuiz, ...prev]);
-    setOpenAdd(false);
-    setPage(1);
-  };
+  const handleAddSuccess = async () => {
+  setOpenAdd(false);
+  setPage(1);
+
+  const res = await api.get("/admin/quiz", {
+    params: { page: 1, limit: 6, search },
+  });
+
+  setQuizzes(res.data.data);
+};
+
 
   return (
     <div>
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-8 mt-8">
         <h1 className="text-lg font-semibold text-blue-quiz">
           Quiz Management
@@ -67,8 +64,6 @@ export default function QuizManagement() {
           placeholder="Search quizzes..."
         />
       </div>
-
-      {/* Add */}
       <div className="flex justify-end mb-6">
         <button
           onClick={() => setOpenAdd(true)}
@@ -77,8 +72,6 @@ export default function QuizManagement() {
           + Add Quiz
         </button>
       </div>
-
-      {/* GRID VIEW */}
       {loading ? (
         <p className="text-center text-sm text-gray-400">
           Loading quizzes...
@@ -95,8 +88,6 @@ export default function QuizManagement() {
           ))}
         </div>
       )}
-
-      {/* Pagination */}
       {pagination && (
         <div className="mt-10">
           <Pagination
@@ -107,7 +98,6 @@ export default function QuizManagement() {
         </div>
       )}
 
-      {/* Empty */}
       {!loading && quizzes.length === 0 && search && (
         <div className="mt-6 text-center text-sm text-blue-quiz">
           No quizzes found for
@@ -115,7 +105,6 @@ export default function QuizManagement() {
         </div>
       )}
 
-      {/* Add Modal */}
       {openAdd && (
         <AddQuizModal
           onClose={() => setOpenAdd(false)}

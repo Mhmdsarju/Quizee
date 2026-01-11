@@ -7,18 +7,16 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [timeLimit, setTimeLimit] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);      // file
+  const [oldImage, setOldImage] = useState(""); // cloudinary url
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  // 🔹 Fetch quiz + categories
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setFetching(true);
-
         const [quizRes, catRes] = await Promise.all([
           api.get(`/admin/quiz/${quizId}`),
           api.get("/admin/categories"),
@@ -30,7 +28,7 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
         setDescription(quiz.description || "");
         setCategory(quiz.category?._id || quiz.category);
         setTimeLimit(quiz.timeLimit);
-        setImage(quiz.image || "");
+        setOldImage(quiz.image || "");
 
         setCategories(catRes.data.data || catRes.data);
       } catch (err) {
@@ -44,7 +42,6 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
     fetchData();
   }, [quizId, onClose]);
 
-  // 🔹 Update quiz
   const handleUpdate = async () => {
     if (!title || !category || !timeLimit) {
       return Swal.fire("Error", "Required fields missing", "error");
@@ -53,12 +50,18 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
     try {
       setLoading(true);
 
-      const res = await api.put(`/admin/quiz/${quizId}`, {
-        title,
-        description,
-        category,
-        timeLimit,
-        image: image || null,
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("category", category);
+      formData.append("timeLimit", timeLimit);
+
+      if (image) {
+        formData.append("image", image);
+      }
+
+      const res = await api.put(`/admin/quiz/${quizId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       Swal.fire("Updated", "Quiz updated successfully", "success");
@@ -88,7 +91,6 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white w-full max-w-lg rounded-lg p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-base font-semibold text-blue-quiz">
             Edit Quiz
@@ -98,7 +100,6 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Form */}
         <div className="space-y-4">
           <input
             type="text"
@@ -115,20 +116,19 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
             className="w-full border rounded px-3 py-2 text-sm"
           />
 
+          {/* Image Upload */}
           <input
-            type="text"
-            placeholder="Image URL (optional)"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
           />
 
           {/* Preview */}
-          {image && (
+          {(image || oldImage) && (
             <img
-              src={image}
+              src={image ? URL.createObjectURL(image) : oldImage}
               alt="Preview"
-              className="h-24 rounded object-cover"
+              className="h-32 w-full object-cover rounded"
             />
           )}
 
@@ -154,7 +154,6 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
           />
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}

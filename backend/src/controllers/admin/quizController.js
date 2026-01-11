@@ -1,12 +1,19 @@
-import { createQuizService, getAllQuizService, getQuizByIdService, QuizStatusService, updateQuizService } from "../../services/quizService.js";
+import {createQuizService,getAllQuizService,getQuizByIdService,QuizStatusService,updateQuizService,} from "../../services/quizService.js";
 import { statusCode } from "../../constant/constants.js";
+import cloudinary from "../../config/cloudinary.js";
+import quizModel from "../../models/quizModel.js";
 
 export const createQuiz = async (req, res) => {
   try {
-    const { title, description, category, timeLimit, image } = req.body;
+    const { title, description, category, timeLimit } = req.body;
 
-    if (!title || !category || !timeLimit) {
-      return res.status(statusCode.BAD_REQUEST).json({ message: "Required fields missing" });
+    let imageUrl = null;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "quiz-app/quizzes",
+      });
+      imageUrl = result.secure_url;
     }
 
     const quiz = await createQuizService({
@@ -14,10 +21,11 @@ export const createQuiz = async (req, res) => {
       description,
       category,
       timeLimit,
-      image: image || null,
+      image: imageUrl,
     });
 
-    res.status(statusCode.CREATED).json({ message: "Quiz created", quiz });
+    const populatedQuiz = await quizModel.findById(quiz._id).populate("category", "name");
+    res.status(statusCode.CREATED).json({ quiz: populatedQuiz });
   } catch (err) {
     res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
@@ -45,7 +53,10 @@ export const getAllQuiz = async (req, res) => {
 export const getQuizById = async (req, res) => {
   try {
     const quiz = await getQuizByIdService(req.params.id);
-    if (!quiz) return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
+    if (!quiz)
+      return res
+        .status(statusCode.NOT_FOUND)
+        .json({ message: "Quiz not found" });
 
     res.json(quiz);
   } catch (err) {
@@ -55,14 +66,43 @@ export const getQuizById = async (req, res) => {
 
 export const updateQuiz = async (req, res) => {
   try {
-    const quiz = await updateQuizService(req.params.id, req.body);
-    if (!quiz) return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
+    const { title, description, category, timeLimit } = req.body;
 
-    res.json({ message: "Quiz updated", quiz });
+    let imageUrl;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "quiz-app/quizzes",
+      });
+      imageUrl = result.secure_url;
+    }
+
+    const data = {
+      title,
+      description,
+      category,
+      timeLimit,
+    };
+
+    if (imageUrl) {
+      data.image = imageUrl;
+    }
+
+    const quiz = await updateQuizService(req.params.id, data);
+
+    if (!quiz)
+      return res.status(404).json({ message: "Quiz not found" });
+
+    const populatedQuiz = await quizModel
+      .findById(quiz._id)
+      .populate("category", "name");
+
+    res.json({ quiz: populatedQuiz });
   } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
+
 
 export const toggleQuizStatus = async (req, res) => {
   try {
