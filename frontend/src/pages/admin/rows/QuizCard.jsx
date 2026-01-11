@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import api from "../../../api/axios";
 import EditQuizModal from "../EditQuizModal";
+import QuizImg from "../../../assets/quiz.jpg";
 
 export default function QuizCard({
   _id,
@@ -13,8 +15,10 @@ export default function QuizCard({
   isActive,
   onToggle,
   onEdit,
+  questionCount,
 }) {
   const [openEdit, setOpenEdit] = useState(false);
+  const navigate = useNavigate();
 
   const handleToggleStatus = async () => {
     const result = await Swal.fire({
@@ -32,13 +36,14 @@ export default function QuizCard({
   return (
     <>
       <div className="rounded-2xl overflow-hidden bg-[#2B2450] shadow-lg">
-        <div className="h-36 bg-gradient-to-br from-[#0F172A] to-[#1E293B] flex items-center justify-center">
+        <div className="h-36 w-full overflow-hidden">
           <img
-            src={image || "/quiz-placeholder.png"}
+            src={image || QuizImg}
             alt={title}
-            className="w-16 opacity-70"
+            className="w-full h-full object-cover"
           />
         </div>
+
         <div className="p-4 text-white">
           <div className="flex justify-between items-center mb-2">
             <span
@@ -50,10 +55,13 @@ export default function QuizCard({
             >
               {isActive ? "Active" : "Blocked"}
             </span>
-            <span className="text-xs text-gray-300">{timeLimit} mins</span>
+            <span className="text-xs text-gray-300">
+              {questionCount || 0} Questions
+            </span>
           </div>
 
           <h3 className="font-semibold text-base">{title}</h3>
+
           <p className="text-sm text-gray-300 mt-1 line-clamp-2">
             {description || "No description"}
           </p>
@@ -64,15 +72,24 @@ export default function QuizCard({
 
           <div className="flex gap-2 mt-4">
             <button
-              onClick={() => setOpenEdit(true)}
-              className="flex-1 flex items-center justify-center gap-1 text-sm bg-[#3B356A] hover:bg-[#4C4591] rounded-lg py-2"
+              onClick={() => navigate(`/admin/quizzes/${_id}/questions`)}
+              className="flex-1 text-sm bg-indigo-600 hover:bg-indigo-700 rounded-lg py-2"
             >
-              ✏️ Edit
+              ❓ Questions
+            </button>
+
+            <button
+              onClick={() => setOpenEdit(true)}
+              className="w-10 flex items-center justify-center bg-[#3B356A] hover:bg-[#4C4591] rounded-lg"
+              title="Edit Quiz"
+            >
+              ✏️
             </button>
 
             <button
               onClick={handleToggleStatus}
               className="w-10 flex items-center justify-center bg-[#3B356A] hover:bg-red-600 rounded-lg"
+              title={isActive ? "Block Quiz" : "Unblock Quiz"}
             >
               🗑
             </button>

@@ -28,6 +28,7 @@ import UserSettings from "./pages/user/UserSettings";
 import UserHistory from "./pages/user/UserHistory";
 import UserNotifications from "./pages/user/UserNotifications";
 import GoogleSuccess from "./pages/GoogleSuccess";
+import QuizQuestions from "./pages/admin/questions/QuizQuestions";
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
   useEffect(() => {
     dispatch(refreshToken());
   }, [dispatch]);
+
 
   return (
     <BrowserRouter>
@@ -66,6 +68,7 @@ function App() {
           <Route path="quizzes" element={<QuizzesManagement />} />
           <Route path="contests" element={<ContestManagement />} />
           <Route path="transactions" element={<TransactionManagement />} />
+          <Route path="quizzes/:quizId/questions"element={<QuizQuestions />}/>
         </Route>
 
         <Route path="/google-success" element={<GoogleSuccess />} />

@@ -10,7 +10,7 @@ import passport from "passport";
 import "./src/config/passport.js";
 import categoryRoutes from './src/routes/categoryRoutes.js'
 import quizRoutes from './src/routes/quizRoutes.js'
-
+import questionRoutes from './src/routes/questionRoutes.js'
 
 dotenv.config();
 connectDB();
@@ -28,6 +28,7 @@ app.use('/api/admin',adminRoutes);
 app.use("/api/user",userRoutes)
 app.use("/api/admin/categories",categoryRoutes);
 app.use('/api/admin/quiz/',quizRoutes)
+app.use('/api/admin/questions/',questionRoutes)
 
 
 app.listen(5005, () =>
