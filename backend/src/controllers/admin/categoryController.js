@@ -15,7 +15,7 @@ export const createCategory = async (req, res) => {
 
 export const getAllCategory = async (req, res) => {
   try {
-    const { search = "", page = 1, limit = 10 } = req.query;
+    const { search= "", page = 1, limit = 10 } = req.query;
 
     const filter = req.user?.role === "admin"? {} : { isActive: true };
 
