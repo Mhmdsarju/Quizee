@@ -29,6 +29,9 @@ import UserHistory from "./pages/user/UserHistory";
 import UserNotifications from "./pages/user/UserNotifications";
 import GoogleSuccess from "./pages/GoogleSuccess";
 import QuizQuestions from "./pages/admin/questions/QuizQuestions";
+import QuizIntro from "./pages/user/QuizIntro";
+import QuizPlay from "./pages/user/QuizPlay";
+import QuizResult from "./pages/user/QuizResult";
 
 
 function App() {
@@ -37,7 +40,6 @@ function App() {
   useEffect(() => {
     dispatch(refreshToken());
   }, [dispatch]);
-
 
   return (
     <BrowserRouter>
@@ -51,6 +53,10 @@ function App() {
           <Route path="/user/quiz" element={<QuizPage />} />
           <Route path="/user/contest" element={<ContestPage />} />
           <Route path="/user/notifications" element={<UserNotifications />} />
+          <Route path="/user/quiz/:quizId" element={<QuizIntro />} />
+          <Route path="/user/quiz/:quizId/play" element={<QuizPlay/>} />
+          <Route path="/user/quiz/:quizId/result" element={<QuizResult />} />
+
         </Route>
 
         <Route element={ <ProtectedRoute role="user"><UserProfileLayout /></ProtectedRoute>}>

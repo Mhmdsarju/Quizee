@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { replace, useNavigate, useSearchParams } from "react-router-dom";
 import QuizImg from "../../assets/quiz.jpg";
 import Loader from "../../components/Loader";
 import Pagination from "../../components/Pagination";
@@ -57,7 +57,7 @@ export default function QuizPage() {
           <h3 className="text-sm mb-4">TOPICS</h3>
 
           {categories.map((c) => (
-            <label key={c._id} className="flex gap-2 text-sm cursor-pointer">
+            <label key={c._id} className="flex gap-2 text-xl cursor-pointer">
               <input
                 type="checkbox"
                 checked={selectedCat === c._id}
@@ -82,7 +82,6 @@ export default function QuizPage() {
             >
               <option value="popular">Most Popular</option>
               <option value="newest">Newest</option>
-              <option value="questions">Most Questions</option>
             </select>
           </div>
 
@@ -106,7 +105,7 @@ export default function QuizPage() {
                       <p className="text-xs">{quiz.questionCount} Questions</p>
                       <p className="text-xs">Category: {quiz.category?.name}</p>
 
-                      <button onClick={() => navigate(`/user/quiz/${quiz._id}`)} className="mt-3 w-full bg-red-600 py-2 rounded" >
+                      <button onClick={() => navigate(`/user/quiz/${quiz._id}`,{replace:true})} className="mt-3 w-full bg-red-600 py-2 rounded" >
                         Start Quiz
                       </button>
                     </div>
