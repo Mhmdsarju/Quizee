@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import api from "../../api/axios";
+import Loader from "../../components/Loader";
 
 export default function AddQuizModal({ onClose, onSuccess }) {
   const [title, setTitle] = useState("");
@@ -129,7 +130,7 @@ export default function AddQuizModal({ onClose, onSuccess }) {
             disabled={loading}
             className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {loading ? "Saving..." : "Add Quiz"}
+            {loading ? <Loader/> : "Add Quiz"}
           </button>
         </div>
       </div>

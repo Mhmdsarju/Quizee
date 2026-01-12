@@ -5,7 +5,7 @@ import { adminOnly, protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.post('/',protect,adminOnly,createCategory);
-router.get("/", protect, adminOnly, getAllCategory);
+router.get("/", protect,  getAllCategory);
 router.patch("/:id", protect, adminOnly, updateCategory);
 router.patch("/:id/status", protect, adminOnly, deleteCategory);
 

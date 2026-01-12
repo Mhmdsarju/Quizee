@@ -21,9 +21,7 @@ export const googleCallback = async (req, res) => {
       secure: false, 
     });
 
-    res.redirect(
-      `http://localhost:5173/google-success?token=${accessToken}`
-    );
+    res.redirect(`http://localhost:5173/google-success?token=${accessToken}`);
   } catch (err) {
     res.redirect("http://localhost:5173/login");
   }

@@ -41,9 +41,7 @@ export const getAllQuizService = async ({ search = "", page = 1, limit = 10 }) =
 
 
 export const getQuizByIdService = async (id) => {
-  return await quizModel
-    .findById(id)
-    .populate("category", "name");
+  return await quizModel.findById(id).populate("category", "name");
 };
 
 
@@ -60,3 +58,50 @@ export const QuizStatusService = async (id) => {
 
   return quiz;
 };
+
+export const getUserQuizService = async ({search = "",category,page = 1,limit = 9,sort = "newest",}) => {
+  let query = { isActive: true };
+
+  if (category) {
+    query.category = category;
+  }
+
+  let sortQuery = { createdAt: -1 };
+
+  if (sort === "newest") {
+    sortQuery = { createdAt: -1 };
+  }
+
+  if (sort === "popular") {
+    sortQuery = { attempts: -1 }; 
+  }
+
+  const result = await paginateAndSearch({
+    model: quizModel,
+    query,                 
+    search,
+    searchFields: ["title"],
+    page,
+    limit,
+    populate: { path: "category", select: "name" },
+    sort: sort === "questions" ? {} : sortQuery,
+  });
+const quizzesWithCount = await Promise.all(
+  result.data.map(async (quiz) => {
+    const count = await questionModel.countDocuments({ quiz: quiz._id });
+    return { ...quiz.toObject(), questionCount: count };
+  })
+);
+
+const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
+
+  if (sort === "questions") {
+    quizzesWithCount.sort((a, b) => b.questionCount - a.questionCount);
+  }
+
+  return {
+    ...result,
+    data: filtered,
+  };
+};
+

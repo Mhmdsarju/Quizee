@@ -7,18 +7,13 @@ import { logoutApi } from "../api/authApi";
 import logo from "../assets/logo1.png";
 
 const Navbar = () => {
-  const [openSearch, setOpenSearch] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
-  const inputRef = useRef(null);
 
   const { accessToken } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (openSearch && inputRef.current) inputRef.current.focus();
-  }, [openSearch]);
 
   const handleNavClick = (path) => {
     if (!accessToken) navigate("/login");
@@ -88,20 +83,6 @@ const Navbar = () => {
             </li>
           </ul>
           <div className="hidden md:flex items-center gap-4">
-            {openSearch ? (
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search quizzes..."
-                className="w-40 rounded-full px-3 py-1 text-xs text-black outline-none"
-                onBlur={() => setOpenSearch(false)}
-              />
-            ) : (
-              <button onClick={() => setOpenSearch(true)}>
-                <FaSearch className="h-3.5 w-3.5" />
-              </button>
-            )}
-
             <span className="opacity-40 text-sm">|</span>
 
             {!accessToken ? (
@@ -127,9 +108,6 @@ const Navbar = () => {
             )}
           </div>
           <div className="flex md:hidden items-center gap-4">
-            <button onClick={() => setOpenSearch(!openSearch)}>
-              <FaSearch />
-            </button>
             <button onClick={() => setOpenMenu(!openMenu)}>
               {openMenu ? <FaTimes /> : <FaBars />}
             </button>

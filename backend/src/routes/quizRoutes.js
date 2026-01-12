@@ -9,6 +9,7 @@ router.post('/',protect,adminOnly,upload.single("image"),createQuiz);
 router.get('/',protect,adminOnly,getAllQuiz)
 router.get('/:id',protect,adminOnly,getQuizById);
 router.put("/:id", protect, adminOnly, upload.single("image"), updateQuiz);
-router.patch('/:id/status',protect,adminOnly,toggleQuizStatus)
+router.patch('/:id/status',protect,adminOnly,toggleQuizStatus);
+
 
 export default router;

@@ -5,9 +5,7 @@ import api from "../../../api/axios";
 export default function EditQuestionModal({ question, onClose, onSuccess }) {
   const [qText, setQText] = useState(question.question);
   const [options, setOptions] = useState([...question.options]);
-  const [correctAnswer, setCorrectAnswer] = useState(
-    question.correctAnswer
-  );
+  const [correctAnswer, setCorrectAnswer] = useState(question.correctAnswer);
 
   const handleUpdate = async () => {
     await api.put(`/admin/questions/${question._id}`, {
