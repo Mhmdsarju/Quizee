@@ -26,10 +26,7 @@ export default function UserSettings() {
     }
 
     try {
-      await api.patch("/user/change-password", {
-        oldPassword,
-        newPassword,
-      });
+      await api.patch("/user/change-password", {oldPassword,newPassword,});
 
       Swal.fire("Success", "Password updated successfully", "success");
       setOpen(false);
@@ -49,14 +46,11 @@ export default function UserSettings() {
     <div className="p-10">
       <h1 className="text-2xl font-semibold mb-6">Settings</h1>
 
-      <button
-        onClick={() => setOpen(true)}
-        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-      >
-        Change Password
-      </button>
+      <div onClick={() => setOpen(true)}className="cursor-pointer bg-blue-600 text-white px-6 py-3 rounded hover:bg-green-900 flex justify-between bg-green-700 shadow-2xl">
+         <p>change password</p>
+         <p>{'>'}</p>
+      </div>
 
-      {/* Modal */}
       {open && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white w-full max-w-md rounded-xl p-6 space-y-4 relative">
@@ -65,7 +59,6 @@ export default function UserSettings() {
               Change Password
             </h2>
 
-            {/* Old Password */}
             <div className="relative">
               <input
                 type={showOld ? "text" : "password"}
@@ -74,16 +67,10 @@ export default function UserSettings() {
                 onChange={(e) => setOldPassword(e.target.value)}
                 className="w-full border px-3 py-2 rounded pr-10"
               />
-              <button
-                type="button"
-                onClick={() => setShowOld(!showOld)}
-                className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
-              >
+              <button type="button" onClick={() => setShowOld(!showOld)} className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700">
                 {showOld ? <FiEyeOff size={18} /> : <FiEye size={18} />}
               </button>
             </div>
-
-            {/* New Password */}
             <div className="relative">
               <input
                 type={showNew ? "text" : "password"}
@@ -101,7 +88,6 @@ export default function UserSettings() {
               </button>
             </div>
 
-            {/* Confirm Password */}
             <div className="relative">
               <input
                 type={showConfirm ? "text" : "password"}
@@ -110,38 +96,21 @@ export default function UserSettings() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full border px-3 py-2 rounded pr-10"
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
-              >
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)}className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700">
                 {showConfirm ? <FiEyeOff size={18} /> : <FiEye size={18} />}
               </button>
             </div>
-
-            {/* Forgot password */}
             <div className="text-right">
-              <button
-                onClick={() => navigate("/forgot-password")}
-                className="text-sm text-blue-600 hover:underline"
-              >
+              <button onClick={() => navigate("/forgot-password")}className="text-sm text-blue-600 hover:underline">
                 Forgot password?
               </button>
             </div>
-
-            {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
-              <button
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 border rounded"
-              >
+              <button onClick={() => setOpen(false)}className="px-4 py-2 border rounded">
                 Cancel
               </button>
 
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              >
+              <button onClick={handleSave}className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                 Save
               </button>
             </div>
