@@ -1,4 +1,4 @@
-import authService from "../services/authService.js";
+import authService,{ changePasswordService } from "../services/authService.js";
 import { statusCode } from "../constant/constants.js";
 
 const signup = async (req, res) => {
@@ -145,4 +145,20 @@ const logout = async (req, res) => {
   res.json({ message: "Logged out successfully" });
 };
 
-export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback};
+
+ const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    await changePasswordService(req.user.id, oldPassword, newPassword);
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    if (error.message === "OLD_PASSWORD_WRONG") {
+      return res.status(statusCode.BAD_REQUEST).json({ message: "Old password incorrect" });
+    }
+
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to change password" });
+  }
+};
+export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback,changePassword};

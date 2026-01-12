@@ -256,4 +256,20 @@ export const googleLogin = async (user) => {
   };
 };
 
+
+export const changePasswordService = async (userId, oldPassword, newPassword) => {
+  const user = await userModel.findById(userId).select("+password");
+
+  if (!user) throw new Error("User not found");
+
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) throw new Error("OLD_PASSWORD_WRONG");
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  return true;
+};
+
+
 export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin,sendOtp};

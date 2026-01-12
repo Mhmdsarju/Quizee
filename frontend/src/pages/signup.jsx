@@ -120,7 +120,7 @@ export default function Signup() {
               <input
                 type="text"
                 placeholder="Referral code"
-                {...register("referral")}
+              
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
               />
             </div>
