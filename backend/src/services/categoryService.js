@@ -17,9 +17,7 @@ export const updateCategoryService=async(id,name)=>{
    if(!category){
     throw new Error("category not found");
    }
-
    category.name=name;
-
    return await category.save();
 }
 

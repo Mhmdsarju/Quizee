@@ -64,11 +64,7 @@ export default function CategoryRow({_id,name,isActive,onRefresh,onEdit,}) {
         </div>
 
         <div className="flex justify-end gap-2">
-          <button
-            onClick={() => setOpenEdit(true)}
-            className="px-3 h-8 rounded-md text-xs font-medium
-                       bg-blue-600/20 text-blue-400 hover:bg-blue-600/30"
-          >
+          <button onClick={() => setOpenEdit(true)} className="px-3 h-8 rounded-md text-xs font-medium bg-blue-600/20 text-blue-400 hover:bg-blue-600/30">
             Edit
           </button>
 

@@ -1,7 +1,7 @@
-export const paginateAndSearch = async ({model,query = {},      search = "",searchFields = [],page = 1,limit = 10,sort = { createdAt: -1 },select = "",populate = null,}) => {
+export const paginateAndSearch = async ({model,query = {},search = "",searchFields = [],page = 1,limit = 10,sort = { createdAt: -1 },select = "",populate = null,filter = {} }) => {
   const skip = (page - 1) * limit;
 
-  let finalQuery = { ...query };
+  let finalQuery = { ...query,...filter };
 
   if (search && searchFields.length > 0) {
     finalQuery.$or = searchFields.map((field) => ({

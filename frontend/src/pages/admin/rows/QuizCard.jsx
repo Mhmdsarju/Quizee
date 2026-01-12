@@ -64,7 +64,7 @@ export default function QuizCard({_id,title,description,category,timeLimit,image
               onClick={() => navigate(`/admin/quizzes/${_id}/questions`)}
               className="flex-1 text-sm bg-indigo-600 hover:bg-indigo-700 rounded-lg py-2"
             >
-              ❓ Questions
+             Questions ?
             </button>
 
             <button

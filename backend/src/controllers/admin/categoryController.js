@@ -17,20 +17,24 @@ export const getAllCategory = async (req, res) => {
   try {
     const { search = "", page = 1, limit = 10 } = req.query;
 
+    const filter = req.user?.role === "admin"? {} : { isActive: true };
+
     const result = await paginateAndSearch({
       model: categoryModel,
       search,
-      searchFields: ["name"], 
+      searchFields: ["name"],
       page: Number(page),
       limit: Number(limit),
+      filter,  
     });
 
     res.json(result);
   } catch (error) {
-    console.error("ADMIN CATEGORY ERROR:", error);
-    res.status(500).json({ message: "Failed to fetch categories" });
+    console.error("CATEGORY ERROR:", error);
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch categories" });
   }
 };
+
 
 
 export const updateCategory = async (req, res) => {

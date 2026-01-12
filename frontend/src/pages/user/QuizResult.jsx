@@ -43,36 +43,14 @@ export default function QuizResult() {
       <div className="min-h-screen">
         <div
         className="bg-black/60 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-4xl flex gap-8 text-white container m-auto mt-14"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1600&q=80')",
-        }}
-      >
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1600&q=80')",}}>
         <div className="flex-1 flex flex-col items-center justify-center space-y-6">
           <h2 className="text-2xl font-bold">Congrats!</h2>
 
           <div className="relative w-60 h-60">
             <svg className="w-full h-full">
-              <circle
-                cx="120"
-                cy="120"
-                r={radius}
-                stroke="#334155"
-                strokeWidth="14"
-                fill="none"
-              />
-              <circle
-                cx="120"
-                cy="120"
-                r={radius}
-                stroke="#ef4444"
-                strokeWidth="14"
-                fill="none"
-                strokeDasharray={circumference}
-                strokeDashoffset={dashOffset}
-                strokeLinecap="round"
-                transform="rotate(-90 120 120)"
-              />
+              <circle cx="120" cy="120" r={radius} stroke="#334155" strokeWidth="14" fill="none"/>
+              <circle cx="120" cy="120" r={radius} stroke="#ef4444" strokeWidth="14" fill="none" strokeDasharray={circumference} strokeDashoffset={dashOffset} strokeLinecap="round"transform="rotate(-90 120 120)"/>
             </svg>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -93,10 +71,7 @@ export default function QuizResult() {
           </div>
         </div>
         <div className="w-80 bg-[#0f172a] rounded-xl overflow-hidden shadow-lg">
-          <img
-            src="https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=800&q=80"
-            className="h-40 w-full object-cover"
-          />
+          <img src="https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=800&q=80" className="h-40 w-full object-cover"/>
 
           <div className="p-4 space-y-3">
             <h3 className="font-semibold text-lg">Next Up!</h3>
