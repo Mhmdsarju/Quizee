@@ -109,17 +109,20 @@ const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
 };
 
 export const getUserQuizByIdService = async (quizId) => {
-  const quiz = await quizModel
-    .findOne({ _id: quizId, isActive: true })
-    .populate("category", "name");
+  const quiz = await quizModel.findOne({ _id: quizId}).populate("category", "name");
 
-  if (!quiz) return null;
+  if (!quiz) return {status:"NOT_FOUND"};
+
+  if(!quiz.isActive){
+    return {status:"INACTIVE"}
+  }
 
   const totalQuestions = await questionModel.countDocuments({
     quiz: quizId,
   });
 
   return {
+    status:"OK",
     quiz,
     totalQuestions,
   };
@@ -179,16 +182,23 @@ export const submitQuizService = async (quizId, userId, answers) => {
 
 export const getQuizPlayService = async (quizId) => {
   const quiz = await quizModel
-    .findOne({ _id: quizId, isActive: true })
+    .findById(quizId)
     .populate("category", "name");
 
-  if (!quiz) return null;
+  if (!quiz) {
+    return { status: "NOT_FOUND" };
+  }
+
+  if (!quiz.isActive) {
+    return { status: "INACTIVE" };
+  }
 
   const questions = await questionModel
     .find({ quiz: quizId })
     .select("question options correctAnswer");
 
   return {
+    status: "OK",
     quiz: {
       _id: quiz._id,
       title: quiz.title,
@@ -198,4 +208,3 @@ export const getQuizPlayService = async (quizId) => {
     questions,
   };
 };
-

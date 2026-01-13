@@ -161,4 +161,5 @@ const logout = async (req, res) => {
     res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to change password" });
   }
 };
+
 export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback,changePassword};

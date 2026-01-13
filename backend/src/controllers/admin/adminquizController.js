@@ -71,23 +71,28 @@ export const updateQuiz = async (req, res) => {
     const quiz = await updateQuizService(req.params.id, data);
 
     if (!quiz)
-      return res.status(404).json({ message: "Quiz not found" });
+      return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
 
     const populatedQuiz = await quizModel.findById(quiz._id).populate("category", "name");
     res.json({ quiz: populatedQuiz });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
 
-export const toggleQuizStatus = async (req, res) => {
+export const updateQuizStatus = async (req, res) => {
   try {
     const quiz = await QuizStatusService(req.params.id);
-    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+
+    if (!quiz) return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
+
     res.json({message: quiz.isActive ? "Quiz enabled" : "Quiz blocked",quiz,});
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+
   }
 };
 

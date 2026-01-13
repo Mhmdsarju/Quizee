@@ -45,39 +45,23 @@ const Navbar = () => {
     <div className="container mx-auto mt-4 px-4">
       <nav className="relative bg-blue-quiz px-5 py-2.5 text-quiz-main shadow-xl md:rounded-full">
         <div className="flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleNavClick("/")}
-          >
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleNavClick("/")}>
             <img src={logo} alt="Quizee" className="h-7 w-7" />
             <span className="text-sm font-semibold">Quizee.</span>
           </div>
           <ul className="hidden md:flex items-center gap-10 text-xs font-medium uppercase">
             <li>
-              <button
-                onClick={() => handleNavClick("/")}
-                className={isActive("/") ? activeClass : normalClass}
-              >
+              <button onClick={() => handleNavClick("/")}className={isActive("/") ? activeClass : normalClass}>
                 Home
               </button>
             </li>
             <li>
-              <button
-                onClick={() => handleNavClick("/user/quiz")}
-                className={
-                  isActive("/user/quiz") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/quiz")}className={isActive("/user/quiz") ? activeClass : normalClass}>
                 Quiz
               </button>
             </li>
             <li>
-              <button
-                onClick={() => handleNavClick("/user/contest")}
-                className={
-                  isActive("/user/contest") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/contest")}className={isActive("/user/contest") ? activeClass : normalClass}>
                 Contest
               </button>
             </li>
@@ -88,10 +72,7 @@ const Navbar = () => {
             {!accessToken ? (
               <>
                 <Link to="/login">Login</Link>
-                <Link
-                  to="/signup"
-                  className="rounded-full bg-quiz-main px-4 py-1 text-blue-quiz font-semibold"
-                >
+                <Link to="/signup" className="rounded-full bg-quiz-main px-4 py-1 text-blue-quiz font-semibold" >
                   Signup
                 </Link>
               </>
@@ -116,42 +97,23 @@ const Navbar = () => {
         {openMenu && (
           <div className="mt-4 md:hidden bg-blue-quiz px-5 py-4 shadow-lg">
             <ul className="flex flex-col gap-4 text-sm uppercase">
-              <button
-                onClick={() => handleNavClick("/")}
-                className={isActive("/") ? activeClass : normalClass}
-              >
+              <button onClick={() => handleNavClick("/")} className={isActive("/") ? activeClass : normalClass}>
                 Home
               </button>
-              <button
-                onClick={() => handleNavClick("/user/quiz")}
-                className={
-                  isActive("/user/quiz") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/quiz")}className={ isActive("/user/quiz") ? activeClass : normalClass}>
                 Quiz
               </button>
-              <button
-                onClick={() => handleNavClick("/user/contest")}
-                className={
-                  isActive("/user/contest") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/contest")} className={ isActive("/user/contest") ? activeClass : normalClass }>
                 Contest
               </button>
             </ul>
 
             {accessToken && (
               <div className="mt-4 flex flex-col gap-3">
-                <button
-                  onClick={() => navigate("/user/profile")}
-                  className="border py-1 rounded-full"
-                >
+                <button onClick={() => navigate("/user/profile")} className="border py-1 rounded-full">
                   Profile
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-900 text-red-400 py-1 rounded-full"
-                >
+                <button onClick={handleLogout} className="bg-red-900 text-red-400 py-1 rounded-full">
                   Logout
                 </button>
               </div>

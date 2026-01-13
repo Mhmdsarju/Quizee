@@ -1,6 +1,6 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
-import {addQuestion,getQuestionsByQuiz,updateQuestion,deleteQuestion,} from "../controllers/admin/questionController.js";
+import {addQuestion,getQuestionsByQuiz,updateQuestion,deleteQuestion,} from "../controllers/admin/adminquestionController.js";
 
 const router = express.Router();
 

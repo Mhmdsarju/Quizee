@@ -7,8 +7,8 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [timeLimit, setTimeLimit] = useState("");
-  const [image, setImage] = useState(null);      // file
-  const [oldImage, setOldImage] = useState(""); // cloudinary url
+  const [image, setImage] = useState(null);      
+  const [oldImage, setOldImage] = useState(""); 
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -115,15 +115,11 @@ export default function EditQuizModal({ quizId, onClose, onSuccess }) {
             onChange={(e) => setDescription(e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm"
           />
-
-          {/* Image Upload */}
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setImage(e.target.files[0])}
           />
-
-          {/* Preview */}
           {(image || oldImage) && (
             <img
               src={image ? URL.createObjectURL(image) : oldImage}
