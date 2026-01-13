@@ -1,4 +1,5 @@
 import { statusCode } from "../../constant/constants.js";
+import questionModel from "../../models/questionModel.js";
 import { getQuizPlayService, getUserQuizByIdService, getUserQuizService, submitQuizService } from "../../services/quizService.js";
 
 
@@ -86,3 +87,20 @@ export const submitQuiz = async (req, res) => {
   }
 };
 
+export const validateQuestion = async (req, res) => {
+  const { quizId } = req.params;
+  const { questionId } = req.body;
+
+  const question = await questionModel.findOne({
+    _id: questionId,
+    quiz: quizId
+  });
+
+  if (!question) {
+    return res.status(409).json({
+      message: "This question was removed. Quiz has changed."
+    });
+  }
+
+  res.json({ valid: true });
+};

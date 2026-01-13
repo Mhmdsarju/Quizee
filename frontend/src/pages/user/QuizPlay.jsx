@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import Loader from "../../components/Loader";
-import Swal from "sweetalert2"; 
+import Swal from "sweetalert2";
 
 export default function QuizPlay() {
   const { quizId } = useParams();
@@ -28,7 +28,7 @@ export default function QuizPlay() {
           Swal.fire({
             icon: "error",
             title: "Quiz Unavailable",
-            text: "quiz diasabled by admin!! try another Quiz !!",
+            text: err.response?.data?.message || "Quiz disabled by admin",
             confirmButtonText: "Go to Quizzes",
           }).then(() => {
             navigate("/user/quiz");
@@ -42,7 +42,7 @@ export default function QuizPlay() {
     };
 
     fetchQuiz();
-  }, [quizId]);
+  }, [quizId, navigate]);
 
   useEffect(() => {
     if (!quiz || submittedRef.current) return;
@@ -63,7 +63,32 @@ export default function QuizPlay() {
     const qid = questions[current]._id;
     setAnswers((prev) => ({ ...prev, [qid]: index }));
   };
-  const next = () => {
+  const validateCurrentQuestion = async () => {
+    const currentQid = questions[current]._id;
+
+    try {
+      await api.post(`/user/quiz/${quizId}/validate-question`, {
+        questionId: currentQid,
+      });
+      return true;
+    } catch (err) {
+      Swal.fire({
+        icon: "warning",
+        title: "Quiz Updated",
+        text:
+          err.response?.data?.message ||
+          "This question was removed by admin. Please restart the quiz.",
+      }).then(() => {
+        navigate(`/user/quiz/${quizId}`);
+      });
+      return false;
+    }
+  };
+
+  const next = async () => {
+    const valid = await validateCurrentQuestion();
+    if (!valid) return;
+
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
     }
@@ -71,6 +96,10 @@ export default function QuizPlay() {
 
   const submitQuiz = async () => {
     if (submittedRef.current) return;
+
+    const valid = await validateCurrentQuestion();
+    if (!valid) return;
+
     submittedRef.current = true;
 
     try {
@@ -83,8 +112,7 @@ export default function QuizPlay() {
         replace: true,
       });
     } catch (err) {
-      console.error("Submit failed", err);
-      alert("Submit failed");
+      Swal.fire("Error", "Submit failed", "error");
       submittedRef.current = false;
     }
   };
@@ -101,7 +129,7 @@ export default function QuizPlay() {
   const hasAnswered = answers[currentQid] !== undefined;
 
   return (
-    <div className="min-h-screen px-7 ">
+    <div className="min-h-screen px-7">
       <div className="max-w-3xl mx-auto bg-[#1e293b] p-10 rounded-xl space-y-4 text-white mt-12 shadow-2xl">
         <div className="flex justify-between items-center">
           <h2 className="font-semibold text-lg">{quiz.title}</h2>
@@ -119,8 +147,7 @@ export default function QuizPlay() {
             <button
               key={i}
               onClick={() => selectOption(i)}
-              className={`w-full text-left px-4 py-2 rounded border transition
-              ${
+              className={`w-full text-left px-4 py-2 rounded border transition ${
                 answers[q._id] === i
                   ? "bg-green-600 border-green-600"
                   : "border-gray-500 hover:bg-[#334155]"
