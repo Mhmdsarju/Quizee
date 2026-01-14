@@ -135,7 +135,12 @@ const login = async ({ email, password }) => {
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) throw new Error("Invalid credentials");
   if (!user.isVerified) throw new Error("Verify email first");
-  if (user.isBlocked) throw new Error("Account blocked");
+  if (user.isBlocked) {
+  const err = new Error("Account blocked");
+  err.code = "ACCOUNT_BLOCKED";
+  throw err;
+}
+
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");

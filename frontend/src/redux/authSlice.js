@@ -21,10 +21,21 @@ export const loginUser = createAsyncThunk(
       const res = await loginApi(data);
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message);
+      if (error.response?.data?.code === "ACCOUNT_BLOCKED") {
+        return rejectWithValue({
+          type: "BLOCKED",
+          message: error.response.data.message,
+        });
+      }
+
+      return rejectWithValue({
+        type: "ERROR",
+        message: error.response?.data?.message || "Login failed",
+      });
     }
   }
 );
+
 
 export const refreshToken = createAsyncThunk(
   "auth/refresh",
@@ -129,6 +140,8 @@ const authSlice = createSlice({
     accessToken: null,
     loading: false,
     error: null,
+    authChecked: false,
+    blocked: false,
   },
   reducers: {
     logout: (state) => {
@@ -156,9 +169,15 @@ const authSlice = createSlice({
         state.accessToken = action.payload.accessToken;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+  state.loading = false;
+
+  if (action.payload?.type === "BLOCKED") {
+    state.blocked = true;
+    state.error = action.payload.message;
+  } else {
+    state.error = action.payload?.message;
+  }
+})
       .addCase(signupUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -194,19 +213,19 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(refreshToken.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-      })
-      .addCase(refreshToken.rejected, (state) => {
-        state.loading = false;
-        state.user = null;
-        state.accessToken = null;
-      })
+  state.loading = true;
+})
+.addCase(refreshToken.fulfilled, (state, action) => {
+  state.loading = false;
+  state.accessToken = action.payload.accessToken;
+  state.user = action.payload.user;
+  state.authChecked = true; // ✅
+})
+.addCase(refreshToken.rejected, (state) => {
+  state.loading = false;
+  state.authChecked = true; // ✅ EVEN FAIL
+})
+
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;

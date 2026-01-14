@@ -26,13 +26,16 @@ export default function Login() {
   }
 
   const submit = async (data) => {
-    const res = await dispatch(loginUser(data));
+  const res = await dispatch(loginUser(data));
 
-    if (res.meta.requestStatus === "fulfilled") {
-      const role = res.payload.user.role;
-      navigate(role === "admin" ? "/admin" : "/", { replace: true });
-    }
-  };
+  if (res.meta.requestStatus === "fulfilled") {
+    const role = res.payload.user.role;
+    navigate(role === "admin" ? "/admin" : "/", { replace: true });
+  } else {
+    return;
+  }
+};
+
 
   return (
     <>

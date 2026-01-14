@@ -37,9 +37,9 @@ import QuizResult from "./pages/user/QuizResult";
 function App() {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(refreshToken());
-  }, [dispatch]);
+useEffect(() => {
+  dispatch(refreshToken());
+}, [dispatch]);
 
   return (
     <BrowserRouter>

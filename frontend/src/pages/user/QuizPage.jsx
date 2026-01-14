@@ -5,6 +5,7 @@ import QuizImg from "../../assets/quiz.jpg";
 import Loader from "../../components/Loader";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar";
+import { useSelector } from "react-redux";
 
 export default function QuizPage() {
   const [quizzes, setQuizzes] = useState([]);
@@ -17,7 +18,7 @@ export default function QuizPage() {
 
   const [params, setParams] = useSearchParams();
   const search = params.get("search") || "";
-
+  const token =useSelector((state)=>state.auth.accessToken)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,11 +36,16 @@ export default function QuizPage() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    api.get("/admin/categories").then((res) => {
-      setCategories(res.data.data || res.data);
-    });
-  }, []);
+   useEffect(() => {
+    if (!token) return;   
+    api.get("/admin/categories")
+      .then((res) => {
+        setCategories(res.data.data || res.data);
+      })
+      .catch((err) => {
+        console.error("Category error:", err.response?.data);
+      });
+  }, [token]);
 
   const handleSearch = (value) => {
     setPage(1);

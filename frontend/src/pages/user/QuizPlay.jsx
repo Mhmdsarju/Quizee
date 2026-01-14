@@ -28,7 +28,7 @@ export default function QuizPlay() {
           Swal.fire({
             icon: "error",
             title: "Quiz Unavailable",
-            text: err.response?.data?.message || "Quiz disabled by admin",
+            text:"Quiz disabled by admin",
             confirmButtonText: "Go to Quizzes",
           }).then(() => {
             navigate("/user/quiz");
@@ -64,26 +64,24 @@ export default function QuizPlay() {
     setAnswers((prev) => ({ ...prev, [qid]: index }));
   };
   const validateCurrentQuestion = async () => {
-    const currentQid = questions[current]._id;
+  if (submittedRef.current) return false;
 
-    try {
-      await api.post(`/user/quiz/${quizId}/validate-question`, {
-        questionId: currentQid,
-      });
-      return true;
-    } catch (err) {
-      Swal.fire({
-        icon: "warning",
-        title: "Quiz Updated",
-        text:
-          err.response?.data?.message ||
-          "This question was removed by admin. Please restart the quiz.",
-      }).then(() => {
-        navigate(`/user/quiz/${quizId}`);
-      });
-      return false;
-    }
-  };
+  try {
+    await api.post(`/user/quiz/${quizId}/validate-question`, {
+      questionId: questions[current]._id,
+    });
+    return true;
+  } catch (err) {
+    Swal.fire({
+      icon: "warning",
+      title: "Quiz Updated",
+      text:"This quiz is updated by the admin !! so retry the Quiz",
+    }).then(() => {
+      navigate(`/user/quiz/${quizId}`);
+    });
+    return false;
+  }
+};
 
   const next = async () => {
     const valid = await validateCurrentQuestion();

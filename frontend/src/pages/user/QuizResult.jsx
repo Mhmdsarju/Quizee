@@ -7,13 +7,14 @@ export default function QuizResult() {
   const { quizId } = useParams();
   const [showAnswers, setShowAnswers] = useState(false);
 
-  if (!state) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        No result found , Refresh now
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!state) {
+      navigate(`/user/quiz/${quizId}`, { replace: true });
+    }
+  }, [state, quizId, navigate]);
+
+  // ⛔ State illena render pannathe
+  if (!state) return null;
 
   useEffect(() => {
   window.history.pushState(null, "", window.location.href);
@@ -61,7 +62,7 @@ export default function QuizResult() {
             </div>
           </div>
           <div className="flex gap-4">
-            <button onClick={() => navigate(`/user/quiz/${quizId}`)} className="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200" >
+            <button onClick={() => navigate(`/user/quiz/${quizId}`,{replace:true})} className="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200" >
               Play Again
             </button>
 

@@ -4,6 +4,7 @@ import {store}  from './redux/store.js'
 import {Provider} from "react-redux";
 import { setupInterceptors } from './api/interceptors.js';
 import "./index.css";
+import { PersistGate } from 'redux-persist/integration/react';
 
 setupInterceptors(store);
 

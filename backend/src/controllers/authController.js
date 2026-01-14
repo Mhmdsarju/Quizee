@@ -66,7 +66,13 @@ const login = async (req, res) => {
 
     res.json({ user, accessToken });
   } catch (e) {
-    res.status(statusCode.UNAUTHORIZED).json({ message: e.message });
+    if (e.code === "ACCOUNT_BLOCKED") {
+    return res.status(403).json({
+      code: "ACCOUNT_BLOCKED",
+      message: "Your account has been blocked. Please contact support."
+    });
+  }
+    res.status(statusCode.FORBIDDEN).json({ message: e.message });
   }
 };
 
