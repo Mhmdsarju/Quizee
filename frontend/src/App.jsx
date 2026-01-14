@@ -40,7 +40,6 @@ function App() {
 useEffect(() => {
   dispatch(refreshToken());
 }, [dispatch]);
-
   return (
     <BrowserRouter>
       <Routes>

@@ -12,6 +12,7 @@ import categoryRoutes from './src/routes/categoryRoutes.js'
 import quizRoutes from './src/routes/quizRoutes.js'
 import questionRoutes from './src/routes/questionRoutes.js'
 
+
 dotenv.config();
 connectDB();
 
