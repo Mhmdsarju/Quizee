@@ -138,7 +138,7 @@ export default function Signup() {
                   : "bg-quiz-main text-blue-quiz hover:opacity-90"
               }`}
             >
-              {loading ? <Loader/> : "Create Account"}
+              {loading ? "Creating..." : "Create Account"}
             </button>
 
             <div className="flex items-center gap-3">
