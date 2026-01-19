@@ -3,22 +3,42 @@ import { Navigate, useLocation } from "react-router-dom";
 import Loader from "../components/Loader";
 
 const ProtectedRoute = ({ children, role }) => {
-  const { accessToken, user, loading } = useSelector(
-    (state) => state.auth
-  );
-  const location = useLocation();
-  if (loading) return <Loader />;
+  const {
+    accessToken,
+    user,
+    loading,
+    authChecked,
+  } = useSelector((state) => state.auth);
 
-  if (!accessToken) {
-    return <Navigate to="/login" replace />;
+  const location = useLocation();
+
+  // 🔥 WAIT until refreshToken API finishes
+  if (!authChecked || loading) {
+    return <Loader />;
   }
-  if (role && user?.role !== role) {
+
+  // 🔐 Not authenticated
+  if (!accessToken || !user) {
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+
+  // 🛑 Role mismatch
+  if (role && user.role !== role) {
     return <Navigate to="/" replace />;
   }
-  if (user?.role === "admin" && location.pathname.startsWith("/user")) {
+
+  // 🧭 Extra safety redirects
+  if (user.role === "admin" && location.pathname.startsWith("/user")) {
     return <Navigate to="/admin/dashboard" replace />;
   }
-  if (user?.role === "user" && location.pathname.startsWith("/admin")) {
+
+  if (user.role === "user" && location.pathname.startsWith("/admin")) {
     return <Navigate to="/" replace />;
   }
 

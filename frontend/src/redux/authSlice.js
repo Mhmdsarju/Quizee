@@ -149,6 +149,7 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     authChecked: false,
+    blocked: false,
     hasTriedRefresh: false
   },
   reducers: {
@@ -157,8 +158,6 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.loading = false;
       state.error = null;
-      state.authChecked = true;
-      state.hasTriedRefresh = true;
     },
     updateUser: (state, action) => {
       state.user = action.payload;
@@ -177,11 +176,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.authChecked = true; 
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
 
         if (action.payload?.type === "BLOCKED") {
+          state.blocked = true;
           state.error = action.payload.message;
         } else {
           state.error = action.payload?.message;
@@ -206,6 +207,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.authChecked = true;
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
@@ -235,9 +237,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.authChecked = true;
         state.hasTriedRefresh = true; 
-
-         state.user = null;
-         state.accessToken = null;
       })
 
       .addCase(forgotPassword.pending, (state) => {

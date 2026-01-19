@@ -33,12 +33,9 @@ import QuizIntro from "./pages/user/QuizIntro";
 import QuizPlay from "./pages/user/QuizPlay";
 import QuizResult from "./pages/user/QuizResult";
 
-
 function App() {
   const dispatch = useDispatch();
-  const { accessToken, hasTriedRefresh } = useSelector(
-    (state) => state.auth
-  );
+  const { accessToken, hasTriedRefresh } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // refresh only ONCE, only if not logged in
@@ -50,29 +47,47 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        <Route element={<UserLayout/>}>
-          <Route path="/" element={<HomeUser />} />
+        
+        <Route path="/" element={ <ProtectedRoute role="user"> <UserLayout /></ProtectedRoute>}>
+          <Route index element={<HomeUser />} />
         </Route>
 
-        <Route element={<ProtectedRoute role="user"><UserLayout /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute role="user">
+              <UserLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/user/quiz" element={<QuizPage />} />
           <Route path="/user/contest" element={<ContestPage />} />
           <Route path="/user/notifications" element={<UserNotifications />} />
           <Route path="/user/quiz/:quizId" element={<QuizIntro />} />
-          <Route path="/user/quiz/:quizId/play" element={<QuizPlay/>} />
+          <Route path="/user/quiz/:quizId/play" element={<QuizPlay />} />
           <Route path="/user/quiz/:quizId/result" element={<QuizResult />} />
-
         </Route>
 
-        <Route element={ <ProtectedRoute role="user"><UserProfileLayout /></ProtectedRoute>}>
+        <Route
+          element={
+            <ProtectedRoute role="user">
+              <UserProfileLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/user/profile" element={<ProfilePage />} />
           <Route path="/user/wallet" element={<UserWallet />} />
           <Route path="/user/settings" element={<UserSettings />} />
           <Route path="/user/history" element={<UserHistory />} />
         </Route>
 
-        <Route path="/admin"element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>}>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
@@ -80,17 +95,37 @@ function App() {
           <Route path="quizzes" element={<QuizzesManagement />} />
           <Route path="contests" element={<ContestManagement />} />
           <Route path="transactions" element={<TransactionManagement />} />
-          <Route path="quizzes/:quizId/questions"element={<QuizQuestions />}/>
+          <Route path="quizzes/:quizId/questions" element={<QuizQuestions />} />
         </Route>
 
         <Route path="/google-success" element={<GoogleSuccess />} />
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-        <Route path="/verify-otp" element={<PublicRoute><VerifyOtp /></PublicRoute>} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/verify-otp"
+          element={
+            <PublicRoute>
+              <VerifyOtp />
+            </PublicRoute>
+          }
+        />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/forgot-password/verify-otp" element={<ForgotOtp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-       
       </Routes>
     </BrowserRouter>
   );
