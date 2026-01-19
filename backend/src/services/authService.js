@@ -163,6 +163,10 @@ const refresh = async (token) => {
   if (!user) throw new Error("Unauthorized");
   if (user.isBlocked) throw new Error("Account blocked");
 
+  if(decoded.tokenVersion!== user.refreshTokenVersion){
+    throw new Error("Refresh Token invalid");
+  }
+
   const tokens = genarateToken(user);
 
   return {

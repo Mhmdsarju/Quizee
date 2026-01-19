@@ -32,9 +32,7 @@ export const protect = async (req, res, next) => {
 
     next();
   } catch (err) {
-    return res
-      .status(statusCode.UNAUTHORIZED)
-      .json({ message: "Invalid or expired token" });
+    return res.status(statusCode.UNAUTHORIZED).json({ message: "Invalid or expired token" });
   }
 };
 

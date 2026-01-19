@@ -119,12 +119,24 @@ const resetPassword = async (req, res) => {
 const refresh = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
+
     const result = await authService.refresh(token);
+
     res.json(result);
   } catch (e) {
-    res.status(statusCode.FORBIDDEN).json({ message: e.message });
+    // 🔥 IMPORTANT: clear refresh token cookie
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false // prod-la true
+    });
+
+    return res
+      .status(statusCode.FORBIDDEN)
+      .json({ message: e.message });
   }
 };
+
 
 const resendForgotOtp = async (req, res) => {
   try {

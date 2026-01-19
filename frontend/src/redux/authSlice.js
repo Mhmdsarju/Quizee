@@ -150,6 +150,7 @@ const authSlice = createSlice({
     error: null,
     authChecked: false,
     blocked: false,
+    hasTriedRefresh: false
   },
   reducers: {
     logout: (state) => {
@@ -227,11 +228,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
-        state.authChecked = true; // ✅
+        state.authChecked = true; 
+        state.hasTriedRefresh = true;
       })
       .addCase(refreshToken.rejected, (state) => {
         state.loading = false;
-        state.authChecked = true; // ✅ EVEN FAIL
+        state.authChecked = true;
+        state.hasTriedRefresh = true; 
       })
 
       .addCase(forgotPassword.pending, (state) => {

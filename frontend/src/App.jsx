@@ -36,13 +36,17 @@ import QuizResult from "./pages/user/QuizResult";
 
 function App() {
   const dispatch = useDispatch();
-  const { accessToken } = useSelector((state) => state.auth);
+  const { accessToken, hasTriedRefresh } = useSelector(
+    (state) => state.auth
+  );
 
   useEffect(() => {
-    if (accessToken) {
+    // refresh only ONCE, only if not logged in
+    if (!accessToken && !hasTriedRefresh) {
       dispatch(refreshToken());
     }
-  }, [dispatch, accessToken]);
+  }, [dispatch, accessToken, hasTriedRefresh]);
+
   return (
     <BrowserRouter>
       <Routes>

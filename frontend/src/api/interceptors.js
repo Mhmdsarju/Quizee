@@ -1,7 +1,17 @@
 import api from "./axios";
 import { refreshToken, logout } from "../redux/authSlice";
 import Swal from "sweetalert2";
+
 let blockedAlertShown = false;
+
+const AUTH_ROUTES = [
+  "/auth/login",
+  "/auth/signup",
+  "/auth/refresh",
+  "/auth/verify-otp",
+  "/auth/forgot-password",
+  "/auth/reset-password"
+];
 
 export const setupInterceptors = (store) => {
   api.interceptors.request.use(
@@ -21,6 +31,10 @@ export const setupInterceptors = (store) => {
       const originalRequest = error.config;
       const message = error.response?.data?.message?.toLowerCase();
 
+      if (AUTH_ROUTES.some(route => originalRequest.url?.includes(route))) {
+        return Promise.reject(error);
+      }
+
       if (error.response?.status === 403 && message?.includes("blocked")) {
         if (!blockedAlertShown) {
           blockedAlertShown = true;
@@ -31,6 +45,7 @@ export const setupInterceptors = (store) => {
             text: "Admin has blocked your account.",
             confirmButtonText: "OK",
           }).then(() => {
+            blockedAlertShown = false;
             store.dispatch(logout());
             window.location.href = "/login";
           });
