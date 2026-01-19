@@ -276,5 +276,25 @@ export const changePasswordService = async (userId, oldPassword, newPassword) =>
   return true;
 };
 
+const resendForgotOtp = async ({ email }) => {
+  if (!email) throw new Error("Email required");
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin,sendOtp};
+  await OTP.deleteMany({ email, purpose: "forgot" });
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose: "forgot",
+    attempts: 0,
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP resent successfully" };
+};
+
+
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin,sendOtp,resendForgotOtp};

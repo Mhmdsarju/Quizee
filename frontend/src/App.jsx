@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
@@ -36,10 +36,13 @@ import QuizResult from "./pages/user/QuizResult";
 
 function App() {
   const dispatch = useDispatch();
+  const { accessToken } = useSelector((state) => state.auth);
 
-useEffect(() => {
-  dispatch(refreshToken());
-}, [dispatch]);
+  useEffect(() => {
+    if (accessToken) {
+      dispatch(refreshToken());
+    }
+  }, [dispatch, accessToken]);
   return (
     <BrowserRouter>
       <Routes>
