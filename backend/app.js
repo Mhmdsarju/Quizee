@@ -17,8 +17,25 @@ dotenv.config();
 connectDB();
 
 const app =express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://admin.localhost:5173"
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Postman / server-to-server
+      if (!origin) return callback(null, true);
 
-app.use(cors({ origin: "http://localhost:5173",credentials: true }));
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

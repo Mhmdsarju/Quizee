@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import Swal from "sweetalert2";
+import { quizGuard } from "../QuizGuard";
 
 export default function QuizPlay() {
   const { quizId } = useParams();
@@ -14,7 +15,16 @@ export default function QuizPlay() {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
+
   const submittedRef = useRef(false);
+
+  useEffect(() => {
+    quizGuard.ongoing = true; // quiz started
+
+    return () => {
+      quizGuard.ongoing = false; // quiz left 
+    };
+  }, []);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -28,10 +38,11 @@ export default function QuizPlay() {
           Swal.fire({
             icon: "error",
             title: "Quiz Unavailable",
-            text:"Quiz disabled by admin",
+            text: "Quiz disabled by admin",
             confirmButtonText: "Go to Quizzes",
           }).then(() => {
-            navigate("/user/quiz");
+            quizGuard.ongoing = false;
+            navigate("/user/quiz", { replace: true });
           });
         } else {
           Swal.fire("Error", "Failed to load quiz", "error");
@@ -59,29 +70,43 @@ export default function QuizPlay() {
     return () => clearInterval(timer);
   }, [timeLeft, quiz]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (!quizGuard.ongoing) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () =>
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   const selectOption = (index) => {
     const qid = questions[current]._id;
     setAnswers((prev) => ({ ...prev, [qid]: index }));
   };
-  const validateCurrentQuestion = async () => {
-  if (submittedRef.current) return false;
 
-  try {
-    await api.post(`/user/quiz/${quizId}/validate-question`, {
-      questionId: questions[current]._id,
-    });
-    return true;
-  } catch (err) {
-    Swal.fire({
-      icon: "warning",
-      title: "Quiz Updated",
-      text:"This quiz is updated by the admin !! so retry the Quiz",
-    }).then(() => {
-      navigate(`/user/quiz/${quizId}`);
-    });
-    return false;
-  }
-};
+  const validateCurrentQuestion = async () => {
+    if (submittedRef.current) return false;
+
+    try {
+      await api.post(`/user/quiz/${quizId}/validate-question`, {
+        questionId: questions[current]._id,
+      });
+      return true;
+    } catch {
+      Swal.fire({
+        icon: "warning",
+        title: "Quiz Updated",
+        text: "This quiz is updated by admin. Please retry.",
+      }).then(() => {
+        quizGuard.ongoing = false;
+        navigate(`/user/quiz/${quizId}`, { replace: true });
+      });
+      return false;
+    }
+  };
 
   const next = async () => {
     const valid = await validateCurrentQuestion();
@@ -99,19 +124,16 @@ export default function QuizPlay() {
     if (!valid) return;
 
     submittedRef.current = true;
+    quizGuard.ongoing = false; 
 
     try {
-      const res = await api.post(`/user/quiz/${quizId}/submit`, {
-        answers,
-      });
+      const res = await api.post(`/user/quiz/${quizId}/submit`, { answers });
 
-      navigate(`/user/quiz/${quizId}/result`, {
-        state: res.data,
-        replace: true,
-      });
-    } catch (err) {
+      navigate(`/user/quiz/${quizId}/result`, {state: res.data,replace: true, });
+    } catch {
       Swal.fire("Error", "Submit failed", "error");
       submittedRef.current = false;
+      quizGuard.ongoing = true;
     }
   };
 
@@ -122,9 +144,7 @@ export default function QuizPlay() {
   const q = questions[current];
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
-
-  const currentQid = questions[current]._id;
-  const hasAnswered = answers[currentQid] !== undefined;
+  const hasAnswered = answers[q._id] !== undefined;
 
   return (
     <div className="min-h-screen px-7">
@@ -145,7 +165,7 @@ export default function QuizPlay() {
             <button
               key={i}
               onClick={() => selectOption(i)}
-              className={`w-full text-left px-4 py-2 rounded border transition ${
+              className={`w-full text-left px-4 py-2 rounded border ${
                 answers[q._id] === i
                   ? "bg-green-600 border-green-600"
                   : "border-gray-500 hover:bg-[#334155]"
@@ -168,7 +188,7 @@ export default function QuizPlay() {
               className={`px-6 py-2 rounded ${
                 hasAnswered
                   ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-600 cursor-not-allowed opacity-60"
+                  : "bg-gray-600 opacity-60"
               }`}
             >
               Submit
@@ -180,7 +200,7 @@ export default function QuizPlay() {
               className={`px-6 py-2 rounded ${
                 hasAnswered
                   ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-gray-600 cursor-not-allowed opacity-60"
+                  : "bg-gray-600 opacity-60"
               }`}
             >
               Next

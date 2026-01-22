@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
 import { logoutApi } from "../api/authApi";
 import logo from "../assets/logo1.png";
+import Swal from "sweetalert2";
+import { quizGuard } from "../pages/QuizGuard";
 
 const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(false);
@@ -15,11 +17,31 @@ const Navbar = () => {
   const location = useLocation();
 
 
-  const handleNavClick = (path) => {
-    if (!accessToken) navigate("/login");
-    else navigate(path);
-    setOpenMenu(false);
-  };
+  const handleNavClick = async (path) => {
+  if (quizGuard.ongoing) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Quiz ongoing",
+      text: "If you leave this page, your quiz will be cancelled. Do you want to continue?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Leave",
+      cancelButtonText: "Stay",
+    });
+
+    if (!result.isConfirmed) {
+      setOpenMenu(false);
+      return; 
+    }
+
+    quizGuard.ongoing = false; 
+  }
+
+  if (!accessToken) navigate("/login");
+  else navigate(path);
+
+  setOpenMenu(false);
+};
+
 
   const handleLogout = async () => {
     try {

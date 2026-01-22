@@ -28,7 +28,8 @@ export default function QuizResult() {
   return () => {
     window.removeEventListener("popstate", handleBack);
   };
-}, []);
+}, [navigate]);
+
 
   const { score, total, percentage, correctAnswers = [] } = state;
   const radius = 90;

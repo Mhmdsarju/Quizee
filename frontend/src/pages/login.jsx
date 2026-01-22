@@ -22,7 +22,7 @@ export default function Login() {
   const {register,handleSubmit,formState: { errors },} = useForm({ resolver: zodResolver(loginSchema) });
 
   if (accessToken) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const submit = async (data) => {
@@ -30,11 +30,15 @@ export default function Login() {
 
   if (res.meta.requestStatus === "fulfilled") {
     const role = res.payload.user.role;
-    navigate(role === "admin" ? "/admin" : "/", { replace: true });
-  } else {
-    return;
+
+    if (role === "admin") {
+      navigate("/dashboard", { replace: true });
+    } else {
+      window.location.href = "http://localhost:5173/";
+    }
   }
 };
+
 
 
   return (

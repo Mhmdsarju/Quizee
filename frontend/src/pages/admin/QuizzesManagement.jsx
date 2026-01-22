@@ -6,7 +6,7 @@ import QuizCard from "./rows/QuizCard";
 import AddQuizModal from "./AddQuizModal";
 
 export default function QuizManagement() {
-  const {data,loading,pagination,search,setSearch,page,setPage, } = useAdminList({
+  const {data,loading,pagination,search,setSearch,page,setPage,} = useAdminList({
     endpoint: "/admin/quiz",
     limit: 6,
   });
@@ -36,21 +36,14 @@ export default function QuizManagement() {
     );
   };
 
-  const handleAddSuccess = async () => {
-  setOpenAdd(false);
-  setPage(1);
-
-  const res = await api.get("/admin/quiz", {
-    params: { page: 1, limit: 6, search },
-  });
-
-  setQuizzes(res.data.data);
-};
-
+  const handleAddSuccess = (newQuiz) => {
+    setOpenAdd(false);
+    setQuizzes((prev) => [newQuiz, ...prev]);
+  };
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-8 mt-8">
+      <div className="flex justify-between items-center mb-8 mt-8">
         <h1 className="text-lg font-semibold text-blue-quiz">
           Quiz Management
         </h1>
@@ -64,18 +57,18 @@ export default function QuizManagement() {
           placeholder="Search quizzes..."
         />
       </div>
+
       <div className="flex justify-end mb-6">
         <button
           onClick={() => setOpenAdd(true)}
-          className="h-10 px-4 rounded-md text-sm font-medium bg-green-600 text-white hover:bg-green-700"
+          className="h-10 px-4 bg-green-600 text-white rounded-md"
         >
           + Add Quiz
         </button>
       </div>
+
       {loading ? (
-        <p className="text-center text-sm text-gray-400">
-          Loading quizzes...
-        </p>
+        <p className="text-center text-gray-400">Loading...</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {quizzes.map((q) => (
@@ -88,21 +81,13 @@ export default function QuizManagement() {
           ))}
         </div>
       )}
-      {pagination && (
-        <div className="mt-10">
-          <Pagination
-            page={page}
-            totalPages={pagination.totalPages}
-            onPageChange={setPage}
-          />
-        </div>
-      )}
 
-      {!loading && quizzes.length === 0 && search && (
-        <div className="mt-6 text-center text-sm text-blue-quiz">
-          No quizzes found for
-          <span className="text-red-500 font-medium"> "{search}"</span>
-        </div>
+      {pagination && (
+        <Pagination
+          page={page}
+          totalPages={pagination.totalPages}
+          onPageChange={setPage}
+        />
       )}
 
       {openAdd && (

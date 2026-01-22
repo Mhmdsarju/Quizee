@@ -12,35 +12,18 @@ const ProtectedRoute = ({ children, role }) => {
 
   const location = useLocation();
 
-  // 🔥 WAIT until refreshToken API finishes
   if (!authChecked || loading) {
     return <Loader />;
   }
 
-  // 🔐 Not authenticated
   if (!accessToken || !user) {
-    return (
-      <Navigate
-        to="/login"
-        state={{ from: location }}
-        replace
-      />
-    );
-  }
+  return <Navigate to="/admin" replace />;
+}
 
-  // 🛑 Role mismatch
   if (role && user.role !== role) {
     return <Navigate to="/" replace />;
   }
 
-  // 🧭 Extra safety redirects
-  if (user.role === "admin" && location.pathname.startsWith("/user")) {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-
-  if (user.role === "user" && location.pathname.startsWith("/admin")) {
-    return <Navigate to="/" replace />;
-  }
 
   return children;
 };

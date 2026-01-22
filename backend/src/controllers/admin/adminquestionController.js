@@ -8,7 +8,7 @@ export const addQuestion = async (req, res) => {
     return res.status(statusCode.BAD_REQUEST).json({ message: "Invalid data" });
   }
   const q = await addQuestionService({
-    quiz: quizId,
+    quizId: quizId,
     question,
     options,
     correctAnswer,

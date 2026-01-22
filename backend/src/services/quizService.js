@@ -24,7 +24,7 @@ export const getAllQuizService = async ({ search = "", page = 1, limit = 10 }) =
   const quizzesWithCount = await Promise.all(
     result.data.map(async (quiz) => {
       const count = await questionModel.countDocuments({
-        quiz: quiz._id,
+        quizId: quiz._id,
       });
 
       return {
@@ -86,12 +86,19 @@ export const getUserQuizService = async ({search = "",category,page = 1,limit = 
     searchFields: ["title"],
     page,
     limit,
-    populate: { path: "category", select: "name" },
-    sort: sort === "questions" ? {} : sortQuery,
+    populate: { path: "category", select: "name",match: { isActive: true } },
+    sort:  sortQuery,
   });
-const quizzesWithCount = await Promise.all(
-  result.data.map(async (quiz) => {
-    const count = await questionModel.countDocuments({ quiz: quiz._id });
+const activeCategoryQuizzes = result.data.filter(
+    (quiz) => quiz.category !== null
+  );
+
+  const quizzesWithCount = await Promise.all(
+    activeCategoryQuizzes.map(async (quiz) => {
+      const count = await questionModel.countDocuments({
+        quizId: quiz._id,
+      });
+
     return { ...quiz.toObject(), questionCount: count };
   })
 );
@@ -118,7 +125,7 @@ export const getUserQuizByIdService = async (quizId) => {
   }
 
   const totalQuestions = await questionModel.countDocuments({
-    quiz: quizId,
+    quizId: quizId,
   });
 
   return {
@@ -130,7 +137,7 @@ export const getUserQuizByIdService = async (quizId) => {
 
 
 export const submitQuizService = async (quizId, userId, answers) => {
-  const questions = await questionModel.find({ quiz: quizId });
+  const questions = await questionModel.find({ quizId: quizId });
 
   let score = 0;
 
@@ -194,7 +201,7 @@ export const getQuizPlayService = async (quizId) => {
   }
 
   const questions = await questionModel
-    .find({ quiz: quizId })
+    .find({ quizId: quizId })
     .select("question options correctAnswer");
 
   return {

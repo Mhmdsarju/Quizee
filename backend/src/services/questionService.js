@@ -5,7 +5,7 @@ export const addQuestionService = async (data) => {
 };
 
 export const getQuestionsByQuizService = async (quizId) => {
-  return await questionModel.find({ quiz: quizId });
+  return await questionModel.find({ quizId: quizId });
 };
 
 export const updateQuestionService = async (id, data) => {

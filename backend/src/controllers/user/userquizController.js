@@ -93,7 +93,7 @@ export const validateQuestion = async (req, res) => {
 
   const question = await questionModel.findOne({
     _id: questionId,
-    quiz: quizId
+    quizId: quizId
   });
 
   if (!question) {

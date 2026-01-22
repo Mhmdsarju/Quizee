@@ -19,6 +19,7 @@ export const googleCallback = async (req, res) => {
       httpOnly: true,
       sameSite: "lax",
       secure: false, 
+      domain: ".localhost",
     });
 
     res.redirect(`http://localhost:5173/google-success?token=${accessToken}`);
@@ -35,7 +36,8 @@ const verifyotp = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
+      domain: ".localhost",
     });
 
     res.json({ user, accessToken });
@@ -61,7 +63,8 @@ const login = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
+      domain: ".localhost",
     });
 
     res.json({ user, accessToken });
@@ -124,11 +127,11 @@ const refresh = async (req, res) => {
 
     res.json(result);
   } catch (e) {
-    // 🔥 IMPORTANT: clear refresh token cookie
     res.clearCookie("refreshToken", {
       httpOnly: true,
       sameSite: "lax",
-      secure: false // prod-la true
+      secure: false ,
+      domain: ".localhost",
     });
 
     return res
@@ -152,7 +155,8 @@ const logout = async (req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     sameSite: "lax",
-    secure: false
+    secure: false,
+    domain: ".localhost",
   });
   res.json({ message: "Logged out successfully" });
 };

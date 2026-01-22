@@ -26,7 +26,7 @@ export default function AdminSidebar() {
       console.log(err);
     } finally {
       dispatch(logout());
-      navigate("/login", { replace: true });
+      navigate("/admin", { replace: true });
     }
   };
 
@@ -59,22 +59,22 @@ export default function AdminSidebar() {
           </div>
 
           <nav className="mt-4 space-y-1">
-            <NavLink to="/admin/dashboard" className={linkClass} onClick={() => setOpen(false)}>
+            <NavLink to="/dashboard" className={linkClass} onClick={() => setOpen(false)}>
               Dashboard
             </NavLink>
-            <NavLink to="/admin/users" className={linkClass} onClick={() => setOpen(false)}>
+            <NavLink to="/users" className={linkClass} onClick={() => setOpen(false)}>
               Users
             </NavLink>
-            <NavLink to="/admin/categories" className={linkClass} onClick={() => setOpen(false)}>
+            <NavLink to="/categories" className={linkClass} onClick={() => setOpen(false)}>
               Categories
             </NavLink>
-            <NavLink to="/admin/quizzes" className={linkClass} onClick={() => setOpen(false)}>
+            <NavLink to="/quizzes" className={linkClass} onClick={() => setOpen(false)}>
               Quizzes
             </NavLink>
-            <NavLink to="/admin/contests" className={linkClass} onClick={() => setOpen(false)}>
+            <NavLink to="/contests" className={linkClass} onClick={() => setOpen(false)}>
               Contests
             </NavLink>
-            <NavLink to="/admin/transactions" className={linkClass} onClick={() => setOpen(false)}>
+            <NavLink to="/transactions" className={linkClass} onClick={() => setOpen(false)}>
               Transactions
             </NavLink>
           </nav>

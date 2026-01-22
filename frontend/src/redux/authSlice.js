@@ -1,14 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  signupApi,
-  loginApi,
-  refreshApi,
-  otpVerify,
-  verifyForgotOtpApi,
-  forgotPasswordApi,
-  resetPasswordApi,
-  resendForgotOtpApi,
-} from "../api/authApi";
+import {signupApi,loginApi,refreshApi,otpVerify,verifyForgotOtpApi,forgotPasswordApi,resetPasswordApi,resendForgotOtpApi,} from "../api/authApi";
 import api from "../api/axios";
 
 export const signupUser = createAsyncThunk(
@@ -165,6 +156,9 @@ const authSlice = createSlice({
     setCredentials: (state, action) => {
       state.accessToken = action.payload.accessToken;
     },
+    setAuthChecked: (state) => {
+      state.authChecked = true;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -285,5 +279,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, updateUser, setCredentials } = authSlice.actions;
+export const { logout, updateUser, setCredentials,setAuthChecked } = authSlice.actions;
 export default authSlice.reducer;
