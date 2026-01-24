@@ -1,5 +1,17 @@
 import api from "./axios";
 import { refreshToken, logout } from "../redux/authSlice";
+import Swal from "sweetalert2";
+
+let blockedAlertShown = false;
+
+const AUTH_ROUTES = [
+  "/auth/login",
+  "/auth/signup",
+  "/auth/refresh",
+  "/auth/verify-otp",
+  "/auth/forgot-password",
+  "/auth/reset-password"
+];
 
 export const setupInterceptors = (store) => {
   api.interceptors.request.use(
@@ -17,17 +29,39 @@ export const setupInterceptors = (store) => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
+      const message = error.response?.data?.message?.toLowerCase();
 
-      if (
-        error.response?.status === 401 && !originalRequest._retry
-      ) {
+      if (AUTH_ROUTES.some(route => originalRequest.url?.includes(route))) {
+        return Promise.reject(error);
+      }
+
+      if (error.response?.status === 403 && message?.includes("blocked")) {
+        if (!blockedAlertShown) {
+          blockedAlertShown = true;
+
+          Swal.fire({
+            icon: "error",
+            title: "Account Blocked",
+            text: "Admin has blocked your account.",
+            confirmButtonText: "OK",
+          }).then(() => {
+            blockedAlertShown = false;
+            store.dispatch(logout());
+            window.location.href = "/login";
+          });
+        }
+
+        return Promise.reject(error);
+      }
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
         try {
           const res = await store.dispatch(refreshToken());
-          const newToken = res.payload;
-          originalRequest.headers.Authorization =`Bearer ${newToken}`;
-          return api(originalRequest); 
+          const newToken = res.payload.accessToken;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
         } catch {
           store.dispatch(logout());
           window.location.href = "/login";

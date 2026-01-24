@@ -17,11 +17,7 @@ export default function Signup() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const {register,  handleSubmit,formState: { errors }} = useForm({
     resolver: zodResolver(signupSchema),
   });
 
@@ -43,11 +39,7 @@ export default function Signup() {
         </div>
       )}
 
-      <img
-        src={quizImg}
-        alt="Quiz"
-        className="hidden md:block h-[120px] absolute -rotate-12 opacity-70"
-      />
+      <img src={quizImg} alt="Quiz"className="hidden md:block h-[120px] absolute -rotate-12 opacity-70"/>
 
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl p-6">
@@ -128,7 +120,7 @@ export default function Signup() {
               <input
                 type="text"
                 placeholder="Referral code"
-                {...register("referral")}
+              
                 className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-quiz"
               />
             </div>
@@ -146,7 +138,7 @@ export default function Signup() {
                   : "bg-quiz-main text-blue-quiz hover:opacity-90"
               }`}
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? "Creating..." : "Create Account"}
             </button>
 
             <div className="flex items-center gap-3">

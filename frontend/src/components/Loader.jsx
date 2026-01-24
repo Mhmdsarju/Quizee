@@ -1,7 +1,9 @@
+import { LoaderIcon } from "lucide-react";
+
 const Loader = () => {
   return (
-    <div className="flex justify-center items-center py-20">
-      <div className="w-10 h-10 border-4 border-blue-quiz border-dashed rounded-full animate-spin"></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      <LoaderIcon className="w-12 h-12 text-blue-quiz animate-spin" />
     </div>
   );
 };

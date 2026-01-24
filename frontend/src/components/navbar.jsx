@@ -5,26 +5,43 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
 import { logoutApi } from "../api/authApi";
 import logo from "../assets/logo1.png";
+import Swal from "sweetalert2";
+import { quizGuard } from "../pages/QuizGuard";
 
 const Navbar = () => {
-  const [openSearch, setOpenSearch] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
-  const inputRef = useRef(null);
 
   const { accessToken } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (openSearch && inputRef.current) inputRef.current.focus();
-  }, [openSearch]);
 
-  const handleNavClick = (path) => {
-    if (!accessToken) navigate("/login");
-    else navigate(path);
-    setOpenMenu(false);
-  };
+  const handleNavClick = async (path) => {
+  if (quizGuard.ongoing) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Quiz ongoing",
+      text: "If you leave this page, your quiz will be cancelled. Do you want to continue?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Leave",
+      cancelButtonText: "Stay",
+    });
+
+    if (!result.isConfirmed) {
+      setOpenMenu(false);
+      return; 
+    }
+
+    quizGuard.ongoing = false; 
+  }
+
+  if (!accessToken) navigate("/login");
+  else navigate(path);
+
+  setOpenMenu(false);
+};
+
 
   const handleLogout = async () => {
     try {
@@ -50,67 +67,34 @@ const Navbar = () => {
     <div className="container mx-auto mt-4 px-4">
       <nav className="relative bg-blue-quiz px-5 py-2.5 text-quiz-main shadow-xl md:rounded-full">
         <div className="flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleNavClick("/")}
-          >
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleNavClick("/")}>
             <img src={logo} alt="Quizee" className="h-7 w-7" />
             <span className="text-sm font-semibold">Quizee.</span>
           </div>
           <ul className="hidden md:flex items-center gap-10 text-xs font-medium uppercase">
             <li>
-              <button
-                onClick={() => handleNavClick("/")}
-                className={isActive("/") ? activeClass : normalClass}
-              >
+              <button onClick={() => handleNavClick("/")}className={isActive("/") ? activeClass : normalClass}>
                 Home
               </button>
             </li>
             <li>
-              <button
-                onClick={() => handleNavClick("/user/quiz")}
-                className={
-                  isActive("/user/quiz") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/quiz")}className={isActive("/user/quiz") ? activeClass : normalClass}>
                 Quiz
               </button>
             </li>
             <li>
-              <button
-                onClick={() => handleNavClick("/user/contest")}
-                className={
-                  isActive("/user/contest") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/contest")}className={isActive("/user/contest") ? activeClass : normalClass}>
                 Contest
               </button>
             </li>
           </ul>
           <div className="hidden md:flex items-center gap-4">
-            {openSearch ? (
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search quizzes..."
-                className="w-40 rounded-full px-3 py-1 text-xs text-black outline-none"
-                onBlur={() => setOpenSearch(false)}
-              />
-            ) : (
-              <button onClick={() => setOpenSearch(true)}>
-                <FaSearch className="h-3.5 w-3.5" />
-              </button>
-            )}
-
             <span className="opacity-40 text-sm">|</span>
 
             {!accessToken ? (
               <>
                 <Link to="/login">Login</Link>
-                <Link
-                  to="/signup"
-                  className="rounded-full bg-quiz-main px-4 py-1 text-blue-quiz font-semibold"
-                >
+                <Link to="/signup" className="rounded-full bg-quiz-main px-4 py-1 text-blue-quiz font-semibold" >
                   Signup
                 </Link>
               </>
@@ -127,9 +111,6 @@ const Navbar = () => {
             )}
           </div>
           <div className="flex md:hidden items-center gap-4">
-            <button onClick={() => setOpenSearch(!openSearch)}>
-              <FaSearch />
-            </button>
             <button onClick={() => setOpenMenu(!openMenu)}>
               {openMenu ? <FaTimes /> : <FaBars />}
             </button>
@@ -138,42 +119,23 @@ const Navbar = () => {
         {openMenu && (
           <div className="mt-4 md:hidden bg-blue-quiz px-5 py-4 shadow-lg">
             <ul className="flex flex-col gap-4 text-sm uppercase">
-              <button
-                onClick={() => handleNavClick("/")}
-                className={isActive("/") ? activeClass : normalClass}
-              >
+              <button onClick={() => handleNavClick("/")} className={isActive("/") ? activeClass : normalClass}>
                 Home
               </button>
-              <button
-                onClick={() => handleNavClick("/user/quiz")}
-                className={
-                  isActive("/user/quiz") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/quiz")}className={ isActive("/user/quiz") ? activeClass : normalClass}>
                 Quiz
               </button>
-              <button
-                onClick={() => handleNavClick("/user/contest")}
-                className={
-                  isActive("/user/contest") ? activeClass : normalClass
-                }
-              >
+              <button onClick={() => handleNavClick("/user/contest")} className={ isActive("/user/contest") ? activeClass : normalClass }>
                 Contest
               </button>
             </ul>
 
             {accessToken && (
               <div className="mt-4 flex flex-col gap-3">
-                <button
-                  onClick={() => navigate("/user/account/profile")}
-                  className="border py-1 rounded-full"
-                >
+                <button onClick={() => navigate("/user/profile")} className="border py-1 rounded-full">
                   Profile
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-900 text-red-400 py-1 rounded-full"
-                >
+                <button onClick={handleLogout} className="bg-red-900 text-red-400 py-1 rounded-full">
                   Logout
                 </button>
               </div>

@@ -135,7 +135,12 @@ const login = async ({ email, password }) => {
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) throw new Error("Invalid credentials");
   if (!user.isVerified) throw new Error("Verify email first");
-  if (user.isBlocked) throw new Error("Account blocked");
+  if (user.isBlocked) {
+  const err = new Error("Account blocked");
+  err.code = "ACCOUNT_BLOCKED";
+  throw err;
+}
+
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
@@ -158,6 +163,10 @@ const refresh = async (token) => {
   if (!user) throw new Error("Unauthorized");
   if (user.isBlocked) throw new Error("Account blocked");
 
+  if(decoded.tokenVersion!== user.refreshTokenVersion){
+    throw new Error("Refresh Token invalid");
+  }
+
   const tokens = genarateToken(user);
 
   return {
@@ -169,6 +178,38 @@ const refresh = async (token) => {
     },
     accessToken: tokens.accessToken,
   };
+};
+
+const sendOtp = async ({ email, purpose, userId }) => {
+  if (!email || !purpose) {
+    throw new Error("Email and purpose required");
+  }
+
+  let data = {};
+
+  if (purpose === "email-change") {
+    if (!userId) throw new Error("Unauthorized");
+    data.userId = userId;
+
+    await OTP.deleteMany({ purpose, "data.userId": userId });
+  } else {
+    await OTP.deleteMany({ email, purpose });
+  }
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose,
+    attempts: 0,
+    data,
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP sent successfully" };
 };
 
 const forgotPassword = async ({ email }) => {
@@ -224,4 +265,40 @@ export const googleLogin = async (user) => {
   };
 };
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin};
+
+export const changePasswordService = async (userId, oldPassword, newPassword) => {
+  const user = await userModel.findById(userId).select("+password");
+
+  if (!user) throw new Error("User not found");
+
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) throw new Error("OLD_PASSWORD_WRONG");
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  return true;
+};
+
+const resendForgotOtp = async ({ email }) => {
+  if (!email) throw new Error("Email required");
+
+  await OTP.deleteMany({ email, purpose: "forgot" });
+
+  const otp = genarateOtp();
+  const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+  await OTP.create({
+    email,
+    otp: otpHash,
+    purpose: "forgot",
+    attempts: 0,
+  });
+
+  await sendOTPEmail(email, otp);
+
+  return { message: "OTP resent successfully" };
+};
+
+
+export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin,sendOtp,resendForgotOtp};

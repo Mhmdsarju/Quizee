@@ -3,6 +3,7 @@ import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/authSlice";
+import Loader from "../../components/Loader";
 
 export default function VerifyEmailModal({ email, name, onClose }) {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ export default function VerifyEmailModal({ email, name, onClose }) {
     if (!otp) return;
 
     try {
-      setVerifying(true); 
+      setVerifying(true);
       const res = await api.post("/auth/verify-otp", {
         email,
         otp,
@@ -40,13 +41,13 @@ export default function VerifyEmailModal({ email, name, onClose }) {
         "error"
       );
     } finally {
-      setVerifying(false); 
+      setVerifying(false);
     }
   };
 
   const resendOtp = async () => {
     try {
-      setResending(true); 
+      setResending(true);
 
       await api.post("/auth/resend-otp", {
         email,
@@ -61,14 +62,13 @@ export default function VerifyEmailModal({ email, name, onClose }) {
         "error"
       );
     } finally {
-      setResending(false); 
+      setResending(false);
     }
   };
 
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50" />
-
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="bg-[#241d3b] p-6 rounded-xl w-full max-w-sm space-y-4">
           <h2 className="text-white font-semibold">Verify Email</h2>
@@ -97,20 +97,34 @@ export default function VerifyEmailModal({ email, name, onClose }) {
               {resending ? "Sending..." : "Resend OTP"}
             </button>
 
-            <button
-              onClick={verifyOtp}
-              disabled={verifying || resending}
-              className={`flex items-center gap-2 ${
-                verifying
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-green-400"
-              }`}
-            >
-              {verifying && (
-                <span className="h-3 w-3 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
-              )}
-              {verifying ? "Verifying..." : "Verify"}
-            </button>
+            <div className="flex gap-4">
+
+              <button
+                onClick={onClose}
+                disabled={verifying || resending}
+                className={`${
+                  verifying || resending
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-red-400"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={verifyOtp}
+                disabled={verifying || resending}
+                className={`flex items-center gap-2 ${
+                  verifying
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-green-400"
+                }`}
+              >
+                {verifying && (
+                  <span className="h-3 w-3 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
+                )}
+                {verifying ? <Loader /> : "Verify"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

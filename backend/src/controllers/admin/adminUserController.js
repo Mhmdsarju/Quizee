@@ -20,7 +20,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const toggleBlockUser = async (req, res) => {
+export const blockUser = async (req, res) => {
   const { id } = req.params;
 
   const user = await userModel.findById(id);
@@ -29,6 +29,9 @@ export const toggleBlockUser = async (req, res) => {
   }
 
   user.isBlocked = !user.isBlocked;
+  if(user.isBlocked){
+     user.refreshTokenVersion+=1;
+  }
   await user.save();
 
   res.json({

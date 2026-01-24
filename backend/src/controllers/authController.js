@@ -1,4 +1,4 @@
-import authService from "../services/authService.js";
+import authService,{ changePasswordService } from "../services/authService.js";
 import { statusCode } from "../constant/constants.js";
 
 const signup = async (req, res) => {
@@ -19,11 +19,10 @@ export const googleCallback = async (req, res) => {
       httpOnly: true,
       sameSite: "lax",
       secure: false, 
+      domain: ".localhost",
     });
 
-    res.redirect(
-      `http://localhost:5173/google-success?token=${accessToken}`
-    );
+    res.redirect(`http://localhost:5173/google-success?token=${accessToken}`);
   } catch (err) {
     res.redirect("http://localhost:5173/login");
   }
@@ -37,7 +36,8 @@ const verifyotp = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
+      domain: ".localhost",
     });
 
     res.json({ user, accessToken });
@@ -63,7 +63,8 @@ const login = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
+      domain: ".localhost",
     });
 
     res.json({ user, accessToken });
@@ -121,12 +122,24 @@ const resetPassword = async (req, res) => {
 const refresh = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
+
     const result = await authService.refresh(token);
+
     res.json(result);
   } catch (e) {
-    res.status(statusCode.FORBIDDEN).json({ message: e.message });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false ,
+      domain: ".localhost",
+    });
+
+    return res
+      .status(statusCode.FORBIDDEN)
+      .json({ message: e.message });
   }
 };
+
 
 const resendForgotOtp = async (req, res) => {
   try {
@@ -142,9 +155,27 @@ const logout = async (req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     sameSite: "lax",
-    secure: false
+    secure: false,
+    domain: ".localhost",
   });
   res.json({ message: "Logged out successfully" });
 };
 
-export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback};
+
+ const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    await changePasswordService(req.user.id, oldPassword, newPassword);
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    if (error.message === "OLD_PASSWORD_WRONG") {
+      return res.status(statusCode.BAD_REQUEST).json({ message: "Old password incorrect" });
+    }
+
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to change password" });
+  }
+};
+
+export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback,changePassword};

@@ -8,6 +8,9 @@ import adminRoutes from './src/routes/adminRoutes.js';
 import userRoutes from './src/routes/userRoutes.js'
 import passport from "passport";
 import "./src/config/passport.js";
+import categoryRoutes from './src/routes/categoryRoutes.js'
+import quizRoutes from './src/routes/quizRoutes.js'
+import questionRoutes from './src/routes/questionRoutes.js'
 
 
 dotenv.config();
@@ -15,7 +18,25 @@ connectDB();
 
 const app =express();
 
-app.use(cors({ origin: "http://localhost:5173",credentials: true }));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://admin.localhost:5173"
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -23,8 +44,10 @@ app.use(passport.initialize());
 
 app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
-app.use("/api/user",userRoutes)
-
+app.use("/api/user",userRoutes);
+app.use("/api/admin/categories",categoryRoutes);
+app.use('/api/admin/quiz/',quizRoutes);
+app.use('/api/admin/questions/',questionRoutes);
 
 
 app.listen(5005, () =>

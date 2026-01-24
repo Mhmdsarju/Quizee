@@ -12,8 +12,8 @@ export default function UserSidebar() {
     `block px-4 py-2 rounded-md text-sm transition
      ${
        isActive
-         ? "bg-[#2f3b32] text-white"
-         : "text-gray-300 hover:bg-[#2f3b32]"
+         ? "bg-red-50/10 text-white"
+         : "text-gray-300 hover:bg-red-50/10"
      }`;
 
   const handleLogout = async () => {

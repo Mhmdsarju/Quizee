@@ -1,13 +1,22 @@
-export const paginateAndSearch = async ({model,search,searchFields=[],page=1,limit=10,sort={createdAt:-1},select="",})=>{
+export const paginateAndSearch = async ({model,query = {},search = "",searchFields = [],page = 1,limit = 10,sort = { createdAt: -1 },select = "",populate = null,filter = {} }) => {
   const skip = (page - 1) * limit;
-  let query = {};
+
+  let finalQuery = { ...query,...filter };
+
   if (search && searchFields.length > 0) {
-    query.$or = searchFields.map((field) => ({
+    finalQuery.$or = searchFields.map((field) => ({
       [field]: { $regex: search, $options: "i" },
     }));
   }
-  const data = await model.find(query).select(select).skip(skip).limit(limit).sort(sort);
-  const total = await model.countDocuments(query);
+
+  let mongooseQuery = model.find(finalQuery).skip(skip).limit(limit).sort(sort);
+
+  if (select) mongooseQuery = mongooseQuery.select(select);
+  if (populate) mongooseQuery = mongooseQuery.populate(populate);
+
+  const data = await mongooseQuery;
+  const total = await model.countDocuments(finalQuery);
+
   return {
     data,
     pagination: {

@@ -21,7 +21,17 @@ export const loginUser = createAsyncThunk(
       const res = await loginApi(data);
       return res.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message);
+      if (error.response?.data?.code === "ACCOUNT_BLOCKED") {
+        return rejectWithValue({
+          type: "BLOCKED",
+          message: error.response.data.message,
+        });
+      }
+
+      return rejectWithValue({
+        type: "ERROR",
+        message: error.response?.data?.message || "Login failed",
+      });
     }
   }
 );
@@ -129,6 +139,9 @@ const authSlice = createSlice({
     accessToken: null,
     loading: false,
     error: null,
+    authChecked: false,
+    blocked: false,
+    hasTriedRefresh: false
   },
   reducers: {
     logout: (state) => {
@@ -143,6 +156,9 @@ const authSlice = createSlice({
     setCredentials: (state, action) => {
       state.accessToken = action.payload.accessToken;
     },
+    setAuthChecked: (state) => {
+      state.authChecked = true;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -154,10 +170,17 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.authChecked = true; 
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+
+        if (action.payload?.type === "BLOCKED") {
+          state.blocked = true;
+          state.error = action.payload.message;
+        } else {
+          state.error = action.payload?.message;
+        }
       })
       .addCase(signupUser.pending, (state) => {
         state.loading = true;
@@ -178,6 +201,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.authChecked = true;
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
@@ -195,18 +219,20 @@ const authSlice = createSlice({
       })
       .addCase(refreshToken.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.user = action.payload.user;
+        state.authChecked = true; 
+        state.hasTriedRefresh = true;
       })
       .addCase(refreshToken.rejected, (state) => {
         state.loading = false;
-        state.user = null;
-        state.accessToken = null;
+        state.authChecked = true;
+        state.hasTriedRefresh = true; 
       })
+
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -253,5 +279,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, updateUser, setCredentials } = authSlice.actions;
+export const { logout, updateUser, setCredentials,setAuthChecked } = authSlice.actions;
 export default authSlice.reducer;
