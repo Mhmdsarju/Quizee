@@ -16,7 +16,10 @@ import ProfilePage from "../pages/user/userProfile";
 import UserWallet from "../pages/user/UserWallet";
 import UserSettings from "../pages/user/UserSettings";
 import UserHistory from "../pages/user/UserHistory";
-
+import VerifyOtp from "../pages/VerifyOtp";
+import ForgotPassword from "../pages/ForgotPassword";
+import ForgotOtp from "../pages/ForgetOtp";
+import ResetPassword from "../pages/ResetPassword";
 import Login from "../pages/login";
 import Signup from "../pages/signup";
 
@@ -25,6 +28,11 @@ const UserRoutes = () => {
     <Routes>
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      <Route path="/verify-otp" element={<PublicRoute><VerifyOtp /></PublicRoute>} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password/verify-otp" element={<ForgotOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+       
 
       <Route element={<ProtectedRoute role="user"><UserLayout /></ProtectedRoute>}>
         <Route index element={<HomeUser />} />

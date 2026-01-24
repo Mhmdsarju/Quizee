@@ -6,6 +6,7 @@ import { genarateToken } from "../utils/genarateToken.js";
 import OTP from "../models/otpModel.js";
 import { genarateOtp } from "../utils/OtpHelper.js";
 import { sendOTPEmail } from "../utils/emailService.js";
+import walletModel from "../models/walletModel.js";
 
 const MAX_ATTEMPTS = 5;
 
@@ -81,6 +82,9 @@ const verifyOtp = async ({ email, otp, purpose }) => {
       referredBy,
       isVerified: true,
     });
+
+    await walletModel.create({
+      user:user._id,balance:0,})
   }
   if (purpose === "email-change") {
     if (!record.data?.userId) throw new Error("Unauthorized");

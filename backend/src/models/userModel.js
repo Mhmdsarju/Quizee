@@ -36,12 +36,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    walletBalance: {
-      type: Number,
-      default: 0,
-      min:[0,"wallet balance cannot be negative"]
-    },
-
     isBlocked: {
       type: Boolean,
       default: false
