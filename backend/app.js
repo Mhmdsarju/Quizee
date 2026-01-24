@@ -17,6 +17,7 @@ dotenv.config();
 connectDB();
 
 const app =express();
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://admin.localhost:5173"
@@ -24,7 +25,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Postman / server-to-server
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -36,6 +36,7 @@ app.use(
     credentials: true
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -43,10 +44,10 @@ app.use(passport.initialize());
 
 app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
-app.use("/api/user",userRoutes)
+app.use("/api/user",userRoutes);
 app.use("/api/admin/categories",categoryRoutes);
-app.use('/api/admin/quiz/',quizRoutes)
-app.use('/api/admin/questions/',questionRoutes)
+app.use('/api/admin/quiz/',quizRoutes);
+app.use('/api/admin/questions/',questionRoutes);
 
 
 app.listen(5005, () =>
