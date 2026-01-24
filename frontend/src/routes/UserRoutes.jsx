@@ -22,20 +22,24 @@ import ForgotOtp from "../pages/ForgetOtp";
 import ResetPassword from "../pages/ResetPassword";
 import Login from "../pages/login";
 import Signup from "../pages/signup";
+import GoogleSuccess from "../pages/GoogleSuccess";
 
 const UserRoutes = () => {
   return (
     <Routes>
+      <Route element={<UserLayout />}>
+        <Route path="/" element={<HomeUser />} />
+      </Route>
+
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route path="/verify-otp" element={<PublicRoute><VerifyOtp /></PublicRoute>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/forgot-password/verify-otp" element={<ForgotOtp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-       
+      <Route path="/forgot-password/verify-otp" element={<ForgotOtp />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/google-success" element={<GoogleSuccess />} />
 
       <Route element={<ProtectedRoute role="user"><UserLayout /></ProtectedRoute>}>
-        <Route index element={<HomeUser />} />
         <Route path="user/quiz" element={<QuizPage />} />
         <Route path="user/contest" element={<ContestPage />} />
         <Route path="user/notifications" element={<UserNotifications />} />
