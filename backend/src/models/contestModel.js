@@ -12,7 +12,7 @@ const contestSchema = new mongoose.Schema(
     quiz: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
-      required: true, // 🔥 very important
+      required: true, //  very important
     },
 
     entryFee: {

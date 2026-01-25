@@ -1,55 +1,17 @@
 import express from "express";
-import {
-  createContestHandler,
-  getAdminContestsHandler,
-  editContestHandler,
-  toggleBlockContestHandler,
-  endContestHandler,
-} from "../controllers/admin/adminContestController.js";
+import { createContestHandler, getAdminContestsHandler, editContestHandler, toggleBlockContestHandler, endContestHandler, } from "../controllers/admin/adminContestController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/* ================= CONTEST MANAGEMENT ================= */
+router.post("/",protect,adminOnly,createContestHandler);
 
-// CREATE CONTEST
-router.post(
-  "/",
-  protect,
-  adminOnly,
-  createContestHandler
-);
+router.get("/",protect,adminOnly,getAdminContestsHandler);
 
-// LIST CONTESTS (SEARCH + PAGINATION)
-router.get(
-  "/",
-  protect,
-  adminOnly,
-  getAdminContestsHandler
-);
+router.patch("/:id",protect,adminOnly,editContestHandler);
 
-// EDIT CONTEST (only UPCOMING + not blocked)
-router.patch(
-  "/:id",
-  protect,
-  adminOnly,
-  editContestHandler
-);
+router.patch("/:id/block",protect,adminOnly,toggleBlockContestHandler);
 
-// BLOCK / UNBLOCK CONTEST (TOGGLE)
-router.patch(
-  "/:id/block",
-  protect,
-  adminOnly,
-  toggleBlockContestHandler
-);
-
-// END CONTEST (only LIVE)
-router.patch(
-  "/:id/end",
-  protect,
-  adminOnly,
-  endContestHandler
-);
+router.patch("/:id/end",protect,adminOnly,endContestHandler);
 
 export default router;

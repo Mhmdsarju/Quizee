@@ -1,10 +1,4 @@
-import {
-  createContestService,
-  getAdminContestsService,
-  editContestService,
-  toggleContestBlockService,
-  endContestService,
-} from "../../services/contestService.js";
+import {createContestService,getAdminContestsService,editContestService,toggleContestBlockService,endContestService,} from "../../services/contestService.js";
 
 export const createContestHandler = async (req, res) => {
   try {
