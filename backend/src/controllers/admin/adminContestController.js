@@ -1,87 +1,72 @@
-import { blockContestService, createContest, editContestService, endContestService, listAdminContests } from "../../services/contestService";
+import {
+  createContestService,
+  getAdminContestsService,
+  editContestService,
+  toggleContestBlockService,
+  endContestService,
+} from "../../services/contestService.js";
 
 export const createContestHandler = async (req, res) => {
   try {
-    const contest = await createContest(req.body);
+    const contest = await createContestService(req.body);
     res.status(201).json(contest);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 export const getAdminContestsHandler = async (req, res) => {
   try {
-    const contests = await listAdminContests();
-    res.json(contests);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-
-export const editContest = async (req, res) => {
-  try {
-    const result = await editContestService(req.params.id, req.body);
-
-    if (result.status === "NOT_FOUND")
-      return res.status(404).json({ message: "Contest not found" });
-
-    if (result.status === "EDIT_NOT_ALLOWED")
-      return res.status(400).json({ message: "Edit allowed only before contest starts" });
-
-    res.json({
-      message: "Contest updated successfully",
-      contest: result.contest,
+    const { search = "", page = 1, limit = 10 } = req.query;
+    const result = await getAdminContestsService({
+      search,
+      page: Number(page),
+      limit: Number(limit),
     });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-export const blockContest = async (req, res) => {
-  try {
-    const result = await blockContestService(req.params.id);
+export const editContestHandler = async (req, res) => {
+  const result = await editContestService(req.params.id, req.body);
 
-    if (result.status === "NOT_FOUND")
-      return res.status(404).json({ message: "Contest not found" });
+  if (result.status === "NOT_FOUND")
+    return res.status(404).json({ message: "Contest not found" });
 
-    if (result.status === "ALREADY_COMPLETED")
-      return res.status(400).json({ message: "Completed contest cannot be blocked" });
+  if (result.status === "EDIT_NOT_ALLOWED")
+    return res.status(400).json({ message: "Edit not allowed" });
 
-    res.json({
-      message: "Contest blocked successfully",
-      refundedUsers: result.refundedUsers,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  res.json({ message: "Contest updated", contest: result.contest });
 };
-export const endContest = async (req, res) => {
-  try {
-    const result = await endContestService(req.params.id);
+export const toggleBlockContestHandler = async (req, res) => {
+  const result = await toggleContestBlockService(req.params.id);
 
-    switch (result.status) {
-      case "NOT_FOUND":
-        return res.status(404).json({ message: "Contest not found" });
+  if (result.status === "NOT_FOUND")
+    return res.status(404).json({ message: "Contest not found" });
 
-      case "NOT_LIVE":
-        return res.status(400).json({
-          message: "Only LIVE contests can be ended",
-        });
+  if (result.status === "COMPLETED")
+    return res.status(400).json({ message: "Completed contest cannot be blocked" });
 
-      case "NO_PARTICIPANTS":
-        return res.json({
-          message: "Contest ended. No participants joined",
-        });
+  res.json({
+    message: result.isBlocked ? "Contest blocked" : "Contest unblocked",
+    refundedUsers: result.refundedUsers,
+    contest: result.contest,
+  });
+};
 
-      default:
-        return res.json({
-          message: "Contest ended successfully",
-          totalParticipants: result.totalParticipants,
-          prizePool: result.prizePool,
-        });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+export const endContestHandler = async (req, res) => {
+  const result = await endContestService(req.params.id);
+
+  if (result.status === "NOT_FOUND")
+    return res.status(404).json({ message: "Contest not found" });
+
+  if (result.status === "NOT_LIVE")
+    return res.status(400).json({ message: "Contest not live" });
+
+  res.json({
+    message: "Contest ended",
+    prizePool: result.prizePool,
+    totalParticipants: result.totalParticipants,
+  });
 };

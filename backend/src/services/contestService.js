@@ -1,34 +1,75 @@
-import contestModel from "../models/contestModel";
-import contestParticipantsModel from "../models/contestParticipantsModel";
-import walletModel from "../models/walletModel";
+import contestModel from "../models/contestModel.js";
+import contestParticipantsModel from "../models/contestParticipantsModel.js";
+import walletModel from "../models/walletModel.js";
+import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 
-export const createContest = async (payload) => {
-  return await contestModel.create(payload);
+export const createContestService = async (payload) => {
+  const contest = await contestModel.create(payload);
+  return await contest.populate("quiz", "title");
+};
+export const getAdminContestsService = async ({ search, page, limit }) => {
+  const result = await paginateAndSearch({
+    model: contestModel,
+    search,
+    searchFields: ["title"],
+    page,
+    limit,
+    populate: { path: "quiz", select: "title" },
+    sort: { createdAt: -1 },
+  });
+
+  const dataWithCount = await Promise.all(
+    result.data.map(async (contest) => {
+      const count = await contestParticipantsModel.countDocuments({
+        contest: contest._id,
+      });
+
+      return {
+        ...contest.toObject(),
+        participantsCount: count,
+      };
+    })
+  );
+
+  return { ...result, data: dataWithCount };
 };
 
-export const listAdminContests = async () => {
-  return await contestModel.find().populate("quiz");
+export const getUserContestsService = async ({ search, page, limit }) => {
+  return await paginateAndSearch({
+    model: contestModel,
+    search,
+    searchFields: ["title"],
+    page,
+    limit,
+    populate: { path: "quiz", select: "title duration" },
+    filter: {
+      isBlocked: false,
+      status: { $in: ["UPCOMING", "LIVE"] },
+    },
+    sort: { startTime: 1 },
+  });
 };
-export const listUserContests = async () => {
-  return await contestModel.find({ status: { $ne: "COMPLETED" } }).populate("quiz");
-};
-export const joinContest = async ({ contestId, userId }) => {
+
+export const joinContestService = async ({ contestId, userId }) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
+  if (contest.isBlocked) return { status: "BLOCKED" };
 
-  if (contest.status !== "UPCOMING") return { status: "CONTEST_STARTED" };
+  const now = new Date();
 
-  const alreadyJoined = await contestParticipantsModel.findOne({
+  if (contest.startTime <= now)
+    return { status: "CONTEST_STARTED" };
+
+  const joined = await contestParticipantsModel.findOne({
     contest: contestId,
     user: userId,
   });
-  if (alreadyJoined) return { status: "ALREADY_JOINED" };
+  if (joined) return { status: "ALREADY_JOINED" };
 
   const wallet = await walletModel.findOne({ user: userId });
   if (!wallet || wallet.balance < contest.entryFee)
     return { status: "INSUFFICIENT_BALANCE" };
 
-  // debit wallet
   wallet.balance -= contest.entryFee;
   await wallet.save();
 
@@ -42,102 +83,71 @@ export const joinContest = async ({ contestId, userId }) => {
 };
 
 
-export const blockContestService = async (contestId) => {
+export const toggleContestBlockService = async (contestId) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
 
   if (contest.status === "COMPLETED")
-    return { status: "ALREADY_COMPLETED" };
+    return { status: "COMPLETED" };
 
-  // find joined users
-  const participants = await contestParticipantsModel.find({ contest: contestId });
+  let refundedUsers = 0;
 
-  // refund wallet
-  for (const p of participants) {
-    const wallet = await walletModel.findOne({ user: p.user });
-    if (wallet) {
-      wallet.balance += contest.entryFee;
-      await wallet.save();
+  if (!contest.isBlocked) {
+    const participants = await contestParticipantsModel.find({
+      contest: contestId,
+    });
+
+    for (const p of participants) {
+      const wallet = await walletModel.findOne({ user: p.user });
+      if (wallet) {
+        wallet.balance += contest.entryFee;
+        await wallet.save();
+        refundedUsers++;
+      }
     }
   }
 
-  contest.status = "BLOCKED";
+  contest.isBlocked = !contest.isBlocked;
   await contest.save();
 
-  return { status: "SUCCESS", refundedUsers: participants.length };
+  const populatedContest = await contest.populate("quiz", "title");
+
+  return {
+    status: "SUCCESS",
+    isBlocked: populatedContest.isBlocked, 
+    refundedUsers,
+    contest: populatedContest,
+  };
 };
 
 export const editContestService = async (contestId, payload) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
 
-  if (contest.status !== "UPCOMING")
+  const now = new Date();
+
+  if (contest.isBlocked || contest.startTime <= now)
     return { status: "EDIT_NOT_ALLOWED" };
 
-  // allowed fields only
-  const allowedFields = ["title", "rules", "startTime", "endTime"];
-  allowedFields.forEach((field) => {
-    if (payload[field] !== undefined) {
-      contest[field] = payload[field];
-    }
-  });
+  const allowed = ["title", "rules", "startTime", "endTime"];
+  allowed.forEach(
+    (f) => payload[f] !== undefined && (contest[f] = payload[f])
+  );
 
   await contest.save();
-  return { status: "SUCCESS", contest };
+
+  const populatedContest = await contest.populate("quiz", "title");
+  return { status: "SUCCESS", contest: populatedContest };
 };
+
 
 export const endContestService = async (contestId) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
-
-  if (contest.status !== "LIVE")
-    return { status: "NOT_LIVE" };
-
-  // get participants sorted by score (high → low)
-  const participants = await contestParticipantsModel.find({
-    contest: contestId,
-  }).sort({ score: -1 });
-
-  if (participants.length === 0) {
-    contest.status = "COMPLETED";
-    await contest.save();
-    return { status: "NO_PARTICIPANTS" };
-  }
-
-  /* ===== SIMPLE PRIZE LOGIC (example) =====
-     1st → 50%
-     2nd → 30%
-     3rd → 20%
-  */
-  const prizeMap = [0.5, 0.3, 0.2];
-  const prizePool = contest.entryFee * participants.length;
-
-  for (let i = 0; i < participants.length; i++) {
-    const p = participants[i];
-    p.rank = i + 1;
-
-    if (i < prizeMap.length) {
-      const prizeAmount = Math.floor(prizePool * prizeMap[i]);
-      p.prize = prizeAmount;
-
-      const wallet = await Wallet.findOne({ user: p.user });
-      if (wallet) {
-        wallet.balance += prizeAmount;
-        await wallet.save();
-      }
-    } else {
-      p.prize = 0;
-    }
-
-    await p.save();
-  }
+  if (contest.status !== "LIVE") return { status: "NOT_LIVE" };
 
   contest.status = "COMPLETED";
   await contest.save();
 
-  return {
-    status: "SUCCESS",
-    totalParticipants: participants.length,
-    prizePool,
-  };
+  return { status: "SUCCESS" };
 };

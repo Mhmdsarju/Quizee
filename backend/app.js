@@ -15,10 +15,12 @@ import paymentRoutes from './src/routes/paymentRoutes.js'
 import walletRoutes from './src/routes/userWalletRoutes.js'
 import webhookRoutes from './src/routes/webhookRoutes.js'
 import admincontestRoutes from './src/routes/adminContestRoutes.js'
+import { contestStatusCron } from "./src/utils/contestStatusCron.js";
+
 
 dotenv.config();
 connectDB();
-
+contestStatusCron()
 const app =express();
 
 const allowedOrigins = [
@@ -54,7 +56,7 @@ app.use('/api/admin/quiz/',quizRoutes);
 app.use('/api/admin/questions/',questionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use('/api/wallet',walletRoutes);
-app.use('/api/contest',admincontestRoutes);
+app.use('/api/admin/contest',admincontestRoutes);
 
 
 
