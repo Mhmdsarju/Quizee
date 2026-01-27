@@ -21,6 +21,13 @@ const contestSchema = new mongoose.Schema(
       min: 0,
     },
 
+    questionsSnapshot: [
+    {
+      question: String,
+      options: [String],
+      correctAnswer: Number,
+    }
+  ],
     rules: [
       {
         title: {

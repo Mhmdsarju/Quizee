@@ -23,6 +23,8 @@ import ResetPassword from "../pages/ResetPassword";
 import Login from "../pages/login";
 import Signup from "../pages/signup";
 import GoogleSuccess from "../pages/GoogleSuccess";
+import ContestLeaderboard from "../pages/user/ContestLeaderboard";
+
 
 const UserRoutes = () => {
   return (
@@ -46,6 +48,7 @@ const UserRoutes = () => {
         <Route path="user/quiz/:quizId" element={<QuizIntro />} />
         <Route path="user/quiz/:quizId/play" element={<QuizPlay />} />
         <Route path="user/quiz/:quizId/result" element={<QuizResult />} />
+        <Route path="user/contest/:contestId/leaderboard" element={<ContestLeaderboard/>}/>
       </Route>
 
       <Route element={<ProtectedRoute role="user"><UserProfileLayout /></ProtectedRoute>}>

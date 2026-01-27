@@ -2,6 +2,8 @@ import questionModel from "../models/questionModel.js";
 import quizModel from "../models/quizModel.js";
 import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 import quizAttemptModel from "../models/quizAttemptModel.js";
+import contestModel from "../models/contestModel.js";
+import contestParticipantsModel from "../models/contestParticipantsModel.js";
 
 
 
@@ -182,12 +184,11 @@ export const submitQuizService = async (quizId, userId, answers) => {
   };
 };
 
-
-
-
-
-
-export const getQuizPlayService = async (quizId) => {
+export const getQuizPlayService = async ({
+  quizId,
+  contestId = null,
+  userId,
+}) => {
   const quiz = await quizModel
     .findById(quizId)
     .populate("category", "name");
@@ -200,8 +201,34 @@ export const getQuizPlayService = async (quizId) => {
     return { status: "INACTIVE" };
   }
 
+  // ================= CONTEST FLOW =================
+  if (contestId) {
+    const contest = await contestModel.findById(contestId);
+
+    if (!contest) {
+      return { status: "NOT_FOUND" };
+    }
+
+    const now = new Date();
+
+    // Contest must be LIVE
+    if (now < contest.startTime || now >= contest.endTime) {
+      return { status: "CONTEST_NOT_LIVE" };
+    }
+
+    // User must have joined contest
+    const joined = await contestParticipantsModel.findOne({
+      contest: contestId,
+      user: userId,
+    });
+
+    if (!joined) {
+      return { status: "CONTEST_NOT_JOINED" };
+    }
+  }
+
   const questions = await questionModel
-    .find({ quizId: quizId })
+    .find({ quizId })
     .select("question options correctAnswer");
 
   return {

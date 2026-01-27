@@ -1,12 +1,30 @@
 import contestModel from "../models/contestModel.js";
 import contestParticipantsModel from "../models/contestParticipantsModel.js";
+import contestResultModel from "../models/contestResultModel.js";
+import questionModel from "../models/questionModel.js";
 import walletModel from "../models/walletModel.js";
 import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 
+
 export const createContestService = async (payload) => {
-  const contest = await contestModel.create(payload);
+  // 1️⃣ fetch quiz questions
+  const questions = await questionModel.find({
+    quizId: payload.quiz,
+  }).select("question options correctAnswer");
+
+  // 2️⃣ create contest with snapshot
+  const contest = await contestModel.create({
+    ...payload,
+    questionsSnapshot: questions.map(q => ({
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+    })),
+  });
+
   return await contest.populate("quiz", "title");
 };
+
 export const getAdminContestsService = async ({ search, page, limit }) => {
   const result = await paginateAndSearch({
     model: contestModel,
@@ -34,8 +52,21 @@ export const getAdminContestsService = async ({ search, page, limit }) => {
   return { ...result, data: dataWithCount };
 };
 
-export const getUserContestsService = async ({ search, page, limit }) => {
-  return await paginateAndSearch({
+export const getUserContestsService = async ({
+  search,
+  page,
+  limit,
+  userId,
+  sort = "newest",
+}) => {
+  let sortQuery = { startTime: 1 };
+
+  if (sort === "newest") sortQuery = { createdAt: -1 };
+  if (sort === "oldest") sortQuery = { createdAt: 1 };
+  if (sort === "feeLow") sortQuery = { entryFee: 1 };
+  if (sort === "feeHigh") sortQuery = { entryFee: -1 };
+
+  const result = await paginateAndSearch({
     model: contestModel,
     search,
     searchFields: ["title"],
@@ -44,10 +75,31 @@ export const getUserContestsService = async ({ search, page, limit }) => {
     populate: { path: "quiz", select: "title duration" },
     filter: {
       isBlocked: false,
-      status: { $in: ["UPCOMING", "LIVE"] },
+      status: { $in: ["UPCOMING", "LIVE", "COMPLETED"] },
     },
-    sort: { startTime: 1 },
+    sort: sortQuery,
   });
+
+  const contestIds = result.data.map((c) => c._id);
+
+  const joined = await contestParticipantsModel.find({
+    contest: { $in: contestIds },
+    user: userId,
+  });
+
+  const joinedSet = new Set(
+    joined.map((j) => j.contest.toString())
+  );
+
+  const dataWithJoinStatus = result.data.map((contest) => ({
+    ...contest.toObject(),
+    hasJoined: joinedSet.has(contest._id.toString()),
+  }));
+
+  return {
+    ...result,
+    data: dataWithJoinStatus,
+  };
 };
 
 export const joinContestService = async ({ contestId, userId }) => {
@@ -57,14 +109,24 @@ export const joinContestService = async ({ contestId, userId }) => {
 
   const now = new Date();
 
-  if (contest.startTime <= now)
-    return { status: "CONTEST_STARTED" };
+  if (now < contest.startTime)
+    return { status: "NOT_STARTED" };
+
+  if (now >= contest.endTime)
+    return { status: "COMPLETED" };
 
   const joined = await contestParticipantsModel.findOne({
     contest: contestId,
     user: userId,
   });
-  if (joined) return { status: "ALREADY_JOINED" };
+
+  if (joined) {
+    return {
+      status: "ALREADY_JOINED",
+      contestId: contest._id,
+      quizId: contest.quiz,
+    };
+  }
 
   const wallet = await walletModel.findOne({ user: userId });
   if (!wallet || wallet.balance < contest.entryFee)
@@ -79,10 +141,12 @@ export const joinContestService = async ({ contestId, userId }) => {
     user: userId,
   });
 
-  return { status: "SUCCESS" };
+  return {
+    status: "SUCCESS",
+    contestId: contest._id,
+    quizId: contest.quiz,
+  };
 };
-
-
 export const toggleContestBlockService = async (contestId) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
@@ -114,7 +178,7 @@ export const toggleContestBlockService = async (contestId) => {
 
   return {
     status: "SUCCESS",
-    isBlocked: populatedContest.isBlocked, 
+    isBlocked: populatedContest.isBlocked,
     refundedUsers,
     contest: populatedContest,
   };
@@ -140,7 +204,6 @@ export const editContestService = async (contestId, payload) => {
   return { status: "SUCCESS", contest: populatedContest };
 };
 
-
 export const endContestService = async (contestId) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
@@ -150,4 +213,103 @@ export const endContestService = async (contestId) => {
   await contest.save();
 
   return { status: "SUCCESS" };
+};
+
+export const submitContestQuizService = async ({contestId,userId,score,total,percentage,timeTaken,}) => {
+  try {
+    
+   const contest= await contestModel.findById(contestId).select("quiz");
+    
+   if(!contest){
+    return{status:"CONTEST_NOT_FOUND"};
+   }
+
+    const result = await contestResultModel.create({
+      contestId,
+      quizId:contest.quiz,
+      userId,
+      score,
+      total,
+      percentage,
+      timeTaken,
+    });
+
+    return { status: "SUCCESS", result };
+  } catch (err) {
+    if (err.code === 11000) {
+      return { status: "ALREADY_SUBMITTED" };
+    }
+    throw err;
+  }
+};
+
+export const getContestLeaderboardService = async ({ contestId }) => {
+  const leaderboard = await contestResultModel.find({ contestId })
+    .populate("userId", "name")
+    .sort({score: -1,       
+      timeTaken: 1,     
+      createdAt: 1,
+    });
+
+  return leaderboard;
+};
+
+export const getUserContestHistoryService = async (userId) => {
+  const history = await contestResultModel
+    .find({ userId })
+    .populate("contestId", "title")
+    .populate("quizId", "title")
+    .sort({ createdAt: -1 });
+
+  return history.map((history) => ({
+    _id: history._id,
+    contest: history.contestId,
+    quiz: history.quizId,
+    score: history.score,
+    total: history.total,
+    percentage: history.percentage,
+    rank: history.rank,
+    playedAt: history.createdAt,
+  }));
+};
+
+export const getContestQuizPlayService = async ({
+  contestId,
+}) => {
+  const contest = await contestModel
+    .findById(contestId)
+    .select(
+      "title questionsSnapshot startTime endTime isBlocked"
+    );
+
+  if (!contest) {
+    return { status: "NOT_FOUND" };
+  }
+
+  if (contest.isBlocked) {
+    return { status: "BLOCKED" };
+  }
+
+  const now = new Date();
+
+  if (now < contest.startTime) {
+    return { status: "NOT_STARTED" };
+  }
+
+  if (now > contest.endTime) {
+    return { status: "ENDED" };
+  }
+
+  if (!contest.questionsSnapshot?.length) {
+    return { status: "NO_QUESTIONS" };
+  }
+
+  return {
+    status: "SUCCESS",
+    quiz: {
+      title: contest.title,
+      timeLimit: 10, // or derive from quiz
+    },
+    questions: contest.questionsSnapshot,
+  };
 };

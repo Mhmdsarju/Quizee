@@ -2,7 +2,7 @@ import { useState } from "react";
 import Swal from "sweetalert2";
 import api from "../../api/axios";
 
-export default function AddMoneyModal({ onClose }) {
+export default function AddMoneyModal({ onClose, onSuccess }) {
   const [amount, setAmount] = useState("");
 
   const handleAdd = async () => {
@@ -18,9 +18,7 @@ export default function AddMoneyModal({ onClose }) {
       Swal.fire({
         title: "Creating payment...",
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
+        didOpen: () => Swal.showLoading(),
       });
 
       const { data: order } = await api.post(
@@ -32,22 +30,21 @@ export default function AddMoneyModal({ onClose }) {
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY,
-        amount: order.amount, 
+        amount: order.amount,
         currency: "INR",
         order_id: order.id,
         name: "Quiz App Wallet",
         description: "Add money to wallet",
 
+        /* 🔥 THIS IS THE ONLY PLACE SUCCESS SHOULD BE HANDLED */
         handler: async function (response) {
           try {
-     
             Swal.fire({
               title: "Verifying payment...",
               allowOutsideClick: false,
-              didOpen: () => {
-                Swal.showLoading();
-              },
+              didOpen: () => Swal.showLoading(),
             });
+
             await api.post("/payment/verify", {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -59,12 +56,12 @@ export default function AddMoneyModal({ onClose }) {
               icon: "success",
               title: "Money Added",
               text: `₹${amount} added to your wallet successfully`,
-              timer: 2000,
+              timer: 1500,
               showConfirmButton: false,
             });
 
-            onClose();
-            window.location.reload(); 
+            /* ✅ TELL WALLET PAGE PAYMENT IS DONE */
+            onSuccess();   // 🔥 THIS TRIGGERS AUTO REDIRECT
           } catch (err) {
             Swal.fire({
               icon: "error",

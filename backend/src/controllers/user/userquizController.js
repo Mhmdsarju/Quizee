@@ -45,8 +45,14 @@ export const getUserQuizById = async (req, res) => {
 export const getQuizPlay = async (req, res) => {
   try {
     const { quizId } = req.params;
+    const { contest } = req.query;   // 👈 contestId
+    const userId = req.user.id;
 
-    const result = await getQuizPlayService(quizId);
+    const result = await getQuizPlayService({
+      quizId,
+      contestId: contest,
+      userId,
+    });
 
     if (result.status === "NOT_FOUND") {
       return res.status(404).json({ message: "Quiz not found" });
@@ -54,6 +60,18 @@ export const getQuizPlay = async (req, res) => {
 
     if (result.status === "INACTIVE") {
       return res.status(403).json({ message: "Quiz unavailable now" });
+    }
+
+    if (result.status === "CONTEST_NOT_JOINED") {
+      return res.status(403).json({
+        message: "You are not registered for this contest",
+      });
+    }
+
+    if (result.status === "CONTEST_NOT_LIVE") {
+      return res.status(400).json({
+        message: "Contest not live",
+      });
     }
 
     if (result.questions.length === 0) {
@@ -67,7 +85,8 @@ export const getQuizPlay = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-}
+};
+
 
 
 

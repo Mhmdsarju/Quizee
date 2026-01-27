@@ -17,8 +17,6 @@ export default function ContestManagement() {
   const [editContest, setEditContest] = useState(null);
 
   useEffect(() => {
-    console.log("CONTEST API RESPONSE 👉", data);
-
     if (Array.isArray(data)) {
       setContests(data);
     } else if (Array.isArray(data?.data)) {

@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import Swal from "sweetalert2";
 import { quizGuard } from "../QuizGuard";
+
 
 export default function QuizPlay() {
   const { quizId } = useParams();
@@ -15,6 +16,10 @@ export default function QuizPlay() {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
+
+  const [searchParams] = useSearchParams();
+  const contestId=searchParams.get("contest");
+  const isContest = Boolean(contestId);
 
   const submittedRef = useRef(false);
 
@@ -28,29 +33,32 @@ export default function QuizPlay() {
 
   useEffect(() => {
     const fetchQuiz = async () => {
-      try {
-        const res = await api.get(`/user/quiz/${quizId}/play`);
-        setQuestions(res.data.questions);
-        setQuiz(res.data.quiz);
-        setTimeLeft(res.data.quiz.timeLimit * 60);
-      } catch (err) {
-        if (err.response?.status === 403) {
-          Swal.fire({
-            icon: "error",
-            title: "Quiz Unavailable",
-            text: "Quiz disabled by admin",
-            confirmButtonText: "Go to Quizzes",
-          }).then(() => {
-            quizGuard.ongoing = false;
-            navigate("/user/quiz", { replace: true });
-          });
-        } else {
-          Swal.fire("Error", "Failed to load quiz", "error");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    let res;
+
+    if (isContest) {
+      res = await api.get(
+        `/user/contest/${contestId}/play`
+      );
+    } else {
+      res = await api.get(
+        `/user/quiz/${quizId}/play`
+      );
+    }
+
+    setQuestions(res.data.questions);
+    setQuiz(res.data.quiz);
+    setTimeLeft(res.data.quiz.timeLimit * 60);
+  } catch {
+    Swal.fire(
+      "Error",
+      "Unable to load quiz",
+      "error"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchQuiz();
   }, [quizId, navigate]);
@@ -88,6 +96,8 @@ export default function QuizPlay() {
   };
 
   const validateCurrentQuestion = async () => {
+    if (isContest) return true;
+
     if (submittedRef.current) return false;
 
     try {
@@ -118,24 +128,43 @@ export default function QuizPlay() {
   };
 
   const submitQuiz = async () => {
-    if (submittedRef.current) return;
+  if (submittedRef.current) return;
 
-    const valid = await validateCurrentQuestion();
-    if (!valid) return;
+  const valid = await validateCurrentQuestion();
+  if (!valid) return;
 
-    submittedRef.current = true;
-    quizGuard.ongoing = false; 
+  submittedRef.current = true;
+  quizGuard.ongoing = false;
 
-    try {
-      const res = await api.post(`/user/quiz/${quizId}/submit`, { answers });
+  try {
+    // 1️⃣ Normal quiz submit (common for both)
+    const res = await api.post(`/user/quiz/${quizId}/submit`, { answers });
 
-      navigate(`/user/quiz/${quizId}/result`, {state: res.data,replace: true, });
-    } catch {
-      Swal.fire("Error", "Submit failed", "error");
-      submittedRef.current = false;
-      quizGuard.ongoing = true;
+    // 2️⃣ Contest quiz flow
+    if (isContest) {
+      await api.post(`/user/contest/${contestId}/submit`, {
+        score: res.data.score,
+        total: res.data.total,
+        percentage: res.data.percentage,
+      });
+
+      navigate(`/user/contest/${contestId}/leaderboard`, {
+        replace: true,
+      });
     }
-  };
+    // 3️⃣ Normal quiz flow
+    else {
+      navigate(`/user/quiz/${quizId}/result`, {
+        state: res.data,
+        replace: true,
+      });
+    }
+  } catch (err) {
+    Swal.fire("Error", "Submit failed", "error");
+    submittedRef.current = false;
+    quizGuard.ongoing = true;
+  }
+};
 
   if (loading) return <Loader />;
   if (!quiz || !questions.length)

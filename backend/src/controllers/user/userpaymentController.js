@@ -12,26 +12,44 @@ const razorpay = new Razorpay({
 });
 
 export const createOrder = async (req, res) => {
-  const { amount } = req.body;
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-  const order = await razorpay.orders.create({
-    amount: Number(amount) * 100,
-    currency: "INR",
-    notes: {
-      userId: req.user.id,
-    },
-  });
+    const { amount } = req.body;
 
-  res.json(order);
+    const order = await razorpay.orders.create({
+      amount: Number(amount) * 100,
+      currency: "INR",
+      notes: {
+        userId: req.user.id,
+      },
+    });
+
+    res.json(order);
+  } catch (err) {
+    console.error("Create order error:", err.message);
+    res.status(500).json({ message: "Create order failed" });
+  }
 };
 
 export const verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature,amount,} = req.body;
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      amount,
+    } = req.body;
 
     const sign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
     if (sign !== razorpay_signature) {
@@ -53,7 +71,7 @@ export const verifyPayment = async (req, res) => {
 
     res.json({ message: "Wallet credited successfully" });
   } catch (err) {
-    console.error("Verify payment error:", err.message);
+    console.error("Verify payment error:", err);
     res.status(500).json({ message: "Payment verification error" });
   }
 };
