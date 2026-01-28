@@ -24,7 +24,6 @@ export default function QuizResult() {
     }
   }, [state, quizId, navigate]);
 
-  // ⛔ State illena render pannathe
   if (!state) return null;
 
   useEffect(() => {

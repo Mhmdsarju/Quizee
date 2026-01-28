@@ -1,8 +1,22 @@
 import {createContestService,getAdminContestsService,editContestService,toggleContestBlockService,endContestService,} from "../../services/contestService.js";
+import cloudinary from "../../config/cloudinary.js";
 
 export const createContestHandler = async (req, res) => {
   try {
-    const contest = await createContestService(req.body);
+    let imageUrl =null;
+
+    if(req.file){
+      const result=await cloudinary.uploader.upload(req.file.path,{
+        folder:"quiz-app/contests",
+      });
+      imageUrl=result.secure_url;
+    }
+
+      const contest = await createContestService({
+      ...req.body,
+      image: imageUrl,  
+    })
+    
     res.status(201).json(contest);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -23,16 +37,39 @@ export const getAdminContestsHandler = async (req, res) => {
 };
 
 export const editContestHandler = async (req, res) => {
-  const result = await editContestService(req.params.id, req.body);
+  try {
+    const payload = { ...req.body };
 
-  if (result.status === "NOT_FOUND")
-    return res.status(404).json({ message: "Contest not found" });
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(
+        req.file.path,
+        { folder: "quiz-app/contests" }
+      );
+      payload.image = result.secure_url;
+    }
 
-  if (result.status === "EDIT_NOT_ALLOWED")
-    return res.status(400).json({ message: "Edit not allowed" });
+    const result = await editContestService(
+      req.params.id,
+      payload
+    );
 
-  res.json({ message: "Contest updated", contest: result.contest });
+    if (result.status === "NOT_FOUND")
+      return res.status(404).json({ message: "Contest not found" });
+
+    if (result.status === "EDIT_NOT_ALLOWED")
+      return res.status(400).json({ message: "Edit not allowed" });
+
+    res.json({
+      message: "Contest updated",
+      contest: result.contest,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
+
+
+
 export const toggleBlockContestHandler = async (req, res) => {
   const result = await toggleContestBlockService(req.params.id);
 

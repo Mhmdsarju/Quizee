@@ -35,8 +35,6 @@ export default function AddMoneyModal({ onClose, onSuccess }) {
         order_id: order.id,
         name: "Quiz App Wallet",
         description: "Add money to wallet",
-
-        /* 🔥 THIS IS THE ONLY PLACE SUCCESS SHOULD BE HANDLED */
         handler: async function (response) {
           try {
             Swal.fire({

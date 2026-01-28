@@ -12,7 +12,7 @@ const contestSchema = new mongoose.Schema(
     quiz: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
-      required: true, //  very important
+      required: true, 
     },
 
     entryFee: {
@@ -28,22 +28,9 @@ const contestSchema = new mongoose.Schema(
       correctAnswer: Number,
     }
   ],
-    rules: [
-      {
-        title: {
-          type: String,
-          required: true,
-        },
-        description: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
-
     maxParticipants: {
       type: Number,
-      default: null, // null = unlimited
+      default: null, 
     },
 
     startTime: {
@@ -67,7 +54,11 @@ const contestSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+   
+    image: {
+      type: String, 
+      default: null,  
+    },
   },
   { timestamps: true }
 );

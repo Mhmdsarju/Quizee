@@ -1,4 +1,5 @@
 
+import contestModel from "../../models/contestModel.js";
 import {
   getContestLeaderboardService,
   getContestQuizPlayService,
@@ -172,4 +173,17 @@ export const getContestQuizPlayHandler = async (req,res) => {
       .status(500)
       .json({ message: err.message });
   }
+};
+
+export const getContestStatusHandler= async (req,res)=>{
+  const contest= await contestModel.findById(req.params.id).select("isBlocked status");
+
+  if(!contest){
+    return res.status(404).json({message:"Contest Not Found"})
+  }
+
+  res.json({
+    isBlocked:contest.isBlocked,
+    status:contest.status,
+  });
 };

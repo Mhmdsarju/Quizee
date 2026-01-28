@@ -3,26 +3,29 @@ import contestParticipantsModel from "../models/contestParticipantsModel.js";
 import contestResultModel from "../models/contestResultModel.js";
 import questionModel from "../models/questionModel.js";
 import walletModel from "../models/walletModel.js";
+import walletTransactionModel from "../models/walletTransaction.js";
 import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 
-
 export const createContestService = async (payload) => {
-  // 1️⃣ fetch quiz questions
   const questions = await questionModel.find({
     quizId: payload.quiz,
   }).select("question options correctAnswer");
 
-  // 2️⃣ create contest with snapshot
+  if (!questions.length) {
+    throw new Error("Quiz has no questions");
+  }
+
   const contest = await contestModel.create({
     ...payload,
-    questionsSnapshot: questions.map(q => ({
+    image: payload.image || null, 
+    questionsSnapshot: questions.map((q) => ({
       question: q.question,
       options: q.options,
       correctAnswer: q.correctAnswer,
     })),
   });
 
-  return await contest.populate("quiz", "title");
+  return await contest.populate("quiz", "title timeLimit");
 };
 
 export const getAdminContestsService = async ({ search, page, limit }) => {
@@ -59,9 +62,8 @@ export const getUserContestsService = async ({
   userId,
   sort = "newest",
 }) => {
-  let sortQuery = { startTime: 1 };
+  let sortQuery = { createdAt: -1 };
 
-  if (sort === "newest") sortQuery = { createdAt: -1 };
   if (sort === "oldest") sortQuery = { createdAt: 1 };
   if (sort === "feeLow") sortQuery = { entryFee: 1 };
   if (sort === "feeHigh") sortQuery = { entryFee: -1 };
@@ -72,7 +74,7 @@ export const getUserContestsService = async ({
     searchFields: ["title"],
     page,
     limit,
-    populate: { path: "quiz", select: "title duration" },
+    populate: { path: "quiz", select: "title timeLimit" },
     filter: {
       isBlocked: false,
       status: { $in: ["UPCOMING", "LIVE", "COMPLETED"] },
@@ -87,19 +89,14 @@ export const getUserContestsService = async ({
     user: userId,
   });
 
-  const joinedSet = new Set(
-    joined.map((j) => j.contest.toString())
-  );
+  const joinedSet = new Set(joined.map((j) => j.contest.toString()));
 
   const dataWithJoinStatus = result.data.map((contest) => ({
     ...contest.toObject(),
     hasJoined: joinedSet.has(contest._id.toString()),
   }));
 
-  return {
-    ...result,
-    data: dataWithJoinStatus,
-  };
+  return { ...result, data: dataWithJoinStatus };
 };
 
 export const joinContestService = async ({ contestId, userId }) => {
@@ -108,12 +105,8 @@ export const joinContestService = async ({ contestId, userId }) => {
   if (contest.isBlocked) return { status: "BLOCKED" };
 
   const now = new Date();
-
-  if (now < contest.startTime)
-    return { status: "NOT_STARTED" };
-
-  if (now >= contest.endTime)
-    return { status: "COMPLETED" };
+  if (now < contest.startTime) return { status: "NOT_STARTED" };
+  if (now >= contest.endTime) return { status: "COMPLETED" };
 
   const joined = await contestParticipantsModel.findOne({
     contest: contestId,
@@ -135,6 +128,15 @@ export const joinContestService = async ({ contestId, userId }) => {
   wallet.balance -= contest.entryFee;
   await wallet.save();
 
+  await walletTransactionModel.create({
+    user: userId,
+    type: "debit",
+    amount: contest.entryFee,
+    reason: "contest_fee",
+    reference: contestId.toString(),
+    balanceAfter: wallet.balance,
+  });
+
   await contestParticipantsModel.create({
     contest: contestId,
     quiz: contest.quiz,
@@ -150,9 +152,7 @@ export const joinContestService = async ({ contestId, userId }) => {
 export const toggleContestBlockService = async (contestId) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
-
-  if (contest.status === "COMPLETED")
-    return { status: "COMPLETED" };
+  if (contest.status === "COMPLETED") return { status: "COMPLETED" };
 
   let refundedUsers = 0;
 
@@ -166,6 +166,15 @@ export const toggleContestBlockService = async (contestId) => {
       if (wallet) {
         wallet.balance += contest.entryFee;
         await wallet.save();
+        await walletTransactionModel.create({
+          user: p.user,
+          type: "credit",
+          amount: contest.entryFee,
+          reason: "refund",
+          reference: contestId.toString(),
+          balanceAfter: wallet.balance,
+        });
+
         refundedUsers++;
       }
     }
@@ -189,18 +198,23 @@ export const editContestService = async (contestId, payload) => {
   if (!contest) return { status: "NOT_FOUND" };
 
   const now = new Date();
-
   if (contest.isBlocked || contest.startTime <= now)
     return { status: "EDIT_NOT_ALLOWED" };
 
-  const allowed = ["title", "rules", "startTime", "endTime"];
-  allowed.forEach(
-    (f) => payload[f] !== undefined && (contest[f] = payload[f])
-  );
+  const allowed = [
+    "title",
+    "startTime",
+    "endTime",
+    "image",
+  ];
+
+  allowed.forEach((f) => {
+    if (payload[f] !== undefined) contest[f] = payload[f];
+  });
 
   await contest.save();
-
   const populatedContest = await contest.populate("quiz", "title");
+
   return { status: "SUCCESS", contest: populatedContest };
 };
 
@@ -214,19 +228,21 @@ export const endContestService = async (contestId) => {
 
   return { status: "SUCCESS" };
 };
-
-export const submitContestQuizService = async ({contestId,userId,score,total,percentage,timeTaken,}) => {
+export const submitContestQuizService = async ({
+  contestId,
+  userId,
+  score,
+  total,
+  percentage,
+  timeTaken,
+}) => {
   try {
-    
-   const contest= await contestModel.findById(contestId).select("quiz");
-    
-   if(!contest){
-    return{status:"CONTEST_NOT_FOUND"};
-   }
+    const contest = await contestModel.findById(contestId).select("quiz");
+    if (!contest) return { status: "CONTEST_NOT_FOUND" };
 
     const result = await contestResultModel.create({
       contestId,
-      quizId:contest.quiz,
+      quizId: contest.quiz,
       userId,
       score,
       total,
@@ -236,22 +252,16 @@ export const submitContestQuizService = async ({contestId,userId,score,total,per
 
     return { status: "SUCCESS", result };
   } catch (err) {
-    if (err.code === 11000) {
-      return { status: "ALREADY_SUBMITTED" };
-    }
+    if (err.code === 11000) return { status: "ALREADY_SUBMITTED" };
     throw err;
   }
 };
 
 export const getContestLeaderboardService = async ({ contestId }) => {
-  const leaderboard = await contestResultModel.find({ contestId })
+  return await contestResultModel
+    .find({ contestId })
     .populate("userId", "name")
-    .sort({score: -1,       
-      timeTaken: 1,     
-      createdAt: 1,
-    });
-
-  return leaderboard;
+    .sort({ score: -1, timeTaken: 1, createdAt: 1 });
 };
 
 export const getUserContestHistoryService = async (userId) => {
@@ -261,54 +271,38 @@ export const getUserContestHistoryService = async (userId) => {
     .populate("quizId", "title")
     .sort({ createdAt: -1 });
 
-  return history.map((history) => ({
-    _id: history._id,
-    contest: history.contestId,
-    quiz: history.quizId,
-    score: history.score,
-    total: history.total,
-    percentage: history.percentage,
-    rank: history.rank,
-    playedAt: history.createdAt,
+  return history.map((h) => ({
+    _id: h._id,
+    contest: h.contestId,
+    quiz: h.quizId,
+    score: h.score,
+    total: h.total,
+    percentage: h.percentage,
+    rank: h.rank,
+    playedAt: h.createdAt,
   }));
 };
 
-export const getContestQuizPlayService = async ({
-  contestId,
-}) => {
+export const getContestQuizPlayService = async ({ contestId }) => {
   const contest = await contestModel
     .findById(contestId)
-    .select(
-      "title questionsSnapshot startTime endTime isBlocked"
-    );
+    .populate("quiz", "timeLimit title")
+    .select("quiz questionsSnapshot startTime endTime isBlocked");
 
-  if (!contest) {
-    return { status: "NOT_FOUND" };
-  }
-
-  if (contest.isBlocked) {
-    return { status: "BLOCKED" };
-  }
+  if (!contest) return { status: "NOT_FOUND" };
+  if (contest.isBlocked) return { status: "BLOCKED" };
 
   const now = new Date();
-
-  if (now < contest.startTime) {
-    return { status: "NOT_STARTED" };
-  }
-
-  if (now > contest.endTime) {
-    return { status: "ENDED" };
-  }
-
-  if (!contest.questionsSnapshot?.length) {
+  if (now < contest.startTime) return { status: "NOT_STARTED" };
+  if (now > contest.endTime) return { status: "ENDED" };
+  if (!contest.questionsSnapshot?.length)
     return { status: "NO_QUESTIONS" };
-  }
 
   return {
     status: "SUCCESS",
     quiz: {
-      title: contest.title,
-      timeLimit: 10, // or derive from quiz
+      title: contest.quiz.title,
+      timeLimit: contest.quiz.timeLimit,
     },
     questions: contest.questionsSnapshot,
   };

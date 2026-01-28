@@ -45,7 +45,6 @@ export default function UserHistory() {
         History
       </h1>
 
-      {/* TABS */}
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => setActiveTab("quiz")}
@@ -93,7 +92,7 @@ export default function UserHistory() {
                 >
                   <div className="flex justify-between items-start">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {item.quiz.title}
+                      <span className="text-sm text-gray-500">Quiz Name : </span>  {item.quiz.title}
                     </h3>
 
                     <span className="text-sm text-gray-500">
@@ -147,7 +146,7 @@ export default function UserHistory() {
                 >
                   <div className="flex justify-between items-start">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {item.contest.title}
+                    <span className="text-sm text-gray-500">Contest Name : </span>   {item.contest.title}
                     </h3>
 
                     <span className="text-sm text-gray-500">
@@ -156,11 +155,6 @@ export default function UserHistory() {
                       ).toLocaleDateString()}
                     </span>
                   </div>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    Quiz: {item.quiz.title}
-                  </p>
-
                   <div className="mt-3 flex flex-wrap gap-6 text-sm text-gray-700">
                     <p>
                       <span className="font-medium">
@@ -175,15 +169,6 @@ export default function UserHistory() {
                       </span>{" "}
                       {item.percentage}%
                     </p>
-
-                    {item.rank && (
-                      <p>
-                        <span className="font-medium">
-                          Rank:
-                        </span>{" "}
-                        #{item.rank}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}

@@ -24,12 +24,44 @@ export default function QuizPlay() {
   const submittedRef = useRef(false);
 
   useEffect(() => {
-    quizGuard.ongoing = true; // quiz started
+    quizGuard.ongoing = true; 
 
     return () => {
-      quizGuard.ongoing = false; // quiz left 
+      quizGuard.ongoing = false; 
     };
   }, []);
+
+
+  const checkContestBlocked = async () => {
+  if (!isContest) return true;
+
+  try {
+    const { data } = await api.get(
+      `/user/contest/${contestId}/status`
+    );
+
+    if (data.isBlocked) {
+      quizGuard.ongoing = false;
+
+      await Swal.fire({
+        icon: "warning",
+        title: "Contest Blocked",
+        text: "Contest blocked by admin. Your money will be refunded.",
+        confirmButtonText: "OK",
+      });
+
+      navigate("/user/contest", { replace: true });
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+
+
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -37,13 +69,9 @@ export default function QuizPlay() {
     let res;
 
     if (isContest) {
-      res = await api.get(
-        `/user/contest/${contestId}/play`
-      );
+      res = await api.get(`/user/contest/${contestId}/play`);
     } else {
-      res = await api.get(
-        `/user/quiz/${quizId}/play`
-      );
+      res = await api.get(`/user/quiz/${quizId}/play`);
     }
 
     setQuestions(res.data.questions);
@@ -119,6 +147,9 @@ export default function QuizPlay() {
   };
 
   const next = async () => {
+    const contestOk =await checkContestBlocked();
+    if (!contestOk) return;
+
     const valid = await validateCurrentQuestion();
     if (!valid) return;
 
@@ -129,6 +160,9 @@ export default function QuizPlay() {
 
   const submitQuiz = async () => {
   if (submittedRef.current) return;
+  
+   const contestOk = await checkContestBlocked();
+  if (!contestOk) return;
 
   const valid = await validateCurrentQuestion();
   if (!valid) return;
@@ -137,10 +171,7 @@ export default function QuizPlay() {
   quizGuard.ongoing = false;
 
   try {
-    // 1️⃣ Normal quiz submit (common for both)
     const res = await api.post(`/user/quiz/${quizId}/submit`, { answers });
-
-    // 2️⃣ Contest quiz flow
     if (isContest) {
       await api.post(`/user/contest/${contestId}/submit`, {
         score: res.data.score,
@@ -152,7 +183,6 @@ export default function QuizPlay() {
         replace: true,
       });
     }
-    // 3️⃣ Normal quiz flow
     else {
       navigate(`/user/quiz/${quizId}/result`, {
         state: res.data,

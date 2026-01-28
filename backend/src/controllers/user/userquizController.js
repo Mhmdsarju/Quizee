@@ -45,7 +45,7 @@ export const getUserQuizById = async (req, res) => {
 export const getQuizPlay = async (req, res) => {
   try {
     const { quizId } = req.params;
-    const { contest } = req.query;   // 👈 contestId
+    const { contest } = req.query;   
     const userId = req.user.id;
 
     const result = await getQuizPlayService({

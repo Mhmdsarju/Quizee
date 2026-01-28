@@ -3,7 +3,7 @@ import { protect } from "../middleware/authMiddleware.js";
 import userModel from "../models/userModel.js";
 import { getQuizHistory, getQuizPlay, getUserQuizById, getUserQuizzes, submitQuiz, validateQuestion } from "../controllers/user/userquizController.js";
 import authController from "../controllers/authController.js";
-import { getContestLeaderboardHandler, getContestQuizPlayHandler, getUserContestHistoryHandler, getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
+import { getContestLeaderboardHandler, getContestQuizPlayHandler, getContestStatusHandler, getUserContestHistoryHandler, getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
 
 
 const router = express.Router();
@@ -33,4 +33,5 @@ router.post("/contest/:id/submit",protect,submitContestQuizHandler);
 router.get("/contest/:id/leaderboard",protect,getContestLeaderboardHandler);
 router.get("/contest-history",protect,getUserContestHistoryHandler);
 router.get("/contest/:id/play",protect,getContestQuizPlayHandler);
+router.get("/contest/:id/status",protect,getContestStatusHandler);
 export default router;

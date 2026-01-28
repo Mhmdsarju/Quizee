@@ -58,8 +58,6 @@ export default function UserWallet() {
             + Add Funds
           </button>
         </div>
-
-        {/* WALLET CARD */}
         <div className="rounded-2xl p-6 text-white bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 shadow">
           <p className="text-sm text-gray-300">
             TOTAL BALANCE
@@ -81,8 +79,6 @@ export default function UserWallet() {
             </span>
           </div>
         </div>
-
-        {/* TRANSACTIONS */}
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800">
@@ -96,28 +92,27 @@ export default function UserWallet() {
             </p>
           ) : (
             <div className="space-y-4">
-              {transactions.map((tx) => (
+              {transactions.map((transaction) => (
                 <div
-                  key={tx._id}
+                  key={transaction._id}
                   className="flex justify-between items-center border rounded-xl p-4"
                 >
                   <div>
                     <p className="font-medium capitalize text-gray-800">
-                      {tx.reason}
+                      {transaction.reason}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(tx.createdAt).toDateString()}
+                      {new Date(transaction.createdAt).toDateString()}
                     </p>
                   </div>
 
                   <span
-                    className={`font-semibold ${
-                      tx.type === "credit"
+                    className={`font-semibold ${transaction.type === "credit"
                         ? "text-green-600"
                         : "text-red-500"
                     }`}
                   >
-                    {tx.type === "credit" ? "+" : "-"}₹{tx.amount}
+                    {transaction.type === "credit" ? "+" : "-"}₹{transaction.amount}
                   </span>
                 </div>
               ))}
@@ -126,7 +121,6 @@ export default function UserWallet() {
         </div>
       </div>
 
-      {/* ADD MONEY MODAL */}
       {open && (
         <AddMoneyModal
           onClose={() => setOpen(false)}

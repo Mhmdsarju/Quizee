@@ -1,33 +1,34 @@
 import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import api from "../../api/axios";
 import Swal from "sweetalert2";
 
 export default function ContestForm({initialData,onClose,onSuccess,}) {
   const isEdit = !!initialData;
-  const [quizzes, setQuizzes] = useState([]);
 
-  const {register,control,handleSubmit,reset,formState: { isSubmitting },
-  } = useForm({
+  const [quizzes, setQuizzes] = useState([]);
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+
+  const {register,control,handleSubmit,reset,formState: { isSubmitting },} = useForm({
     defaultValues: {
       title: "",
       quiz: "",
       entryFee: "",
       startTime: "",
       endTime: "",
-      rules: [{ title: "", description: "" }],
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "rules",
   });
 
   useEffect(() => {
     api
       .get("/admin/quiz", { params: { limit: 100 } })
-      .then(({ data }) => setQuizzes(data.data || []))
+      .then(({ data }) => {
+        const validQuizzes = (data.data || []).filter(
+          (q) => q.questionCount > 0
+        );
+        setQuizzes(validQuizzes);
+      })
       .catch(() => setQuizzes([]));
   }, []);
 
@@ -40,15 +41,35 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
       entryFee: initialData.entryFee || "",
       startTime: initialData.startTime?.slice(0, 16) || "",
       endTime: initialData.endTime?.slice(0, 16) || "",
-      rules:
-        initialData.rules?.length > 0
-          ? initialData.rules
-          : [{ title: "", description: "" }],
     });
+
+    if (initialData.quiz) {
+      setSelectedQuiz({
+        _id: initialData.quiz._id,
+        title: initialData.quiz.title,
+        timeLimit: initialData.quiz.timeLimit,
+        questionCount: initialData.quiz.questionCount,
+      });
+    }
   }, [initialData, reset]);
 
   const onSubmit = async (values) => {
-    if (new Date(values.startTime) >= new Date(values.endTime)) {
+    if (!isEdit && !selectedQuiz) {
+      return Swal.fire("Error", "Please select a quiz", "error");
+    }
+
+    if (!isEdit && selectedQuiz.questionCount === 0) {
+      return Swal.fire(
+        "Invalid Quiz",
+        "Selected quiz has no questions",
+        "warning"
+      );
+    }
+
+    const start = new Date(values.startTime);
+    const end = new Date(values.endTime);
+
+    if (start >= end) {
       return Swal.fire(
         "Invalid Time",
         "End time must be after start time",
@@ -56,25 +77,45 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
       );
     }
 
+    if (!isEdit) {
+      const durationMinutes =
+        (end - start) / (1000 * 60);
+
+      if (durationMinutes < selectedQuiz.timeLimit) {
+        return Swal.fire(
+          "Invalid Duration",
+          `Contest duration must be at least ${selectedQuiz.timeLimit} minutes`,
+          "warning"
+        );
+      }
+    }
+
     try {
+      const formData = new FormData();
+
+      formData.append("title", values.title);
+      formData.append("startTime", values.startTime);
+      formData.append("endTime", values.endTime);
+      if (!isEdit) {
+        formData.append("quiz", values.quiz);
+        formData.append("entryFee", Number(values.entryFee));
+      }
+
+      if (imageFile) {
+        formData.append("image", imageFile); 
+      }
+
       if (isEdit) {
-        const { data } = await api.patch(
-          `/admin/contest/${initialData._id}`,
-          {
-            title: values.title,
-            startTime: values.startTime,
-            endTime: values.endTime,
-            rules: values.rules,
-          }
+        const { data } = await api.patch(`/admin/contest/${initialData._id}`,formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
 
         Swal.fire("Updated", "Contest updated successfully", "success");
         onSuccess(data.contest);
       } else {
-        const { data } = await api.post("/admin/contest", {
-          ...values,
-          entryFee: Number(values.entryFee),
-        });
+        const { data } = await api.post("/admin/contest",formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
         Swal.fire("Created", "Contest created successfully", "success");
         onSuccess(data);
@@ -87,7 +128,6 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
       );
     }
   };
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -103,11 +143,32 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
         </label>
         <input
           {...register("title", { required: true })}
-          placeholder="Eg: Weekly Coding Contest"
-          className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none"
+          className="mt-1 w-full border rounded-lg p-2"
         />
       </div>
 
+      <div>
+        <label className="text-sm font-medium text-gray-600">
+          Contest Image (optional)
+        </label>
+
+        {isEdit && initialData?.image && (
+          <img
+            src={initialData.image}
+            alt="contest"
+            className="h-32 rounded-lg mb-2 object-cover"
+          />
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            setImageFile(e.target.files[0])
+          }
+          className="w-full border rounded-lg p-2"
+        />
+      </div>
       <div>
         <label className="text-sm font-medium text-gray-600">
           Quiz
@@ -115,15 +176,20 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
 
         {isEdit ? (
           <input
-            type="text"
-            value={initialData?.quiz?.title || ""}
+            value={initialData.quiz?.title || ""}
             disabled
-            className="mt-1 w-full border rounded-lg p-2 bg-gray-100 text-gray-600"
+            className="mt-1 w-full border rounded-lg p-2 bg-gray-100"
           />
         ) : (
           <select
             {...register("quiz", { required: true })}
-            className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none"
+            onChange={(e) => {
+              const quiz = quizzes.find(
+                (q) => q._id === e.target.value
+              );
+              setSelectedQuiz(quiz || null);
+            }}
+            className="mt-1 w-full border rounded-lg p-2"
           >
             <option value="">Select Quiz</option>
             {quizzes.map((q) => (
@@ -134,7 +200,6 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
           </select>
         )}
       </div>
-
       <div>
         <label className="text-sm font-medium text-gray-600">
           Entry Fee (₹)
@@ -143,83 +208,28 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
           type="number"
           {...register("entryFee", { required: true })}
           disabled={isEdit}
-          placeholder="Eg: 50"
-          className={`mt-1 w-full border rounded-lg p-2 ${
-            isEdit ? "bg-gray-100 text-gray-600" : "focus:ring-2 focus:ring-green-500"
-          } outline-none`}
+          className="mt-1 w-full border rounded-lg p-2"
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-gray-600">
-            Start Time
-          </label>
-          <input
-            type="datetime-local"
-            {...register("startTime", { required: true })}
-            className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-gray-600">
-            End Time
-          </label>
-          <input
-            type="datetime-local"
-            {...register("endTime", { required: true })}
-            className="mt-1 w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none"
-          />
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-medium text-gray-700 mb-2">Rules</h3>
-
-        {fields.map((field, i) => (
-          <div
-            key={field.id}
-            className="border rounded-xl p-4 mb-3 bg-gray-50"
-          >
-            <input
-              {...register(`rules.${i}.title`, { required: true })}
-              placeholder="Rule title"
-              className="w-full border rounded-lg p-2 mb-2 focus:ring-2 focus:ring-green-500 outline-none"
-            />
-
-            <textarea
-              {...register(`rules.${i}.description`, { required: true })}
-              placeholder="Rule description"
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-500 outline-none"
-            />
-
-            {fields.length > 1 && (
-              <button
-                type="button"
-                onClick={() => remove(i)}
-                className="mt-2 text-sm text-red-600 hover:underline"
-              >
-                Remove Rule
-              </button>
-            )}
-          </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => append({ title: "", description: "" })}
-          className="text-sm text-green-600 hover:underline"
-        >
-          + Add Rule
-        </button>
+      <div className="grid grid-cols-2 gap-4">
+        <input
+          type="datetime-local"
+          {...register("startTime", { required: true })}
+          className="border rounded-lg p-2"
+        />
+        <input
+          type="datetime-local"
+          {...register("endTime", { required: true })}
+          className="border rounded-lg p-2"
+        />
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 rounded-lg border hover:bg-gray-100"
+          className="px-4 py-2 border rounded-lg"
         >
           Cancel
         </button>
@@ -227,7 +237,7 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+          className="px-5 py-2 bg-green-600 text-white rounded-lg"
         >
           {isEdit ? "Update Contest" : "Create Contest"}
         </button>
