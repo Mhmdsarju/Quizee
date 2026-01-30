@@ -8,7 +8,6 @@ import UserProfileLayout from "../layout/UserProfileLayout";
 import HomeUser from "../pages/user/home";
 import QuizPage from "../pages/user/QuizPage";
 import ContestPage from "../pages/user/ContestPage";
-import UserNotifications from "../pages/user/UserNotifications";
 import QuizIntro from "../pages/user/QuizIntro";
 import QuizPlay from "../pages/user/QuizPlay";
 import QuizResult from "../pages/user/QuizResult";
@@ -44,7 +43,6 @@ const UserRoutes = () => {
       <Route element={<ProtectedRoute role="user"><UserLayout /></ProtectedRoute>}>
         <Route path="user/quiz" element={<QuizPage />} />
         <Route path="user/contest" element={<ContestPage />} />
-        <Route path="user/notifications" element={<UserNotifications />} />
         <Route path="user/quiz/:quizId" element={<QuizIntro />} />
         <Route path="user/quiz/:quizId/play" element={<QuizPlay />} />
         <Route path="user/quiz/:quizId/result" element={<QuizResult />} />

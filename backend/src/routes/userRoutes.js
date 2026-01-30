@@ -4,6 +4,7 @@ import userModel from "../models/userModel.js";
 import { getQuizHistory, getQuizPlay, getUserQuizById, getUserQuizzes, submitQuiz, validateQuestion } from "../controllers/user/userquizController.js";
 import authController from "../controllers/authController.js";
 import { getContestLeaderboardHandler, getContestQuizPlayHandler, getContestStatusHandler, getUserContestHistoryHandler, getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
+import { getUserNotificationHandler, UserNotificationMarkAllAsReadHandler, UserNotificationMarkAsReadHandler } from "../controllers/user/userNotificationController.js";
 
 
 const router = express.Router();
@@ -34,4 +35,8 @@ router.get("/contest/:id/leaderboard",protect,getContestLeaderboardHandler);
 router.get("/contest-history",protect,getUserContestHistoryHandler);
 router.get("/contest/:id/play",protect,getContestQuizPlayHandler);
 router.get("/contest/:id/status",protect,getContestStatusHandler);
+router.get("/notifications",protect,getUserNotificationHandler)
+router.patch("/notifications/:id/read",protect,UserNotificationMarkAsReadHandler)
+router.patch("/notifications/read-all",protect,UserNotificationMarkAllAsReadHandler)
+
 export default router;

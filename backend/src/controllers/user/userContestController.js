@@ -1,22 +1,10 @@
 
 import contestModel from "../../models/contestModel.js";
-import {
-  getContestLeaderboardService,
-  getContestQuizPlayService,
-  getUserContestHistoryService,
-  getUserContestsService,
-  joinContestService,
-  submitContestQuizService,
-} from "../../services/contestService.js";
+import { getContestLeaderboardService, getContestQuizPlayService, getUserContestHistoryService, getUserContestsService, joinContestService, submitContestQuizService, } from "../../services/contestService.js";
 
 export const getUserContestsHandler = async (req, res) => {
   try {
-    const {
-      search = "",
-      page = 1,
-      limit = 9,
-      sort = "newest",
-    } = req.query;
+    const { search = "", page = 1, limit = 9, sort = "newest", } = req.query;
 
     const result = await getUserContestsService({
       search,
@@ -127,7 +115,7 @@ export const getUserContestHistoryHandler = async (req, res) => {
 };
 
 
-export const getContestQuizPlayHandler = async (req,res) => {
+export const getContestQuizPlayHandler = async (req, res) => {
   try {
     const { id: contestId } = req.params;
 
@@ -175,15 +163,15 @@ export const getContestQuizPlayHandler = async (req,res) => {
   }
 };
 
-export const getContestStatusHandler= async (req,res)=>{
-  const contest= await contestModel.findById(req.params.id).select("isBlocked status");
+export const getContestStatusHandler = async (req, res) => {
+  const contest = await contestModel.findById(req.params.id).select("isBlocked status");
 
-  if(!contest){
-    return res.status(404).json({message:"Contest Not Found"})
+  if (!contest) {
+    return res.status(404).json({ message: "Contest Not Found" })
   }
 
   res.json({
-    isBlocked:contest.isBlocked,
-    status:contest.status,
+    isBlocked: contest.isBlocked,
+    status: contest.status,
   });
 };

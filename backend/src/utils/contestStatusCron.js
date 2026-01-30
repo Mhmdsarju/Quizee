@@ -5,7 +5,7 @@ export const contestStatusCron = () => {
   cron.schedule("* * * * *", async () => {
     const now = new Date();
 
-    /* UPCOMING → LIVE */
+    /* UPCOMING to LIVE */
     await contestModel.updateMany(
       {
         status: "UPCOMING",
@@ -16,7 +16,7 @@ export const contestStatusCron = () => {
       { $set: { status: "LIVE" } }
     );
 
-    /* LIVE → COMPLETED */
+    /* LIVE to COMPLETED */
     await contestModel.updateMany(
       {
         status: "LIVE",
@@ -26,6 +26,6 @@ export const contestStatusCron = () => {
       { $set: { status: "COMPLETED" } }
     );
 
-    console.log("⏱ Contest status cron executed");
+    console.log("Contest status cron executed");
   });
 };

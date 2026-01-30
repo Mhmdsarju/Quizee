@@ -18,10 +18,8 @@ export const uploadQuestionsCSV = async (req, res) => {
     const questions = [];
     const stream = Readable.from(req.file.buffer);
 
-    stream
-      .pipe(csv())
-      .on("data", (row) => {
-        // 🛑 validation
+    stream.pipe(csv()).on("data", (row) => {
+        // validation
         if (
           !row.question ||
           !row.optionA ||

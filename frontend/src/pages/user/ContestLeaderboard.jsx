@@ -38,30 +38,25 @@ export default function ContestLeaderboard() {
           <div /> 
         </div>
 
-        {/* LOADING */}
         {loading && (
           <p className="text-center text-gray-400 mt-20">
             Loading leaderboard...
           </p>
         )}
 
-        {/* EMPTY STATE */}
         {!loading && data.length === 0 && (
           <div className="bg-white rounded-2xl shadow p-10 text-center">
             <div className="text-5xl mb-4">🏁</div>
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              No Participants Yet
+              No Participants Joined !!!
             </h2>
             <p className="text-sm text-gray-500">
-              Be the first one to join this contest and top the leaderboard!
+              Be the first one to the Next Contest  and top the leaderboard!
             </p>
           </div>
         )}
-
-        {/* LEADERBOARD */}
         {!loading && data.length > 0 && (
           <>
-            {/* 🏆 PODIUM */}
             <div className="flex justify-center items-end gap-6 mb-10">
               {topThree[1] && (
                 <Podium
@@ -93,8 +88,6 @@ export default function ContestLeaderboard() {
                 />
               )}
             </div>
-
-            {/* 📋 REST LIST */}
             {others.length > 0 && (
               <div className="bg-white rounded-xl shadow divide-y">
                 {others.map((row, index) => (
@@ -123,9 +116,6 @@ export default function ContestLeaderboard() {
     </div>
   );
 }
-
-/* ================= PODIUM ================= */
-
 function Podium({ rank, name, score, height, color, highlight }) {
   return (
     <div className="flex flex-col items-center w-32 relative">

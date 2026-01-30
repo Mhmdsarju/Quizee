@@ -6,12 +6,7 @@ export const getUserWallet = async (userId) => {
   if (!wallet) throw new Error("Wallet not found");
   return wallet;
 };
-export const creditWallet = async ({
-  userId,
-  amount,
-  reason,
-  reference,
-}) => {
+export const creditWallet = async ({userId,amount,reason,reference,}) => {
   const amt = Number(amount);
 
   if (!amt || amt <= 0) {
@@ -35,12 +30,7 @@ export const creditWallet = async ({
   return wallet.balance;
 };
 
-export const debitWallet = async ({
-  userId,
-  amount,
-  reason,
-  reference,
-}) => {
+export const debitWallet = async ({userId,amount,reason,reference,}) => {
   const amt = Number(amount);
 
   if (!amt || amt <= 0) {

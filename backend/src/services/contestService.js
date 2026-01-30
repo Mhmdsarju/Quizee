@@ -5,8 +5,13 @@ import questionModel from "../models/questionModel.js";
 import walletModel from "../models/walletModel.js";
 import walletTransactionModel from "../models/walletTransaction.js";
 import { paginateAndSearch } from "../utils/paginateAndSearch.js";
+import UserModel from "../models/userModel.js"
+import notificationModel from '../models/notificationModel.js'
+import { getIo } from "../config/socket.js";
 
 export const createContestService = async (payload) => {
+  const users = await UserModel.find({}, "_id");
+
   const questions = await questionModel.find({
     quizId: payload.quiz,
   }).select("question options correctAnswer");
@@ -17,13 +22,32 @@ export const createContestService = async (payload) => {
 
   const contest = await contestModel.create({
     ...payload,
-    image: payload.image || null, 
+    image: payload.image || null,
     questionsSnapshot: questions.map((q) => ({
       question: q.question,
       options: q.options,
       correctAnswer: q.correctAnswer,
     })),
   });
+
+  const notifications = users.map(user => ({
+    userId: user._id,
+    title: "New Contest !!!",
+    message: `${contest.title}  is avaliable on Quizeee... please checkout!!!`,
+    contestId: contest._id,
+  }))
+
+  await notificationModel.insertMany(notifications);
+
+  getIo().emit("new_notification", {
+    _id: "temp-" + Date.now(),
+    title: "New Contest !!!",
+    message: `${contest.title}  is avaliable on Quizeee... please checkout!!!`,
+    contestId: contest._id,
+    isRead: false,
+    createdAt: new Date(),
+  })
+
 
   return await contest.populate("quiz", "title timeLimit");
 };

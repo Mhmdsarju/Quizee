@@ -1,39 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
 import Swal from "sweetalert2";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar";
-import ContestImg from "../../assets/quiz.jpg"; // ✅ default image
+import ContestImg from "../../assets/quiz.jpg";
+import { useContest } from "../../hooks/useContest";
+import api from "../../api/axios";
 
 export default function ContestPage() {
-  const [contests, setContests] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchContests();
-  }, [search, sort, page]);
+  const { data: contestRes, isLoading } = useContest({search,sort,page,});
 
-  const fetchContests = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/user/contest", {
-        params: { search, sort, page },
-      });
-      setContests(data.data);
-      setPagination(data.pagination);
-    } catch {
-      Swal.fire("Error", "Unable to load contests", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const contests = contestRes?.data || [];
+  const pagination = contestRes?.pagination;
 
   const handleJoin = async (contest) => {
     const res = await Swal.fire({
@@ -47,9 +31,7 @@ export default function ContestPage() {
     if (!res.isConfirmed) return;
 
     try {
-      const { data } = await api.post(
-        `/user/contest/${contest._id}/join`
-      );
+      const { data } = await api.post(`/user/contest/${contest._id}/join`);
 
       Swal.fire({
         title: "Success",
@@ -59,9 +41,7 @@ export default function ContestPage() {
         showConfirmButton: false,
       });
 
-      navigate(
-        `/user/quiz/${data.quizId}/play?contest=${data.contestId}`
-      );
+      navigate(`/user/quiz/${data.quizId}/play?contest=${data.contestId}`);
     } catch (err) {
       const message = err.response?.data?.message || "";
 
@@ -75,9 +55,7 @@ export default function ContestPage() {
         });
 
         if (res.isConfirmed) {
-          navigate("/user/wallet", {
-            state: { from: "contest" },
-          });
+          navigate("/user/wallet", {state: { from: "contest" },});
         }
       } else {
         Swal.fire("Oops", message || "Unable to join contest", "error");
@@ -106,7 +84,6 @@ export default function ContestPage() {
           Contests
         </h1>
 
-        {/* SEARCH + SORT */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-end">
           <SearchBar
             value={search}
@@ -117,8 +94,7 @@ export default function ContestPage() {
             placeholder="Search contests..."
           />
 
-          <select
-            value={sort}
+          <select value={sort}
             onChange={(e) => {
               setPage(1);
               setSort(e.target.value);
@@ -132,7 +108,7 @@ export default function ContestPage() {
           </select>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <p className="text-center text-gray-400 mt-20">
             Loading contests...
           </p>
@@ -155,9 +131,10 @@ export default function ContestPage() {
                     alt={contest.title}
                     className="h-40 w-full object-cover"
                   />
+
                   <div className="p-4 border-b">
                     <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-semibold text-gray-800 leading-tight">
+                      <h3 className="text-lg font-semibold text-gray-800">
                         {contest.title}
                       </h3>
 
@@ -169,7 +146,7 @@ export default function ContestPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 flex-1 space-y-2 text-sm text-gray-700">
+                  <div className="p-4 flex-1 text-sm text-gray-700 space-y-2">
                     <div className="flex justify-between">
                       <span>Entry Fee :</span>
                       <span className="font-semibold">
@@ -182,6 +159,7 @@ export default function ContestPage() {
                       {new Date(contest.endTime).toLocaleString()}
                     </div>
                   </div>
+
                   <div className="p-4 border-t">
                     {contest.hasJoined ? (
                       <button
@@ -229,7 +207,6 @@ export default function ContestPage() {
           </div>
         )}
 
-        {/* PAGINATION */}
         {pagination && (
           <div className="mt-8">
             <Pagination

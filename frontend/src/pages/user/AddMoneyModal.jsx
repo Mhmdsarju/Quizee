@@ -57,9 +57,7 @@ export default function AddMoneyModal({ onClose, onSuccess }) {
               timer: 1500,
               showConfirmButton: false,
             });
-
-            /* ✅ TELL WALLET PAGE PAYMENT IS DONE */
-            onSuccess();   // 🔥 THIS TRIGGERS AUTO REDIRECT
+            onSuccess();  
           } catch (err) {
             Swal.fire({
               icon: "error",

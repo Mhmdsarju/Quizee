@@ -7,8 +7,8 @@ import contestParticipantsModel from "../models/contestParticipantsModel.js";
 
 
 
-export const createQuizService=async(data)=>{
-return await quizModel.create(data);
+export const createQuizService = async (data) => {
+  return await quizModel.create(data);
 }
 
 
@@ -63,7 +63,7 @@ export const QuizStatusService = async (id) => {
   return quiz;
 };
 
-export const getUserQuizService = async ({search = "",category,page = 1,limit = 9,sort = "newest",}) => {
+export const getUserQuizService = async ({ search = "", category, page = 1, limit = 9, sort = "newest", }) => {
   let query = { isActive: true };
 
   if (category) {
@@ -77,21 +77,21 @@ export const getUserQuizService = async ({search = "",category,page = 1,limit = 
   }
 
   if (sort === "popular") {
-    sortQuery = { attempts: -1 }; 
+    sortQuery = { attempts: -1 };
   }
 
 
   const result = await paginateAndSearch({
     model: quizModel,
-    query,                 
+    query,
     search,
     searchFields: ["title"],
     page,
     limit,
-    populate: { path: "category", select: "name",match: { isActive: true } },
-    sort:  sortQuery,
+    populate: { path: "category", select: "name", match: { isActive: true } },
+    sort: sortQuery,
   });
-const activeCategoryQuizzes = result.data.filter(
+  const activeCategoryQuizzes = result.data.filter(
     (quiz) => quiz.category !== null
   );
 
@@ -101,11 +101,11 @@ const activeCategoryQuizzes = result.data.filter(
         quizId: quiz._id,
       });
 
-    return { ...quiz.toObject(), questionCount: count };
-  })
-);
+      return { ...quiz.toObject(), questionCount: count };
+    })
+  );
 
-const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
+  const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
 
   if (sort === "questions") {
     quizzesWithCount.sort((a, b) => b.questionCount - a.questionCount);
@@ -118,12 +118,12 @@ const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
 };
 
 export const getUserQuizByIdService = async (quizId) => {
-  const quiz = await quizModel.findOne({ _id: quizId}).populate("category", "name");
+  const quiz = await quizModel.findOne({ _id: quizId }).populate("category", "name");
 
-  if (!quiz) return {status:"NOT_FOUND"};
+  if (!quiz) return { status: "NOT_FOUND" };
 
-  if(!quiz.isActive){
-    return {status:"INACTIVE"}
+  if (!quiz.isActive) {
+    return { status: "INACTIVE" }
   }
 
   const totalQuestions = await questionModel.countDocuments({
@@ -131,7 +131,7 @@ export const getUserQuizByIdService = async (quizId) => {
   });
 
   return {
-    status:"OK",
+    status: "OK",
     quiz,
     totalQuestions,
   };
@@ -144,7 +144,7 @@ export const submitQuizService = async (quizId, userId, answers) => {
   let score = 0;
 
   const correctAnswers = questions.map((q) => {
-    const userAnswer = answers[q._id.toString()];  
+    const userAnswer = answers[q._id.toString()];
 
     if (userAnswer === q.correctAnswer) {
       score++;
