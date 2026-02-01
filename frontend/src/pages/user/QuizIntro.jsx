@@ -25,7 +25,7 @@ export default function QuizIntro() {
           navigate("/user/quiz");
         });
 
-        setQuiz(null); 
+        setQuiz(null);
       } finally {
         setLoading(false);
       }
@@ -93,6 +93,39 @@ export default function QuizIntro() {
           </div>
         </div>
 
+        <div className="bg-red-50 border border-red-200 rounded-xl p-5 mt-6">
+          <h3 className="text-lg font-semibold text-red-700 mb-3">
+            Quiz Rules & Instructions
+          </h3>
+
+          <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+            <li>
+              Once the quiz is started, it <b>must be completed in one sitting</b>.
+            </li>
+            <li>
+              <b>Do not switch tabs or windows.</b> If a tab or window change is
+              detected, the quiz will be <b>automatically submitted</b>.
+            </li>
+            <li>
+              <b>Refreshing the page is not allowed.</b> Refreshing will end the
+              quiz.
+            </li>
+            <li>
+              <b>Right-click is disabled</b> during the quiz.
+            </li>
+            <li>
+              <b>Developer tools and keyboard shortcuts</b> are restricted.
+            </li>
+            <li>
+              If any rule is violated, the quiz <b>cannot be continued</b>.
+            </li>
+          </ul>
+
+          <p className="text-xs text-gray-500 mt-3">
+            ⚠️ Please ensure a stable internet connection before starting the quiz.
+          </p>
+        </div>
+
         <button
           onClick={startQuiz}
           className="w-full mt-8 py-3 rounded-xl bg-red-600 text-white font-semibold text-lg hover:bg-red-700 transition shadow-lg"
@@ -101,5 +134,6 @@ export default function QuizIntro() {
         </button>
       </div>
     </div>
+
   );
 }

@@ -1,7 +1,7 @@
 import { statusCode } from "../../constant/constants.js";
 import questionModel from "../../models/questionModel.js";
-import quizAttemptModel from "../../models/quizAttemptModel.js";
 import { getQuizPlayService, getUserQuizByIdService, getUserQuizService, submitQuizService } from "../../services/quizService.js";
+
 
 
 export const getUserQuizzes = async (req, res) => {
@@ -45,8 +45,14 @@ export const getUserQuizById = async (req, res) => {
 export const getQuizPlay = async (req, res) => {
   try {
     const { quizId } = req.params;
+    const { contest } = req.query;   
+    const userId = req.user.id;
 
-    const result = await getQuizPlayService(quizId);
+    const result = await getQuizPlayService({
+      quizId,
+      contestId: contest,
+      userId,
+    });
 
     if (result.status === "NOT_FOUND") {
       return res.status(404).json({ message: "Quiz not found" });
@@ -54,6 +60,18 @@ export const getQuizPlay = async (req, res) => {
 
     if (result.status === "INACTIVE") {
       return res.status(403).json({ message: "Quiz unavailable now" });
+    }
+
+    if (result.status === "CONTEST_NOT_JOINED") {
+      return res.status(403).json({
+        message: "You are not registered for this contest",
+      });
+    }
+
+    if (result.status === "CONTEST_NOT_LIVE") {
+      return res.status(400).json({
+        message: "Contest not live",
+      });
     }
 
     if (result.questions.length === 0) {
@@ -67,7 +85,8 @@ export const getQuizPlay = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-}
+};
+
 
 
 
@@ -106,12 +125,3 @@ export const validateQuestion = async (req, res) => {
   res.json({ valid: true });
 };
 
-export const getQuizHistory= async (req,res)=>{
-  try {
-    const userId=req.user.id;
-    const history = await quizAttemptModel.find({user:userId}).populate("quiz","title category").sort({createdAt:-1});
-    res.json(history);
-  } catch (error) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:err.message});
-  }
-}

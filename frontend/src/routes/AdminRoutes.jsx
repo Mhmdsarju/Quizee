@@ -14,7 +14,6 @@ import Login from "../pages/login";
 const AdminRoutes = () => {
   return (
     <Routes>
-        <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Login />} />
       <Route element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />

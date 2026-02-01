@@ -52,11 +52,7 @@ export default function AddCategoryModal({ onClose, onSuccess }) {
         />
 
         <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 h-9 text-sm rounded-md bg-red-500 shadow text-white"
-          >
+          <button type="button" onClick={onClose}className="px-4 h-9 text-sm rounded-md bg-red-500 shadow text-white">
             Cancel
           </button>
 

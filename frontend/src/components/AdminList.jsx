@@ -14,9 +14,9 @@ export default function AdminList({title,headers,data,renderRow,loading,}) {
       <div className="bg-blue-quiz/90 rounded-md shadow-md px-4 py-3 space-y-2">
 
         <div className="hidden md:grid grid-cols-[70px_240px_100px_110px_1fr] items-center text-xs text-gray-400 px-2 pb-2">
-          {headers.map((h, i) => (
-            <div key={i} className={i === headers.length - 1 ? "text-right" : ""}>
-              {h}
+          {headers.map((headers, index) => (
+            <div key={index} className={index === headers.length - 1 ? "text-right" : ""}>
+              {headers}
             </div>
           ))}
         </div>

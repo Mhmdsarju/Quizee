@@ -75,6 +75,27 @@ export default function QuizQuestions() {
 
       <CsvQuestionUpload quizId={quizId} onSuccess={fetchQuestions} />
 
+      <div className="mt-6 bg-[#1f1b3a] border border-gray-600 rounded p-4">
+        <h4 className="text-sm font-semibold text-white mb-2">
+          CSV Upload Format (Reference)
+        </h4>
+
+        <p className="text-xs text-gray-400 mb-2">
+          Header must be in a single row. Do not change column names.
+        </p>
+
+        <pre className="text-xs text-green-300 bg-[#0f172a] p-3 rounded overflow-x-auto">
+          {`question, optionA, optionB, optionC, optionD, correctAnswer
+Capital of India?, Mumbai, Delhi, Chennai, Kolkata, 1`}
+        </pre>
+
+        <p className="text-xs text-gray-400 mt-2 ">
+          correctAnswer = index value <br />
+          0 = optionA, 1 = optionB, 2 = optionC, 3 = optionD
+        </p>
+      </div>
+
+
       {loading ? (
         <p className="text-sm text-gray-400 mt-6">Loading questions...</p>
       ) : questions.length === 0 ? (

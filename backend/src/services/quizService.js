@@ -2,12 +2,29 @@ import questionModel from "../models/questionModel.js";
 import quizModel from "../models/quizModel.js";
 import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 import quizAttemptModel from "../models/quizAttemptModel.js";
+import contestModel from "../models/contestModel.js";
+import contestParticipantsModel from "../models/contestParticipantsModel.js";
 
 
 
-export const createQuizService=async(data)=>{
-return await quizModel.create(data);
-}
+export const createQuizService = async (data) => {
+
+  const title = data.title.trim();
+
+  const quizExists = await quizModel.exists({
+    title: new RegExp(`^${title}$`, "i"),
+  });
+
+  if (quizExists) {
+    throw new Error("Quiz with this name already exists");
+  }
+
+  return await quizModel.create({
+    ...data,
+    title,
+  });
+};
+
 
 
 export const getAllQuizService = async ({ search = "", page = 1, limit = 10 }) => {
@@ -61,7 +78,7 @@ export const QuizStatusService = async (id) => {
   return quiz;
 };
 
-export const getUserQuizService = async ({search = "",category,page = 1,limit = 9,sort = "newest",}) => {
+export const getUserQuizService = async ({ search = "", category, page = 1, limit = 9, sort = "newest", }) => {
   let query = { isActive: true };
 
   if (category) {
@@ -75,21 +92,21 @@ export const getUserQuizService = async ({search = "",category,page = 1,limit = 
   }
 
   if (sort === "popular") {
-    sortQuery = { attempts: -1 }; 
+    sortQuery = { attempts: -1 };
   }
 
 
   const result = await paginateAndSearch({
     model: quizModel,
-    query,                 
+    query,
     search,
     searchFields: ["title"],
     page,
     limit,
-    populate: { path: "category", select: "name",match: { isActive: true } },
-    sort:  sortQuery,
+    populate: { path: "category", select: "name", match: { isActive: true } },
+    sort: sortQuery,
   });
-const activeCategoryQuizzes = result.data.filter(
+  const activeCategoryQuizzes = result.data.filter(
     (quiz) => quiz.category !== null
   );
 
@@ -99,11 +116,11 @@ const activeCategoryQuizzes = result.data.filter(
         quizId: quiz._id,
       });
 
-    return { ...quiz.toObject(), questionCount: count };
-  })
-);
+      return { ...quiz.toObject(), questionCount: count };
+    })
+  );
 
-const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
+  const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
 
   if (sort === "questions") {
     quizzesWithCount.sort((a, b) => b.questionCount - a.questionCount);
@@ -116,12 +133,12 @@ const filtered = quizzesWithCount.filter(q => q.questionCount > 0);
 };
 
 export const getUserQuizByIdService = async (quizId) => {
-  const quiz = await quizModel.findOne({ _id: quizId}).populate("category", "name");
+  const quiz = await quizModel.findOne({ _id: quizId }).populate("category", "name");
 
-  if (!quiz) return {status:"NOT_FOUND"};
+  if (!quiz) return { status: "NOT_FOUND" };
 
-  if(!quiz.isActive){
-    return {status:"INACTIVE"}
+  if (!quiz.isActive) {
+    return { status: "INACTIVE" }
   }
 
   const totalQuestions = await questionModel.countDocuments({
@@ -129,7 +146,7 @@ export const getUserQuizByIdService = async (quizId) => {
   });
 
   return {
-    status:"OK",
+    status: "OK",
     quiz,
     totalQuestions,
   };
@@ -138,11 +155,12 @@ export const getUserQuizByIdService = async (quizId) => {
 
 export const submitQuizService = async (quizId, userId, answers) => {
   const questions = await questionModel.find({ quizId: quizId });
-
+  
+  const quiz = await quizModel.findById(quizId).select("title");
   let score = 0;
 
   const correctAnswers = questions.map((q) => {
-    const userAnswer = answers[q._id.toString()];  
+    const userAnswer = answers[q._id.toString()];
 
     if (userAnswer === q.correctAnswer) {
       score++;
@@ -163,6 +181,7 @@ export const submitQuizService = async (quizId, userId, answers) => {
   const attempt = await quizAttemptModel.create({
     user: userId,
     quiz: quizId,
+    quizTitle:quiz?.title,
     answers,
     score,
     total,
@@ -182,12 +201,11 @@ export const submitQuizService = async (quizId, userId, answers) => {
   };
 };
 
-
-
-
-
-
-export const getQuizPlayService = async (quizId) => {
+export const getQuizPlayService = async ({
+  quizId,
+  contestId = null,
+  userId,
+}) => {
   const quiz = await quizModel
     .findById(quizId)
     .populate("category", "name");
@@ -200,8 +218,33 @@ export const getQuizPlayService = async (quizId) => {
     return { status: "INACTIVE" };
   }
 
+  if (contestId) {
+    const contest = await contestModel.findById(contestId);
+
+    if (!contest) {
+      return { status: "NOT_FOUND" };
+    }
+
+    const now = new Date();
+
+    // Contest must be LIVE
+    if (now < contest.startTime || now >= contest.endTime) {
+      return { status: "CONTEST_NOT_LIVE" };
+    }
+
+    // User must have joined contest
+    const joined = await contestParticipantsModel.findOne({
+      contest: contestId,
+      user: userId,
+    });
+
+    if (!joined) {
+      return { status: "CONTEST_NOT_JOINED" };
+    }
+  }
+
   const questions = await questionModel
-    .find({ quizId: quizId })
+    .find({ quizId })
     .select("question options correctAnswer");
 
   return {

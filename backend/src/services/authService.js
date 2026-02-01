@@ -6,6 +6,7 @@ import { genarateToken } from "../utils/genarateToken.js";
 import OTP from "../models/otpModel.js";
 import { genarateOtp } from "../utils/OtpHelper.js";
 import { sendOTPEmail } from "../utils/emailService.js";
+import walletModel from "../models/walletModel.js";
 
 const MAX_ATTEMPTS = 5;
 
@@ -33,7 +34,7 @@ const signup = async ({ name, email, password, referredBy }) => {
     attempts: 0,
     data: {
       name,
-      password, 
+      password,
       referredBy: referredBy || null,
     },
   });
@@ -81,6 +82,10 @@ const verifyOtp = async ({ email, otp, purpose }) => {
       referredBy,
       isVerified: true,
     });
+
+    await walletModel.create({
+      user: user._id, balance: 0,
+    })
   }
   if (purpose === "email-change") {
     if (!record.data?.userId) throw new Error("Unauthorized");
@@ -136,10 +141,10 @@ const login = async ({ email, password }) => {
   if (!user) throw new Error("Invalid credentials");
   if (!user.isVerified) throw new Error("Verify email first");
   if (user.isBlocked) {
-  const err = new Error("Account blocked");
-  err.code = "ACCOUNT_BLOCKED";
-  throw err;
-}
+    const err = new Error("Account blocked");
+    err.code = "ACCOUNT_BLOCKED";
+    throw err;
+  }
 
 
   const isMatch = await bcrypt.compare(password, user.password);
@@ -163,7 +168,7 @@ const refresh = async (token) => {
   if (!user) throw new Error("Unauthorized");
   if (user.isBlocked) throw new Error("Account blocked");
 
-  if(decoded.tokenVersion!== user.refreshTokenVersion){
+  if (decoded.tokenVersion !== user.refreshTokenVersion) {
     throw new Error("Refresh Token invalid");
   }
 
@@ -301,4 +306,4 @@ const resendForgotOtp = async ({ email }) => {
 };
 
 
-export default {signup,verifyOtp,resendOtp,login,refresh,forgotPassword,verifyForgotOtp,resetPassword,googleLogin,sendOtp,resendForgotOtp};
+export default { signup, verifyOtp, resendOtp, login, refresh, forgotPassword, verifyForgotOtp, resetPassword, googleLogin, sendOtp, resendForgotOtp };

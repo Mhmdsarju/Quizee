@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import Swal from "sweetalert2";
@@ -8,6 +8,10 @@ import { quizGuard } from "../QuizGuard";
 export default function QuizPlay() {
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const contestId = searchParams.get("contest");
+  const isContest = Boolean(contestId);
 
   const [questions, setQuestions] = useState([]);
   const [quiz, setQuiz] = useState(null);
@@ -17,43 +21,35 @@ export default function QuizPlay() {
   const [timeLeft, setTimeLeft] = useState(0);
 
   const submittedRef = useRef(false);
+  const forceSubmitRef = useRef(false); 
 
+ // Quiz Guard 
   useEffect(() => {
-    quizGuard.ongoing = true; // quiz started
-
+    quizGuard.ongoing = true;
     return () => {
-      quizGuard.ongoing = false; // quiz left 
+      quizGuard.ongoing = false;
     };
   }, []);
 
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await api.get(`/user/quiz/${quizId}/play`);
+        const res = isContest
+          ? await api.get(`/user/contest/${contestId}/play`)
+          : await api.get(`/user/quiz/${quizId}/play`);
+
         setQuestions(res.data.questions);
         setQuiz(res.data.quiz);
         setTimeLeft(res.data.quiz.timeLimit * 60);
-      } catch (err) {
-        if (err.response?.status === 403) {
-          Swal.fire({
-            icon: "error",
-            title: "Quiz Unavailable",
-            text: "Quiz disabled by admin",
-            confirmButtonText: "Go to Quizzes",
-          }).then(() => {
-            quizGuard.ongoing = false;
-            navigate("/user/quiz", { replace: true });
-          });
-        } else {
-          Swal.fire("Error", "Failed to load quiz", "error");
-        }
+      } catch {
+        Swal.fire("Error", "Unable to load quiz", "error");
       } finally {
         setLoading(false);
       }
     };
 
     fetchQuiz();
-  }, [quizId, navigate]);
+  }, [quizId]);
 
   useEffect(() => {
     if (!quiz || submittedRef.current) return;
@@ -70,6 +66,7 @@ export default function QuizPlay() {
     return () => clearInterval(timer);
   }, [timeLeft, quiz]);
 
+  // Prevent Refresh 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (!quizGuard.ongoing) return;
@@ -82,13 +79,84 @@ export default function QuizPlay() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
+  // TAB CHANGE 
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.hidden && !submittedRef.current) {
+        forceSubmitRef.current = true;
+
+        Swal.fire({
+          icon: "warning",
+          title: "Tab Change Detected",
+          text: "You switched tabs. As per quiz rules, the quiz cannot be continued and will be submitted automatically.",
+          confirmButtonText: "OK",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then(() => {
+          submitQuiz();
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, []);
+
+  // WINDOW CHANGE 
+  useEffect(() => {
+    const onBlur = () => {
+      if (submittedRef.current) return;
+
+      forceSubmitRef.current = true;
+
+      Swal.fire({
+        icon: "warning",
+        title: "Window Change Detected",
+        text: "You changed the window. Quiz cannot be continued and will be submitted automatically.",
+        confirmButtonText: "OK",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then(() => {
+        submitQuiz();
+      });
+    };
+
+    window.addEventListener("blur", onBlur);
+    return () => window.removeEventListener("blur", onBlur);
+  }, []);
+
+  // Disable Right Click 
+  useEffect(() => {
+    const disable = (e) => e.preventDefault();
+    document.addEventListener("contextmenu", disable);
+    return () => document.removeEventListener("contextmenu", disable);
+  }, []);
+
+  // Disable DevTools Shortcuts 
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && ["I", "C", "J"].includes(e.key)) ||
+        (e.ctrlKey && e.key === "U")
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, []);
+
+  // Helpers 
   const selectOption = (index) => {
     const qid = questions[current]._id;
     setAnswers((prev) => ({ ...prev, [qid]: index }));
   };
 
   const validateCurrentQuestion = async () => {
-    if (submittedRef.current) return false;
+    if (isContest || submittedRef.current) return true;
 
     try {
       await api.post(`/user/quiz/${quizId}/validate-question`, {
@@ -109,8 +177,10 @@ export default function QuizPlay() {
   };
 
   const next = async () => {
-    const valid = await validateCurrentQuestion();
-    if (!valid) return;
+    if (!forceSubmitRef.current) {
+      const valid = await validateCurrentQuestion();
+      if (!valid) return;
+    }
 
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
@@ -120,16 +190,31 @@ export default function QuizPlay() {
   const submitQuiz = async () => {
     if (submittedRef.current) return;
 
-    const valid = await validateCurrentQuestion();
-    if (!valid) return;
-
     submittedRef.current = true;
-    quizGuard.ongoing = false; 
+    quizGuard.ongoing = false;
+
+    if (!forceSubmitRef.current) {
+      const valid = await validateCurrentQuestion();
+      if (!valid) return;
+    }
 
     try {
       const res = await api.post(`/user/quiz/${quizId}/submit`, { answers });
 
-      navigate(`/user/quiz/${quizId}/result`, {state: res.data,replace: true, });
+      if (isContest) {
+        await api.post(`/user/contest/${contestId}/submit`, {
+          score: res.data.score,
+          total: res.data.total,
+          percentage: res.data.percentage,
+        });
+
+        navigate(`/user/contest/${contestId}/leaderboard`, { replace: true });
+      } else {
+        navigate(`/user/quiz/${quizId}/result`, {
+          state: res.data,
+          replace: true,
+        });
+      }
     } catch {
       Swal.fire("Error", "Submit failed", "error");
       submittedRef.current = false;
@@ -147,67 +232,95 @@ export default function QuizPlay() {
   const hasAnswered = answers[q._id] !== undefined;
 
   return (
-    <div className="min-h-screen px-7">
-      <div className="max-w-3xl mx-auto bg-[#1e293b] p-10 rounded-xl space-y-4 text-white mt-12 shadow-2xl">
-        <div className="flex justify-between items-center">
-          <h2 className="font-semibold text-lg">{quiz.title}</h2>
-          <span className="bg-red-600 px-3 py-1 rounded">
-            {minutes}:{seconds.toString().padStart(2, "0")}
-          </span>
-        </div>
+   
+  <div className="min-h-screen flex items-center justify-center  from-slate-900 via-slate-800 to-slate-900 px-4">
+    <div className="w-full max-w-3xl bg-slate-800 text-white rounded-2xl shadow-2xl p-8 space-y-6">
 
-        <h3 className="text-lg font-medium">
+      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+        <h2 className="text-xl font-semibold">{quiz.title}</h2>
+
+        <div className="flex items-center gap-2 bg-red-600 px-4 py-1 rounded-full text-sm font-semibold">
+          ⏱ {minutes}:{seconds.toString().padStart(2, "0")}
+        </div>
+      </div>
+      <div className="flex justify-between text-sm text-slate-300">
+        <span>
+          Question {current + 1} / {questions.length}
+        </span>
+        <span>
+          Answered: {Object.keys(answers).length}
+        </span>
+      </div>
+
+      <div className="bg-slate-900 p-6 rounded-xl">
+        <h3 className="text-lg font-medium leading-relaxed">
           {current + 1}. {q.question}
         </h3>
+      </div>
 
-        <div className="space-y-3">
-          {q.options.map((opt, i) => (
+      <div className="space-y-3">
+        {q.options.map((opt, i) => {
+          const selected = answers[q._id] === i;
+
+          return (
             <button
               key={i}
               onClick={() => selectOption(i)}
-              className={`w-full text-left px-4 py-2 rounded border ${
-                answers[q._id] === i
-                  ? "bg-green-600 border-green-600"
-                  : "border-gray-500 hover:bg-[#334155]"
-              }`}
+              className={`w-full text-left px-5 py-3 rounded-xl border transition-all duration-200
+                ${
+                  selected
+                    ? "bg-green-600 border-green-600 text-white"
+                    : "bg-slate-900 border-slate-600 hover:bg-slate-700"
+                }
+              `}
             >
+              <span className="font-semibold mr-2">
+                {String.fromCharCode(65 + i)}.
+              </span>
               {opt}
             </button>
-          ))}
-        </div>
+          );
+        })}
+      </div>
 
-        <div className="flex justify-between pt-4">
-          <span className="text-sm">
-            Question {current + 1} of {questions.length}
-          </span>
+      <div className="flex items-center justify-between pt-4 border-t border-slate-700">
+        <span className="text-sm text-slate-400">
+          Select an option to continue
+        </span>
 
-          {current === questions.length - 1 ? (
-            <button
-              onClick={submitQuiz}
-              disabled={!hasAnswered}
-              className={`px-6 py-2 rounded ${
+        {current === questions.length - 1 ? (
+          <button
+            onClick={submitQuiz}
+            disabled={!hasAnswered}
+            className={`px-8 py-2 rounded-xl font-semibold transition
+              ${
                 hasAnswered
                   ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-600 opacity-60"
-              }`}
-            >
-              Submit
-            </button>
-          ) : (
-            <button
-              onClick={next}
-              disabled={!hasAnswered}
-              className={`px-6 py-2 rounded ${
+                  : "bg-slate-600 opacity-60 cursor-not-allowed"
+              }
+            `}
+          >
+            Submit Quiz
+          </button>
+        ) : (
+          <button
+            onClick={next}
+            disabled={!hasAnswered}
+            className={`px-8 py-2 rounded-xl font-semibold transition
+              ${
                 hasAnswered
                   ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-gray-600 opacity-60"
-              }`}
-            >
-              Next
-            </button>
-          )}
-        </div>
+                  : "bg-slate-600 opacity-60 cursor-not-allowed"
+              }
+            `}
+          >
+            Next →
+          </button>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
+
+  
 }
