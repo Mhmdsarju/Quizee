@@ -13,7 +13,10 @@ const contestResultSchema = new mongoose.Schema(
       ref: "Quiz",
       required: true,
     },
-
+    contestTitle: {
+      type: String,
+      required: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -32,7 +35,7 @@ const contestResultSchema = new mongoose.Schema(
 
 contestResultSchema.index({ contestId: 1, userId: 1 }, { unique: true });
 
-const contestResultModel= mongoose.model("ContestResult", contestResultSchema);
+const contestResultModel = mongoose.model("ContestResult", contestResultSchema);
 
 export default contestResultModel;
 

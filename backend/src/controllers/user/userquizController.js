@@ -1,7 +1,7 @@
 import { statusCode } from "../../constant/constants.js";
 import questionModel from "../../models/questionModel.js";
-import quizAttemptModel from "../../models/quizAttemptModel.js";
 import { getQuizPlayService, getUserQuizByIdService, getUserQuizService, submitQuizService } from "../../services/quizService.js";
+
 
 
 export const getUserQuizzes = async (req, res) => {
@@ -125,12 +125,3 @@ export const validateQuestion = async (req, res) => {
   res.json({ valid: true });
 };
 
-export const getQuizHistory= async (req,res)=>{
-  try {
-    const userId=req.user.id;
-    const history = await quizAttemptModel.find({user:userId}).populate("quiz","title category").sort({createdAt:-1});
-    res.json(history);
-  } catch (error) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:err.message});
-  }
-}

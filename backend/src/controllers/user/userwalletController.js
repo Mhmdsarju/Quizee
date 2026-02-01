@@ -1,5 +1,6 @@
 import walletTransactionModel from "../../models/walletTransaction.js";
 import { getUserWallet } from "../../services/walletService.js";
+import { paginateAndSearch } from "../../utils/paginateAndSearch.js";
 
 export const getMyWallet = async (req, res) => {
   try {
@@ -20,12 +21,26 @@ export const getMyTransactions = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const transactions = await walletTransactionModel
-      .find({ user: req.user.id })
-      .sort({ createdAt: -1 });
+    const {
+      page = 1,
+      limit = 5,
+    } = req.query;
 
-    res.json(transactions);
+    const result = await paginateAndSearch({
+      model: walletTransactionModel,
+
+      filter: {
+        user: req.user.id,
+      },
+
+      page: Number(page),
+      limit: Number(limit),
+
+      sort: { createdAt: -1 },
+    });
+
+    res.json(result);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };

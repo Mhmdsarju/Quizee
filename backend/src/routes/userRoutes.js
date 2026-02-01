@@ -1,10 +1,11 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import userModel from "../models/userModel.js";
-import { getQuizHistory, getQuizPlay, getUserQuizById, getUserQuizzes, submitQuiz, validateQuestion } from "../controllers/user/userquizController.js";
+import { getQuizPlay, getUserQuizById, getUserQuizzes, submitQuiz, validateQuestion } from "../controllers/user/userquizController.js";
 import authController from "../controllers/authController.js";
-import { getContestLeaderboardHandler, getContestQuizPlayHandler, getContestStatusHandler, getUserContestHistoryHandler, getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
+import { getContestLeaderboardHandler, getContestQuizPlayHandler, getContestStatusHandler,  getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
 import { getUserNotificationHandler, UserNotificationMarkAllAsReadHandler, UserNotificationMarkAsReadHandler } from "../controllers/user/userNotificationController.js";
+import { getQuizHistory, getUserContestHistoryHandler } from "../controllers/user/userhistoryController.js";
 
 
 const router = express.Router();

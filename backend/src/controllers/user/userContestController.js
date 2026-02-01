@@ -1,6 +1,7 @@
 
 import contestModel from "../../models/contestModel.js";
-import { getContestLeaderboardService, getContestQuizPlayService, getUserContestHistoryService, getUserContestsService, joinContestService, submitContestQuizService, } from "../../services/contestService.js";
+import { getContestLeaderboardService, getContestQuizPlayService, getUserContestsService, joinContestService, submitContestQuizService, } from "../../services/contestService.js";
+import { getUserQuizHistoryService } from "../../services/historyService.js";
 
 export const getUserContestsHandler = async (req, res) => {
   try {
@@ -66,14 +67,18 @@ export const submitContestQuizHandler = async (req, res) => {
   try {
     const { id: contestId } = req.params;
     const userId = req.user.id;
-    const { score, total, percentage, timeTaken } = req.body;
+    const { answers, timeTaken } = req.body;
+
+    if (!Array.isArray(answers)) {
+      return res.status(400).json({
+        message: "Answers array is required",
+      });
+    }
 
     const result = await submitContestQuizService({
       contestId,
       userId,
-      score,
-      total,
-      percentage,
+      answers,
       timeTaken,
     });
 
@@ -82,14 +87,30 @@ export const submitContestQuizHandler = async (req, res) => {
         message: "You have already submitted this contest",
       });
     }
+    if (result.status === "INVALID_ANSWERS") {
+      return res.status(400).json({
+        message: "Please answer all questions before submitting",
+      });
+    }
+
+    if (result.status === "NO_QUESTIONS") {
+      return res.status(400).json({
+        message: "No questions found for this contest",
+      });
+    }
+
 
     res.json({
       message: "Contest quiz submitted successfully",
+      score: result.result.score,
+      total: result.result.total,
+      percentage: result.result.percentage,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const getContestLeaderboardHandler = async (req, res) => {
   try {
@@ -100,15 +121,6 @@ export const getContestLeaderboardHandler = async (req, res) => {
     });
 
     res.json(leaderboard);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const getUserContestHistoryHandler = async (req, res) => {
-  try {
-    const history = await getUserContestHistoryService(req.user.id);
-    res.json(history);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

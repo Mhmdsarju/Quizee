@@ -79,13 +79,7 @@ export const getAdminContestsService = async ({ search, page, limit }) => {
   return { ...result, data: dataWithCount };
 };
 
-export const getUserContestsService = async ({
-  search,
-  page,
-  limit,
-  userId,
-  sort = "newest",
-}) => {
+export const getUserContestsService = async ({search,page,limit,userId,sort = "newest"}) => {
   let sortQuery = { createdAt: -1 };
 
   if (sort === "oldest") sortQuery = { createdAt: 1 };
@@ -255,18 +249,53 @@ export const endContestService = async (contestId) => {
 export const submitContestQuizService = async ({
   contestId,
   userId,
-  score,
-  total,
-  percentage,
+  answers,
   timeTaken,
 }) => {
   try {
-    const contest = await contestModel.findById(contestId).select("quiz");
-    if (!contest) return { status: "CONTEST_NOT_FOUND" };
+    const contest = await contestModel.findById(contestId);
+
+    if (!contest) {
+      return { status: "CONTEST_NOT_FOUND" };
+    }
+
+    const questions = contest.questionsSnapshot;
+
+    // SAFETY CHECK 1
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return { status: "NO_QUESTIONS" };
+    }
+
+    //  SAFETY CHECK 2 (MOST IMPORTANT)
+    if (!Array.isArray(answers) || answers.length !== questions.length) {
+      return { status: "INVALID_ANSWERS" };
+    }
+
+    // SAFETY CHECK 3 (duplicate submit)
+    const already = await contestResultModel.findOne({
+      contestId,
+      userId,
+    });
+
+    if (already) {
+      return { status: "ALREADY_SUBMITTED" };
+    }
+
+    let score = 0;
+
+    questions.forEach((q, index) => {
+      if (answers[index] === q.correctAnswer) {
+        score += 1;
+      }
+    });
+
+    const total = questions.length;
+    const percentage = Math.round((score / total) * 100);
 
     const result = await contestResultModel.create({
       contestId,
       quizId: contest.quiz,
+      contestTitle: contest.title,
       userId,
       score,
       total,
@@ -276,10 +305,15 @@ export const submitContestQuizService = async ({
 
     return { status: "SUCCESS", result };
   } catch (err) {
-    if (err.code === 11000) return { status: "ALREADY_SUBMITTED" };
+    // 🔥 IMPORTANT: catch duplicate key
+    if (err.code === 11000) {
+      return { status: "ALREADY_SUBMITTED" };
+    }
     throw err;
   }
 };
+
+
 
 export const getContestLeaderboardService = async ({ contestId }) => {
   return await contestResultModel
@@ -288,24 +322,7 @@ export const getContestLeaderboardService = async ({ contestId }) => {
     .sort({ score: -1, timeTaken: 1, createdAt: 1 });
 };
 
-export const getUserContestHistoryService = async (userId) => {
-  const history = await contestResultModel
-    .find({ userId })
-    .populate("contestId", "title")
-    .populate("quizId", "title")
-    .sort({ createdAt: -1 });
 
-  return history.map((h) => ({
-    _id: h._id,
-    contest: h.contestId,
-    quiz: h.quizId,
-    score: h.score,
-    total: h.total,
-    percentage: h.percentage,
-    rank: h.rank,
-    playedAt: h.createdAt,
-  }));
-};
 
 export const getContestQuizPlayService = async ({ contestId }) => {
   const contest = await contestModel

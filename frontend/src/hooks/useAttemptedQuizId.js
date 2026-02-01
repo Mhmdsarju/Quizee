@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../api/axios";
 
-export function useQuizHistory(token) {
+export function useAttemptedQuizIds(token) {
   return useQuery({
-    queryKey: ["quiz-history"],
+    queryKey: ["attempted-quiz-ids"],
     queryFn: async () => {
       const res = await api.get("/user/quiz-history");
-      return res.data.map((q) => q.quiz._id);
+      return res.data.data.map((q) => q.quiz._id);
     },
     enabled: !!token,
   });

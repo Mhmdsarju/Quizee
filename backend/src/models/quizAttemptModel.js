@@ -12,6 +12,10 @@ const quizAttemptSchema = new mongoose.Schema(
       ref: "Quiz",
       required: true,
     },
+      quizTitle: {
+      type: String,
+      index: true, 
+    },
     answers: {
       type: Object,
       required: true,

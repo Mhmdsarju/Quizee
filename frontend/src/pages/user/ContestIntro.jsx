@@ -1,104 +1,89 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import Swal from "sweetalert2";
 
-export default function QuizIntro() {
-  const { quizId } = useParams();
+export default function ContestIntro() {
+  const { contestId } = useParams();
   const navigate = useNavigate();
 
-  const [quiz, setQuiz] = useState(null);
+  const [contest, setContest] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchQuiz = async () => {
+    const fetchContest = async () => {
       try {
-        const res = await api.get(`/user/quiz/${quizId}`);
-        setQuiz(res.data);
+        const res = await api.get(`/user/contest/${contestId}/status`);
+        setContest(res.data);
       } catch (err) {
         Swal.fire({
           icon: "error",
-          title: "Quiz Not Available",
-          text: err.response?.data?.message || "Unable to load quiz",
+          title: "Contest Not Available",
+          text:
+            err.response?.data?.message ||
+            "Unable to load contest",
         }).then(() => {
-          navigate("/user/quiz");
+          navigate("/user/contest");
         });
-
-        setQuiz(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchQuiz();
-  }, [quizId, navigate]);
+    fetchContest();
+  }, [contestId, navigate]);
 
-  const startQuiz = async () => {
-    try {
-      navigate(`/user/quiz/${quizId}/play`);
-    } catch (err) {
-      if (err.response?.status === 403) {
-        Swal.fire({
-          icon: "error",
-          title: "Quiz Unavailable",
-          text: "This quiz has been disabled by admin.",
-          confirmButtonText: "OK",
-        });
-      } else {
-        Swal.fire("Error", "Unable to start quiz", "error");
-      }
-    }
+  const startContest = () => {
+    navigate(`/user/contest/${contestId}/play`);
   };
 
   if (loading) return <Loader />;
-  if (!quiz) return null;
+  if (!contest) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br px-7">
       <div className="bg-white w-full max-w-xl p-10 rounded-2xl shadow-2xl space-y-6 relative">
         <button
-          onClick={() => navigate("/user/quiz")}
+          onClick={() => navigate("/user/contest")}
           className="absolute top-5 left-5 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition"
         >
           ← Back
         </button>
 
         <h1 className="text-3xl font-bold text-center text-gray-900 mt-4">
-          {quiz.quiz.title}
+          Contest Instructions
         </h1>
 
         <div className="w-16 h-1 bg-red-500 mx-auto rounded-full"></div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center mt-6">
-          <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Category</p>
-            <p className="text-lg font-semibold text-gray-800">
-              {quiz.quiz.category?.name}
-            </p>
-          </div>
-
-          <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Questions</p>
-            <p className="text-lg font-semibold text-gray-800">
-              {quiz.totalQuestions}
-            </p>
-          </div>
-
-          <div className="bg-gray-100 rounded-xl p-4 shadow-sm">
-            <p className="text-sm text-gray-500">Time Limit</p>
-            <p className="text-lg font-semibold text-gray-800">
-              {quiz.quiz.timeLimit} mins
-            </p>
-          </div>
-        </div>
+       
 
         <div className="bg-red-50 border border-red-200 rounded-xl p-5 mt-6">
           <h3 className="text-lg font-semibold text-red-700 mb-3">
-            Quiz Rules & Instructions
+            Contest Rules & Instructions
           </h3>
 
           <ul className="space-y-2 text-sm text-gray-700 list-disc list-inside">
+            <li>
+              Contest once started <b>cannot be paused or restarted</b>.
+            </li>
+            <li>
+              <b>Each participant can submit only once</b>.
+            </li>
+            <li>
+              <b>Score is calculated automatically</b> after submission.
+            </li>
+            <li>
+              In case of tie, <b>less time taken</b> gets higher rank.
+            </li>
+            <li>
+              Switching tabs or refreshing the page may lead to
+              <b> automatic submission</b>.
+            </li>
+            <li>
+              Final ranking will be shown in the <b>leaderboard</b>.
+            </li>
             <li>
               Once the quiz is started, it <b>must be completed in one sitting</b>.
             </li>
@@ -122,18 +107,18 @@ export default function QuizIntro() {
           </ul>
 
           <p className="text-xs text-gray-500 mt-3">
-            ⚠️ Please ensure a stable internet connection before starting the quiz.
+            ⚠️ Ensure stable internet connection before starting
+            the contest.
           </p>
         </div>
 
         <button
-          onClick={startQuiz}
+          onClick={startContest}
           className="w-full mt-8 py-3 rounded-xl bg-red-600 text-white font-semibold text-lg hover:bg-red-700 transition shadow-lg"
         >
-          Start Quiz
+          Start Contest
         </button>
       </div>
     </div>
-
   );
 }

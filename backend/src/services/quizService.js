@@ -140,7 +140,8 @@ export const getUserQuizByIdService = async (quizId) => {
 
 export const submitQuizService = async (quizId, userId, answers) => {
   const questions = await questionModel.find({ quizId: quizId });
-
+  
+  const quiz = await quizModel.findById(quizId).select("title");
   let score = 0;
 
   const correctAnswers = questions.map((q) => {
@@ -165,6 +166,7 @@ export const submitQuizService = async (quizId, userId, answers) => {
   const attempt = await quizAttemptModel.create({
     user: userId,
     quiz: quizId,
+    quizTitle:quiz?.title,
     answers,
     score,
     total,
@@ -201,7 +203,6 @@ export const getQuizPlayService = async ({
     return { status: "INACTIVE" };
   }
 
-  // ================= CONTEST FLOW =================
   if (contestId) {
     const contest = await contestModel.findById(contestId);
 

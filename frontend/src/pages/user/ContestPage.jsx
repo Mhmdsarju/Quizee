@@ -20,48 +20,57 @@ export default function ContestPage() {
   const pagination = contestRes?.pagination;
 
   const handleJoin = async (contest) => {
-    const res = await Swal.fire({
-      title: "Register & Play?",
-      text: `₹${contest.entryFee} will be deducted from your wallet`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Pay & Play",
+  const res = await Swal.fire({
+    title: "Register & Play?",
+    text: `₹${contest.entryFee} will be deducted from your wallet`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Pay & Play",
+  });
+
+  if (!res.isConfirmed) return;
+
+  try {
+    const { data } = await api.post(
+      `/user/contest/${contest._id}/join`
+    );
+
+    Swal.fire({
+      title: "Success",
+      text: data.message,
+      icon: "success",
+      timer: 1200,
+      showConfirmButton: false,
     });
 
-    if (!res.isConfirmed) return;
+    navigate(`/user/contest/${data.contestId}/intro`);
+  } catch (err) {
+    const message = err.response?.data?.message || "";
 
-    try {
-      const { data } = await api.post(`/user/contest/${contest._id}/join`);
-
-      Swal.fire({
-        title: "Success",
-        text: data.message,
-        icon: "success",
-        timer: 1200,
-        showConfirmButton: false,
+    if (message.toLowerCase().includes("insufficient")) {
+      const res = await Swal.fire({
+        title: "Insufficient Wallet Balance",
+        text: "Add money to continue",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Add Funds",
       });
 
-      navigate(`/user/quiz/${data.quizId}/play?contest=${data.contestId}`);
-    } catch (err) {
-      const message = err.response?.data?.message || "";
-
-      if (message.toLowerCase().includes("insufficient")) {
-        const res = await Swal.fire({
-          title: "Insufficient Wallet Balance",
-          text: "Add money to continue",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Add Funds",
+      if (res.isConfirmed) {
+        navigate("/user/wallet", {
+          state: { from: "contest" },
         });
-
-        if (res.isConfirmed) {
-          navigate("/user/wallet", {state: { from: "contest" },});
-        }
-      } else {
-        Swal.fire("Oops", message || "Unable to join contest", "error");
       }
+    } else {
+      Swal.fire(
+        "Oops",
+        message || "Unable to join contest",
+        "error"
+      );
     }
-  };
+  }
+};
+
 
   const getStatusInfo = (contest) => {
     const now = new Date();

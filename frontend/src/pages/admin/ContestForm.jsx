@@ -2,19 +2,32 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import api from "../../api/axios";
 import Swal from "sweetalert2";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { contestSchema } from "../../schema/contestSchema";
 
-export default function ContestForm({initialData,onClose,onSuccess,}) {
+export default function ContestForm({
+  initialData,
+  onClose,
+  onSuccess,
+}) {
   const isEdit = !!initialData;
 
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
-  const {register,control,handleSubmit,reset,formState: { isSubmitting },} = useForm({
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(contestSchema),
     defaultValues: {
       title: "",
       quiz: "",
-      entryFee: "",
+      entryFee: 0,
       startTime: "",
       endTime: "",
     },
@@ -32,13 +45,15 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
       .catch(() => setQuizzes([]));
   }, []);
 
+
+
   useEffect(() => {
     if (!initialData) return;
 
     reset({
       title: initialData.title || "",
       quiz: initialData.quiz?._id || "",
-      entryFee: initialData.entryFee || "",
+      entryFee: initialData.entryFee || 0,
       startTime: initialData.startTime?.slice(0, 16) || "",
       endTime: initialData.endTime?.slice(0, 16) || "",
     });
@@ -53,31 +68,14 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
     }
   }, [initialData, reset]);
 
+
   const onSubmit = async (values) => {
     if (!isEdit && !selectedQuiz) {
       return Swal.fire("Error", "Please select a quiz", "error");
     }
-
-    if (!isEdit && selectedQuiz.questionCount === 0) {
-      return Swal.fire(
-        "Invalid Quiz",
-        "Selected quiz has no questions",
-        "warning"
-      );
-    }
-
-    const start = new Date(values.startTime);
-    const end = new Date(values.endTime);
-
-    if (start >= end) {
-      return Swal.fire(
-        "Invalid Time",
-        "End time must be after start time",
-        "warning"
-      );
-    }
-
     if (!isEdit) {
+      const start = new Date(values.startTime);
+      const end = new Date(values.endTime);
       const durationMinutes =
         (end - start) / (1000 * 60);
 
@@ -92,34 +90,38 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
 
     try {
       const formData = new FormData();
-
       formData.append("title", values.title);
       formData.append("startTime", values.startTime);
       formData.append("endTime", values.endTime);
+
       if (!isEdit) {
         formData.append("quiz", values.quiz);
-        formData.append("entryFee", Number(values.entryFee));
+        formData.append("entryFee", values.entryFee);
       }
 
       if (imageFile) {
-        formData.append("image", imageFile); 
+        formData.append("image", imageFile);
       }
 
-      if (isEdit) {
-        const { data } = await api.patch(`/admin/contest/${initialData._id}`,formData,
+      const res = isEdit
+        ? await api.patch(
+          `/admin/contest/${initialData._id}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        )
+        : await api.post(
+          "/admin/contest",
+          formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        Swal.fire("Updated", "Contest updated successfully", "success");
-        onSuccess(data.contest);
-      } else {
-        const { data } = await api.post("/admin/contest",formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      Swal.fire(
+        isEdit ? "Updated" : "Created",
+        `Contest ${isEdit ? "updated" : "created"} successfully`,
+        "success"
+      );
 
-        Swal.fire("Created", "Contest created successfully", "success");
-        onSuccess(data);
-      }
+      onSuccess(isEdit ? res.data.contest : res.data);
     } catch (err) {
       Swal.fire(
         "Error",
@@ -128,6 +130,8 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
       );
     }
   };
+
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -142,9 +146,14 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
           Contest Title
         </label>
         <input
-          {...register("title", { required: true })}
+          {...register("title")}
           className="mt-1 w-full border rounded-lg p-2"
         />
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.title.message}
+          </p>
+        )}
       </div>
 
       <div>
@@ -169,6 +178,7 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
           className="w-full border rounded-lg p-2"
         />
       </div>
+
       <div>
         <label className="text-sm font-medium text-gray-600">
           Quiz
@@ -182,7 +192,7 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
           />
         ) : (
           <select
-            {...register("quiz", { required: true })}
+            {...register("quiz")}
             onChange={(e) => {
               const quiz = quizzes.find(
                 (q) => q._id === e.target.value
@@ -206,23 +216,42 @@ export default function ContestForm({initialData,onClose,onSuccess,}) {
         </label>
         <input
           type="number"
-          {...register("entryFee", { required: true })}
+          {...register("entryFee", { valueAsNumber: true })}
           disabled={isEdit}
           className="mt-1 w-full border rounded-lg p-2"
         />
+        {errors.entryFee && (
+          <p className="text-red-500 text-sm">
+            {errors.entryFee.message}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <input
-          type="datetime-local"
-          {...register("startTime", { required: true })}
-          className="border rounded-lg p-2"
-        />
-        <input
-          type="datetime-local"
-          {...register("endTime", { required: true })}
-          className="border rounded-lg p-2"
-        />
+        <div>
+          <input
+            type="datetime-local"
+            {...register("startTime")}
+            className="border rounded-lg p-2 w-full"
+          />
+          {errors.startTime && (
+            <p className="text-red-500 text-sm">
+              {errors.startTime.message}
+            </p>
+          )}
+        </div>
+        <div>
+          <input
+            type="datetime-local"
+            {...register("endTime")}
+            className="border rounded-lg p-2 w-full"
+          />
+          {errors.endTime && (
+            <p className="text-red-500 text-sm">
+              {errors.endTime.message}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">

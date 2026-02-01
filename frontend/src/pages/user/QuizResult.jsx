@@ -6,17 +6,7 @@ export default function QuizResult() {
   const navigate = useNavigate();
   const { quizId } = useParams();
   const [showAnswers, setShowAnswers] = useState(false);
-  const[searchParams]=useSearchParams();
 
-  const contestId=searchParams.get("contest");
-
-  useEffect(()=>{
-    if(contestId){
-      navigate(`/user/contest/${contestId}/leaderboard`, {
-      replace: true,
-    });
-    }
-  })
 
   useEffect(() => {
     if (!state) {

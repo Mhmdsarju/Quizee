@@ -8,7 +8,8 @@ import SearchBar from "../../components/SearchBar";
 
 import { useQuizzes } from "../../hooks/useQuizzes";
 import { useCategories } from "../../hooks/useCategories";
-import { useQuizHistory } from "../../hooks/useQuizHistory";
+import { useAttemptedQuizIds } from "../../hooks/useAttemptedQuizId";
+
 
 export default function QuizPage() {
   const [selectedCat, setSelectedCat] = useState("");
@@ -24,7 +25,7 @@ export default function QuizPage() {
   const { data: quizRes, isLoading } = useQuizzes({category: selectedCat,sort,page,search});
 
   const { data: categories = [] } = useCategories(token);
-  const { data: attemptedQuizIds = [] } = useQuizHistory(token);
+  const { data: attemptedQuizIds = [] } = useAttemptedQuizIds(token);
 
   const quizzes = quizRes?.data || [];
   const pagination = quizRes?.pagination;
