@@ -11,6 +11,7 @@ import { getIo } from "../config/socket.js";
 
 export const createContestService = async (payload) => {
   const users = await UserModel.find({}, "_id");
+  
    const contestExists = await contestModel.exists({
     title: new RegExp(`^${payload.title.trim()}$`, "i"),
   });
