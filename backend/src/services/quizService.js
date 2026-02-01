@@ -8,8 +8,23 @@ import contestParticipantsModel from "../models/contestParticipantsModel.js";
 
 
 export const createQuizService = async (data) => {
-  return await quizModel.create(data);
-}
+
+  const title = data.title.trim();
+
+  const quizExists = await quizModel.exists({
+    title: new RegExp(`^${title}$`, "i"),
+  });
+
+  if (quizExists) {
+    throw new Error("Quiz with this name already exists");
+  }
+
+  return await quizModel.create({
+    ...data,
+    title,
+  });
+};
+
 
 
 export const getAllQuizService = async ({ search = "", page = 1, limit = 10 }) => {

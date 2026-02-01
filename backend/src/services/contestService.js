@@ -11,6 +11,13 @@ import { getIo } from "../config/socket.js";
 
 export const createContestService = async (payload) => {
   const users = await UserModel.find({}, "_id");
+   const contestExists = await contestModel.exists({
+    title: new RegExp(`^${payload.title.trim()}$`, "i"),
+  });
+
+  if (contestExists) {
+    throw new Error("Contest with this name already exists");
+  }
 
   const questions = await questionModel.find({
     quizId: payload.quiz,
