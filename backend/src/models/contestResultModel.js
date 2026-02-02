@@ -43,6 +43,10 @@ const contestResultSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    certificateUrl: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

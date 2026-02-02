@@ -78,7 +78,7 @@ export default function UserHistory() {
       )}
 
       {!loading && history.length === 0 && (
-        <p className="text-center  text-red-500">
+        <p className="text-center text-red-500">
           No {activeTab} attempts found !!!
         </p>
       )}
@@ -93,22 +93,58 @@ export default function UserHistory() {
               <div className="flex justify-between">
                 <h3 className="font-semibold">
                   {activeTab === "quiz"
-                    ? item.quiz.title
-                    : item.contestId?.title || "Contest"}
+                    ? item.quiz?.title
+                    : item.contestTitle || item.contestId?.title}
                 </h3>
                 <span className="text-sm text-gray-500">
                   {new Date(item.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
-              <div className="mt-2 text-sm text-gray-700 flex gap-6">
+              <div className="mt-2 text-sm text-gray-700 flex flex-wrap gap-6">
                 <p>
                   <b>Score:</b> {item.score}/{item.total}
                 </p>
                 <p>
                   <b>Percentage:</b> {item.percentage}%
                 </p>
+
+                {activeTab === "contest" && (
+                  <>
+                    <p>
+                      <b>Rank:</b>{" "}
+                      {item.rank ? (
+                        <span className="text-green-700 font-semibold">
+                          #{item.rank}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </p>
+
+                    {item.rewardAmount > 0 && (
+                      <p className="text-green-700 font-semibold">
+                        Reward: ₹{item.rewardAmount}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
+
+              {activeTab === "contest" &&
+                item.certificateIssued &&
+                item.certificateUrl && (
+                  <div className="mt-4">
+                    <a
+                      href={`${import.meta.env.VITE_API_URL}${item.certificateUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-5 py-2 bg-green-600 text-white rounded-md text-sm font-semibold hover:bg-green-700"
+                    >
+                       Download Certificate
+                    </a>
+                  </div>
+                )}
             </div>
           ))}
       </div>

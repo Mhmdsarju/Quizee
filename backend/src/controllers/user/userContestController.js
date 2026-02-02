@@ -206,5 +206,6 @@ export const getUserContestResultHandler = async (req, res) => {
     rank: result.rank,
     rewardAmount: result.rewardAmount,
     certificateIssued: result.certificateIssued,
+    certificateUrl: result.certificateUrl,
   });
 };

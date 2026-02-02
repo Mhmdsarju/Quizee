@@ -16,7 +16,7 @@ import walletRoutes from './src/routes/userWalletRoutes.js'
 import webhookRoutes from './src/routes/webhookRoutes.js'
 import admincontestRoutes from './src/routes/adminContestRoutes.js'
 import { contestStatusCron } from "./src/utils/contestStatusCron.js";
-
+import path from "path";
 
 dotenv.config();
 connectDB();
@@ -59,5 +59,6 @@ app.use("/api/admin/questions", questionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/admin/contest", admincontestRoutes);
+app.use("/certificates",express.static(path.join(process.cwd(), "uploads/certificates")));
 
 export default app;

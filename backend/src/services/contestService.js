@@ -8,6 +8,8 @@ import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 import UserModel from "../models/userModel.js"
 import notificationModel from '../models/notificationModel.js'
 import { getIo } from "../config/socket.js";
+import { generateCertificate } from "../utils/generateCertificate.js";
+import path from "path"
 
 export const createContestService = async (payload) => {
   const users = await UserModel.find({}, "_id");
@@ -370,28 +372,26 @@ export const completeContestAndRewardService = async (contestId) => {
   });
   if (alreadyRanked) return { status: "ALREADY_PROCESSED" };
 
-  // 1️⃣ fetch all results
-  const results = await contestResultModel
-    .find({ contestId })
-    .sort({ score: -1, timeTaken: 1, createdAt: 1 });
+  //  fetch all results
+  const results = await contestResultModel.find({ contestId }).populate("userId", "name").sort({ score: -1, timeTaken: 1, createdAt: 1 });
 
   if (!results.length) return { status: "NO_PARTICIPANTS" };
 
-  // 2️⃣ Rank assign
+  // Rank assign
   let rank = 1;
   for (const r of results) {
     r.rank = rank++;
     await r.save();
   }
 
-  // 3️⃣ Reward config
+  // Reward config
   const CASH_REWARDS = {
     1: 100,
     2: 50,
     3: 25,
   };
 
-  // 4️⃣ Top 3 reward credit
+  // Top 3 reward credit
   for (const r of results.slice(0, 3)) {
     const amount = CASH_REWARDS[r.rank];
     if (!amount) continue;
@@ -413,17 +413,29 @@ export const completeContestAndRewardService = async (contestId) => {
 
     r.rewardAmount = amount;
     r.rewardCredited = true;
+    
+    //  GENERATE CERTIFICATE PDF
+    const certificatePath = await generateCertificate({
+      name: r.userId.name,
+      contestTitle: contest.title,
+      rank: r.rank,
+    });
+
+    //  SAVE CERTIFICATE INFO
     r.certificateIssued = true;
+    r.certificateUrl = `/certificates/${path.basename(certificatePath)}`;
     await r.save();
 
-    // 🔔 optional notification
+    // optional notification
     await notificationModel.create({
       userId: r.userId,
       title: "🎉 Contest Reward Credited",
-      message: `You won ₹${amount} in ${contest.title}`,
+      message: `You won ₹${amount} in  ${contest.title}`,
       contestId,
     });
   }
 
   return { status: "SUCCESS" };
 };
+
+

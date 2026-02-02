@@ -19,7 +19,7 @@ const walletTransactionSchema = new mongoose.Schema(
     },
     reason: {
       type: String,
-      enum: ["add_money", "contest_fee", "reward", "refund", "admin_adjustment"],
+      enum: ["add_money", "contest_fee", "reward", "refund", "admin_adjustment","contest_reward"],
       required: true,
     },
     reference: {
