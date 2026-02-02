@@ -87,7 +87,7 @@ export default function ContestPage() {
   };
 
   return (
-    <div className="min-h-screen py-6 px-4">
+    <div className="min-h-screen py-6 px-4 container m-auto">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
           Contests
@@ -133,17 +133,17 @@ export default function ContestPage() {
               return (
                 <div
                   key={contest._id}
-                  className="bg-white rounded-2xl shadow-sm border hover:shadow-md transition flex flex-col overflow-hidden"
+                  className="bg-slate-400 rounded-2xl shadow-sm border hover:shadow-md transition flex flex-col overflow-hidden text-white border-black"
                 >
                   <img
                     src={contest.image || ContestImg}
                     alt={contest.title}
-                    className="h-40 w-full object-cover"
+                    className="h-40 w-full object-cover hover:scale-105 transition-transform duration-300 border-b border-black"
                   />
 
-                  <div className="p-4 border-b">
+                  <div className="p-3 border-b">
                     <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-semibold text-gray-800">
+                      <h3 className="text-lg font-semibold text-black">
                         {contest.title}
                       </h3>
 
@@ -155,21 +155,21 @@ export default function ContestPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 flex-1 text-sm text-gray-700 space-y-2">
+                  <div className="p-3 flex-1 text-sm  space-y-2">
                     <div className="flex justify-between">
-                      <span>Entry Fee :</span>
-                      <span className="font-semibold">
+                      <span className="text-gray-700">Entry Fee :</span>
+                      <span className="font-semibold  text-black">
                         ₹{contest.entryFee}
                       </span>
                     </div>
 
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs ">
                       {new Date(contest.startTime).toLocaleString()} –{" "}
                       {new Date(contest.endTime).toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="p-4 border-t">
+                  <div className="p-3 border-t">
                     {contest.hasJoined ? (
                       <button
                         onClick={() =>

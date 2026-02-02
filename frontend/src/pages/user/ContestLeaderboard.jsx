@@ -31,8 +31,8 @@ export default function ContestLeaderboard() {
         <div className="flex items-center justify-center mb-8">
           
 
-          <h1 className="text-2xl font-semibold font-serif">
-            Contest Leaderboard
+          <h1 className="text-2xl font-semibold font-serif mb-20">
+            Contest Leaderboard !!!
           </h1>
 
           <div /> 

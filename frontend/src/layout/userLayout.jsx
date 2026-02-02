@@ -5,9 +5,11 @@ import Footer from "../components/Footer";
 export default function UserLayout() {
   return (
     <>
-      <Navbar />
+      <div className="user-app">
+        <Navbar />
       <Outlet />
       <Footer/>
+      </div>
     </>
   );
 }

@@ -83,16 +83,16 @@ export default function QuizPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
                 {quizzes.map((quiz) => {
                   const attempted = isAttempted(quiz._id);
 
                   return (
-                    <div key={quiz._id} className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition">
-                      <img src={quiz.image || QuizImg} className="h-40 w-full object-cover" />
+                    <div key={quiz._id} className="bg-white rounded-xl overflow-hidden shadow-2xl hover:shadow-lg transition border border-black ">
+                      <img src={quiz.image || QuizImg} className="h-40 w-full object-cover hover:scale-105 transition-transform duration-300 border-b  border-black" />
 
-                      <div className="bg-[#4b0f0f] p-4 text-white">
-                        <div className="flex justify-between items-start">
+                      <div className="bg-slate-400  ">
+                        <div className="flex justify-between items-start border-b p-2">
                           <h3 className="font-semibold">{quiz.title}</h3>
 
                           {attempted && (
@@ -102,15 +102,15 @@ export default function QuizPage() {
                           )}
                         </div>
 
-                        <p className="text-xs mt-1">
-                          {quiz.questionCount} Questions
+                        <p className="text-xs  p-2 border-b">
+                         <span className="text-gray-600">Questions :</span> {quiz.questionCount} 
                         </p>
-                        <p className="text-xs">
-                          Category: {quiz.category?.name}
+                        <p className="text-xs p-2 border-b">
+                         <span className="text-gray-600">Category :</span> {quiz.category?.name}
                         </p>
 
                         <button onClick={() => navigate(`/user/quiz/${quiz._id}`, {replace: true,})}
-                          className={`mt-3 w-full py-2 rounded font-medium transition
+                          className={`mt w-full py-2 rounded font-medium transition text-white
                         ${attempted
                               ? "bg-blue-600 hover:bg-blue-700"
                               : "bg-red-600 hover:bg-red-700"

@@ -38,9 +38,6 @@ export default function Signup() {
           <Loader />
         </div>
       )}
-
-      <img src={quizImg} alt="Quiz"className="hidden md:block h-[120px] absolute -rotate-12 opacity-70"/>
-
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl p-6">
 

@@ -1,24 +1,26 @@
 import api from "../../../api/axios";
 import Swal from "sweetalert2";
-
+import ContestImg from "../../../assets/ContestImg.jpg"
 export default function ContestCard({ contest, onUpdate, onEdit }) {
-  const {_id,title,quiz,entryFee,status,startTime,endTime,isBlocked,} = contest;
+  const {_id,title,quiz,entryFee,status,startTime,endTime,isBlocked,image} = contest;
 
   const now = new Date();
-
   let displayStatus = status;
 
   if (!isBlocked) {
-    if (new Date(endTime) <= now) {
-      displayStatus = "COMPLETED";
-    } else if (new Date(startTime) <= now) {
-      displayStatus = "LIVE";
-    } else {
-      displayStatus = "UPCOMING";
-    }
+    if (new Date(endTime) <= now) displayStatus = "COMPLETED";
+    else if (new Date(startTime) <= now) displayStatus = "LIVE";
+    else displayStatus = "UPCOMING";
   } else {
     displayStatus = "BLOCKED";
   }
+
+  const statusStyles = {
+    UPCOMING: "bg-blue-100 text-blue-700",
+    LIVE: "bg-green-100 text-green-700",
+    COMPLETED: "bg-gray-200 text-gray-700",
+    BLOCKED: "bg-red-100 text-red-700",
+  };
 
   const handleBlockToggle = async () => {
     const res = await Swal.fire({
@@ -39,55 +41,62 @@ export default function ContestCard({ contest, onUpdate, onEdit }) {
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow">
-      <h3 className="font-semibold text-lg">{title}</h3>
+    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden border">
 
-      <p className="text-sm text-gray-500">
-        Quiz: {quiz?.title || "—"}
-      </p>
+      <div className="relative h-36">
+        <img
+          src={image ||ContestImg}
+          alt="quiz"
+          className="w-full h-full object-cover"
+        />
 
-      <p className="text-sm">Entry Fee: ₹{entryFee}</p>
+        <span
+          className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${statusStyles[displayStatus]}`}
+        >
+          {displayStatus}
+        </span>
+      </div>
 
-      <p className="text-xs text-gray-400">
-        {new Date(startTime).toLocaleString()} –{" "}
-        {new Date(endTime).toLocaleString()}
-      </p>
+      <div className="p-4 space-y-1">
+        <h3 className="font-semibold text-lg line-clamp-1">{title}</h3>
 
-      <span
-        className={`inline-block mt-2 px-2 py-1 text-xs rounded
-          ${
-            displayStatus === "UPCOMING"
-              ? "bg-blue-100 text-blue-700"
-              : displayStatus === "LIVE"
-              ? "bg-green-100 text-green-700"
-              : displayStatus === "COMPLETED"
-              ? "bg-gray-200 text-gray-700"
-              : "bg-red-100 text-red-700"
-          }`}
-      >
-        {displayStatus}
-      </span>
+        <p className="text-sm text-gray-500">
+           {quiz?.title || "No Quiz"}
+        </p>
 
-      <div className="flex gap-2 mt-4">
+        <p className="text-sm font-medium">
+          Entry Fee: ₹{entryFee}
+        </p>
 
-        {displayStatus === "UPCOMING" && !isBlocked && (
-          <button
-            onClick={onEdit}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded"
-          >
-            Edit
-          </button>
-        )}
-        {displayStatus !== "COMPLETED" && (
-          <button
-            onClick={handleBlockToggle}
-            className={`px-3 py-1 text-sm text-white rounded ${
-              isBlocked ? "bg-green-600" : "bg-red-600"
-            }`}
-          >
-            {isBlocked ? "Unblock" : "Block"}
-          </button>
-        )}
+        <p className="text-xs text-gray-400">
+          {new Date(startTime).toLocaleString()} –{" "}
+          {new Date(endTime).toLocaleString()}
+        </p>
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-3">
+          {displayStatus === "UPCOMING" && !isBlocked && (
+            <button
+              onClick={onEdit}
+              className="flex-1 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            >
+              ✏️ Edit
+            </button>
+          )}
+
+          {displayStatus !== "COMPLETED" && (
+            <button
+              onClick={handleBlockToggle}
+              className={`flex-1 px-3 py-1.5 text-sm text-white rounded-lg ${
+                isBlocked
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
+            >
+              {isBlocked ? "✅ Unblock" : "⛔ Block"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

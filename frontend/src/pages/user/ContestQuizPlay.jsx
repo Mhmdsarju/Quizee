@@ -17,7 +17,6 @@ export default function ContestQuizPlay() {
   const submittedRef = useRef(false);
   const forceSubmitRef = useRef(false);
 
-  // FETCH CONTEST QUIZ 
   useEffect(() => {
     api
       .get(`/user/contest/${contestId}/play`)
@@ -151,7 +150,6 @@ export default function ContestQuizPlay() {
     }
   };
 
-  // SUBMIT 
   const submitQuiz = async () => {
     if (submittedRef.current) return;
     submittedRef.current = true;
