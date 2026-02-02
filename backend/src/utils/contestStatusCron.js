@@ -1,11 +1,12 @@
 import cron from "node-cron";
 import contestModel from "../models/contestModel.js";
+import { completeContestAndRewardService } from "../services/contestService.js";
 
 export const contestStatusCron = () => {
   cron.schedule("* * * * *", async () => {
     const now = new Date();
 
-    /* UPCOMING to LIVE */
+    /* UPCOMING → LIVE */
     await contestModel.updateMany(
       {
         status: "UPCOMING",
@@ -16,16 +17,23 @@ export const contestStatusCron = () => {
       { $set: { status: "LIVE" } }
     );
 
-    /* LIVE to COMPLETED */
-    await contestModel.updateMany(
-      {
-        status: "LIVE",
-        isBlocked: false,
-        endTime: { $lte: now },
-      },
-      { $set: { status: "COMPLETED" } }
-    );
+    /* LIVE → COMPLETED + REWARD */
+    const contestsToComplete = await contestModel.find({
+      status: "LIVE",
+      isBlocked: false,
+      endTime: { $lte: now },
+    });
 
-    console.log("Contest status cron executed");
+    for (const contest of contestsToComplete) {
+      contest.status = "COMPLETED";
+      await contest.save();
+
+      // 🔥 THIS IS THE MISSING PIECE
+      await completeContestAndRewardService(contest._id);
+
+      console.log(
+        `✅ Contest completed & rewarded: ${contest.title}`
+      );
+    }
   });
 };

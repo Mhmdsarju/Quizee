@@ -1,5 +1,6 @@
 
 import contestModel from "../../models/contestModel.js";
+import contestResultModel from "../../models/contestResultModel.js";
 import { getContestLeaderboardService, getContestQuizPlayService, getUserContestsService, joinContestService, submitContestQuizService, } from "../../services/contestService.js";
 import { getUserQuizHistoryService } from "../../services/historyService.js";
 
@@ -185,5 +186,25 @@ export const getContestStatusHandler = async (req, res) => {
   res.json({
     isBlocked: contest.isBlocked,
     status: contest.status,
+  });
+};
+
+export const getUserContestResultHandler = async (req, res) => {
+  const result = await contestResultModel.findOne({
+    contestId: req.params.id,
+    userId: req.user.id,
+  });
+
+  if (!result) {
+    return res.status(404).json({ message: "Result not found" });
+  }
+
+  res.json({
+    score: result.score,
+    total: result.total,
+    percentage: result.percentage,
+    rank: result.rank,
+    rewardAmount: result.rewardAmount,
+    certificateIssued: result.certificateIssued,
   });
 };

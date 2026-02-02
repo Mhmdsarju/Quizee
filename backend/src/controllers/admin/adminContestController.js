@@ -1,4 +1,4 @@
-import {createContestService,getAdminContestsService,editContestService,toggleContestBlockService,endContestService,} from "../../services/contestService.js";
+import {createContestService,getAdminContestsService,editContestService,toggleContestBlockService,endContestService, completeContestAndRewardService,} from "../../services/contestService.js";
 import cloudinary from "../../config/cloudinary.js";
 
 export const createContestHandler = async (req, res) => {
@@ -101,3 +101,14 @@ export const endContestHandler = async (req, res) => {
     totalParticipants: result.totalParticipants,
   });
 };
+
+
+export const completeContestRewardHandler = async (req, res) => {
+  try {
+    const result = await completeContestAndRewardService(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+

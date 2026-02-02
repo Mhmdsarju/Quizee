@@ -11,8 +11,8 @@ import { getIo } from "../config/socket.js";
 
 export const createContestService = async (payload) => {
   const users = await UserModel.find({}, "_id");
-  
-   const contestExists = await contestModel.exists({
+
+  const contestExists = await contestModel.exists({
     title: new RegExp(`^${payload.title.trim()}$`, "i"),
   });
 
@@ -87,7 +87,7 @@ export const getAdminContestsService = async ({ search, page, limit }) => {
   return { ...result, data: dataWithCount };
 };
 
-export const getUserContestsService = async ({search,page,limit,userId,sort = "newest"}) => {
+export const getUserContestsService = async ({ search, page, limit, userId, sort = "newest" }) => {
   let sortQuery = { createdAt: -1 };
 
   if (sort === "oldest") sortQuery = { createdAt: 1 };
@@ -267,19 +267,19 @@ export const submitContestQuizService = async ({
       return { status: "CONTEST_NOT_FOUND" };
     }
 
+    if (contest.status === "COMPLETED") {
+      return { status: "CONTEST_COMPLETED" };
+    }
     const questions = contest.questionsSnapshot;
 
-    // SAFETY CHECK 1
     if (!Array.isArray(questions) || questions.length === 0) {
       return { status: "NO_QUESTIONS" };
     }
 
-    //  SAFETY CHECK 2 (MOST IMPORTANT)
     if (!Array.isArray(answers) || answers.length !== questions.length) {
       return { status: "INVALID_ANSWERS" };
     }
 
-    // SAFETY CHECK 3 (duplicate submit)
     const already = await contestResultModel.findOne({
       contestId,
       userId,
@@ -313,7 +313,6 @@ export const submitContestQuizService = async ({
 
     return { status: "SUCCESS", result };
   } catch (err) {
-    // 🔥 IMPORTANT: catch duplicate key
     if (err.code === 11000) {
       return { status: "ALREADY_SUBMITTED" };
     }
@@ -327,7 +326,7 @@ export const getContestLeaderboardService = async ({ contestId }) => {
   return await contestResultModel
     .find({ contestId })
     .populate("userId", "name")
-    .sort({ score: -1, timeTaken: 1, createdAt: 1 });
+    .sort({ rank: 1 });
 };
 
 
@@ -355,4 +354,76 @@ export const getContestQuizPlayService = async ({ contestId }) => {
     },
     questions: contest.questionsSnapshot,
   };
+};
+
+
+export const completeContestAndRewardService = async (contestId) => {
+  const contest = await contestModel.findById(contestId);
+  if (!contest) return { status: "NOT_FOUND" };
+  if (contest.status !== "COMPLETED")
+    return { status: "NOT_COMPLETED" };
+
+  // already rewarded check (idempotent)
+  const alreadyRanked = await contestResultModel.findOne({
+    contestId,
+    rank: { $exists: true },
+  });
+  if (alreadyRanked) return { status: "ALREADY_PROCESSED" };
+
+  // 1️⃣ fetch all results
+  const results = await contestResultModel
+    .find({ contestId })
+    .sort({ score: -1, timeTaken: 1, createdAt: 1 });
+
+  if (!results.length) return { status: "NO_PARTICIPANTS" };
+
+  // 2️⃣ Rank assign
+  let rank = 1;
+  for (const r of results) {
+    r.rank = rank++;
+    await r.save();
+  }
+
+  // 3️⃣ Reward config
+  const CASH_REWARDS = {
+    1: 100,
+    2: 50,
+    3: 25,
+  };
+
+  // 4️⃣ Top 3 reward credit
+  for (const r of results.slice(0, 3)) {
+    const amount = CASH_REWARDS[r.rank];
+    if (!amount) continue;
+
+    const wallet = await walletModel.findOneAndUpdate(
+      { user: r.userId },
+      { $inc: { balance: amount } },
+      { new: true, upsert: true }
+    );
+
+    await walletTransactionModel.create({
+      user: r.userId,
+      type: "credit",
+      amount,
+      reason: "contest_reward",
+      reference: contestId.toString(),
+      balanceAfter: wallet.balance,
+    });
+
+    r.rewardAmount = amount;
+    r.rewardCredited = true;
+    r.certificateIssued = true;
+    await r.save();
+
+    // 🔔 optional notification
+    await notificationModel.create({
+      userId: r.userId,
+      title: "🎉 Contest Reward Credited",
+      message: `You won ₹${amount} in ${contest.title}`,
+      contestId,
+    });
+  }
+
+  return { status: "SUCCESS" };
 };
