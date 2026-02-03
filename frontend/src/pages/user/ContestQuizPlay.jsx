@@ -77,8 +77,8 @@ export default function ContestQuizPlay() {
           allowEscapeKey: false,
         }).then(() => {
           navigate(`/user/contest/${contestId}/leaderboard`, {
-        replace: true,
-      });
+            replace: true,
+          });
         });
       }
     };
@@ -103,9 +103,9 @@ export default function ContestQuizPlay() {
         allowOutsideClick: false,
         allowEscapeKey: false,
       }).then(() => {
-       navigate(`/user/contest/${contestId}/leaderboard`, {
-        replace: true,
-      });
+        navigate(`/user/contest/${contestId}/leaderboard`, {
+          replace: true,
+        });
       });
     };
 
@@ -189,6 +189,49 @@ export default function ContestQuizPlay() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-3xl bg-slate-800 text-white rounded-2xl shadow-2xl p-8 space-y-6">
 
+        <div className="w-full overflow-hidden bg-orange-100 border-b border-orange-300">
+          <div className="whitespace-nowrap animate-marquee py-2">
+
+            <span className="mx-8 font-semibold text-red-700">
+              ⚠️ Contest Rules:
+            </span>
+
+            <span className="mx-8 text-gray-800">
+              Do not switch tabs after the contest starts
+              &ensp;•&ensp;
+              Refreshing is not allowed
+              &ensp;•&ensp;
+              Right-click is disabled
+              &ensp;•&ensp;
+              If any rule is
+              <span className="text-red-500 font-semibold mx-1">violated</span>
+              the contest will be auto submitted
+              &ensp;•&ensp;
+              <span className="font-semibold text-red-700">
+                Entry fee is NON-REFUNDABLE
+              </span>
+            </span>
+
+            <span className="mx-8 text-gray-800">
+              Do not switch tabs after the contest starts
+              &ensp;•&ensp;
+              Refreshing is not allowed
+              &ensp;•&ensp;
+              Right-click is disabled
+              &ensp;•&ensp;
+              If any rule is
+              <span className="text-red-500 font-semibold mx-1">violated</span>
+              the contest will be auto submitted
+              &ensp;•&ensp;
+              <span className="font-semibold text-red-700">
+                Entry fee is NON-REFUNDABLE
+              </span>
+            </span>
+
+          </div>
+        </div>
+
+
         <div className="flex items-center justify-between border-b border-slate-700 pb-4">
           <h2 className="text-xl font-semibold">{quiz.title}</h2>
 
@@ -221,10 +264,9 @@ export default function ContestQuizPlay() {
                 key={i}
                 onClick={() => selectOption(i)}
                 className={`w-full text-left px-5 py-3 rounded-xl border transition
-                  ${
-                    selected
-                      ? "bg-green-600 border-green-600"
-                      : "bg-slate-900 border-slate-600 hover:bg-slate-700"
+                  ${selected
+                    ? "bg-green-600 border-green-600"
+                    : "bg-slate-900 border-slate-600 hover:bg-slate-700"
                   }`}
               >
                 <span className="font-semibold mr-2">
@@ -242,10 +284,9 @@ export default function ContestQuizPlay() {
               onClick={submitQuiz}
               disabled={!hasAnswered}
               className={`px-8 py-2 rounded-xl font-semibold
-                ${
-                  hasAnswered
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-slate-600 opacity-60 cursor-not-allowed"
+                ${hasAnswered
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-slate-600 opacity-60 cursor-not-allowed"
                 }`}
             >
               Submit Contest
@@ -255,10 +296,9 @@ export default function ContestQuizPlay() {
               onClick={next}
               disabled={!hasAnswered}
               className={`px-8 py-2 rounded-xl font-semibold
-                ${
-                  hasAnswered
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-slate-600 opacity-60 cursor-not-allowed"
+                ${hasAnswered
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-slate-600 opacity-60 cursor-not-allowed"
                 }`}
             >
               Next →

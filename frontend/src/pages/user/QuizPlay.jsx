@@ -21,9 +21,9 @@ export default function QuizPlay() {
   const [timeLeft, setTimeLeft] = useState(0);
 
   const submittedRef = useRef(false);
-  const forceSubmitRef = useRef(false); 
+  const forceSubmitRef = useRef(false);
 
- // Quiz Guard 
+  // Quiz Guard 
   useEffect(() => {
     quizGuard.ongoing = true;
     return () => {
@@ -232,95 +232,105 @@ export default function QuizPlay() {
   const hasAnswered = answers[q._id] !== undefined;
 
   return (
-   
-  <div className="min-h-screen flex items-center justify-center  from-slate-900 via-slate-800 to-slate-900 px-4">
-    <div className="w-full max-w-3xl bg-slate-800 text-white rounded-2xl shadow-2xl p-8 space-y-6">
 
-      <div className="flex items-center justify-between border-b border-slate-700 pb-4">
-        <h2 className="text-xl font-semibold">{quiz.title}</h2>
-
-        <div className="flex items-center gap-2 bg-red-600 px-4 py-1 rounded-full text-sm font-semibold">
-          ⏱ {minutes}:{seconds.toString().padStart(2, "0")}
+    <div className="min-h-screen flex items-center justify-center  from-slate-900 via-slate-800 to-slate-900 px-4">
+      <div className="w-full max-w-3xl bg-slate-800 text-white rounded-2xl shadow-2xl p-8 space-y-6">
+        <div className="w-full overflow-hidden bg-yellow-100 border-b border-yellow-300 rounded-sm">
+          <div className="whitespace-nowrap animate-marquee py-2">
+            <span className="mx-8 font-semibold text-red-700">
+              ⚠️ Quiz Rules:
+            </span>
+            <span className="mx-8 text-gray-800">
+              Do not switch tabs after the quiz started&ensp;•&ensp;Refreshing not allowed &ensp; •&ensp; Right-click disabled &ensp;• &ensp;If the rules has been <span className="text-red-400">violated</span> the quiz will automatically submit !!!
+            </span>
+            <span className="mx-8 text-gray-800">
+              Do not switch tabs after the quiz started&ensp;•&ensp;Refreshing not allowed &ensp; •&ensp; Right-click disabled &ensp;• &ensp;If the rules has been <span className="text-red-400">violated</span> the quiz will automatically submit !!!
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="flex justify-between text-sm text-slate-300">
-        <span>
-          Question {current + 1} / {questions.length}
-        </span>
-        <span>
-          Answered: {Object.keys(answers).length}
-        </span>
-      </div>
 
-      <div className="bg-slate-900 p-6 rounded-xl">
-        <h3 className="text-lg font-medium leading-relaxed">
-          {current + 1}. {q.question}
-        </h3>
-      </div>
+        <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+          <h2 className="text-xl font-semibold">{quiz.title}</h2>
 
-      <div className="space-y-3">
-        {q.options.map((opt, i) => {
-          const selected = answers[q._id] === i;
+          <div className="flex items-center gap-2 bg-red-600 px-4 py-1 rounded-full text-sm font-semibold">
+            ⏱ {minutes}:{seconds.toString().padStart(2, "0")}
+          </div>
+        </div>
+        <div className="flex justify-between text-sm text-slate-300">
+          <span>
+            Question {current + 1} / {questions.length}
+          </span>
+          <span>
+            Answered: {Object.keys(answers).length}
+          </span>
+        </div>
 
-          return (
-            <button
-              key={i}
-              onClick={() => selectOption(i)}
-              className={`w-full text-left px-5 py-3 rounded-xl border transition-all duration-200
-                ${
-                  selected
+        <div className="bg-slate-900 p-6 rounded-xl">
+          <h3 className="text-lg font-medium leading-relaxed">
+            {current + 1}. {q.question}
+          </h3>
+        </div>
+
+        <div className="space-y-3">
+          {q.options.map((opt, i) => {
+            const selected = answers[q._id] === i;
+
+            return (
+              <button
+                key={i}
+                onClick={() => selectOption(i)}
+                className={`w-full text-left px-5 py-3 rounded-xl border transition-all duration-200
+                ${selected
                     ? "bg-green-600 border-green-600 text-white"
                     : "bg-slate-900 border-slate-600 hover:bg-slate-700"
-                }
+                  }
               `}
-            >
-              <span className="font-semibold mr-2">
-                {String.fromCharCode(65 + i)}.
-              </span>
-              {opt}
-            </button>
-          );
-        })}
-      </div>
+              >
+                <span className="font-semibold mr-2">
+                  {String.fromCharCode(65 + i)}.
+                </span>
+                {opt}
+              </button>
+            );
+          })}
+        </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-slate-700">
-        <span className="text-sm text-slate-400">
-          Select an option to continue
-        </span>
+        <div className="flex items-center justify-between pt-4 border-t border-slate-700">
+          <span className="text-sm text-slate-400">
+            Select an option to continue
+          </span>
 
-        {current === questions.length - 1 ? (
-          <button
-            onClick={submitQuiz}
-            disabled={!hasAnswered}
-            className={`px-8 py-2 rounded-xl font-semibold transition
-              ${
-                hasAnswered
+          {current === questions.length - 1 ? (
+            <button
+              onClick={submitQuiz}
+              disabled={!hasAnswered}
+              className={`px-8 py-2 rounded-xl font-semibold transition
+              ${hasAnswered
                   ? "bg-green-600 hover:bg-green-700"
                   : "bg-slate-600 opacity-60 cursor-not-allowed"
-              }
+                }
             `}
-          >
-            Submit Quiz
-          </button>
-        ) : (
-          <button
-            onClick={next}
-            disabled={!hasAnswered}
-            className={`px-8 py-2 rounded-xl font-semibold transition
-              ${
-                hasAnswered
+            >
+              Submit Quiz
+            </button>
+          ) : (
+            <button
+              onClick={next}
+              disabled={!hasAnswered}
+              className={`px-8 py-2 rounded-xl font-semibold transition
+              ${hasAnswered
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-slate-600 opacity-60 cursor-not-allowed"
-              }
+                }
             `}
-          >
-            Next →
-          </button>
-        )}
+            >
+              Next →
+            </button>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 
-  
+
 }

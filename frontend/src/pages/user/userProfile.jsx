@@ -1,10 +1,5 @@
 import { useSelector } from "react-redux";
-import {
-  FaUser,
-  FaEnvelope,
-  FaGift,
-  FaCopy,
-} from "react-icons/fa";
+import {FaUser,FaEnvelope,FaGift,FaCopy,} from "react-icons/fa";
 import { useState } from "react";
 import EditProfileModal from "./EditProfileModal";
 
@@ -24,7 +19,6 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 px-4">
-      {/* Header */}
       <h1 className="text-sm sm:text-base md:text-lg font-semibold text-blue-quiz mb-6 flex items-center justify-between">
         My Profile
         <button
@@ -39,9 +33,7 @@ export default function ProfilePage() {
         <EditProfileModal user={user} onClose={() => setOpenEdit(false)} />
       )}
 
-      {/* Profile Card */}
       <div className="bg-[#241d3b] rounded-xl p-6 shadow-lg space-y-6">
-        {/* Avatar + Name */}
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-full bg-purple-600 flex items-center justify-center text-xl font-semibold text-white">
             {user.name?.charAt(0).toUpperCase()}
@@ -52,7 +44,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3">
             <FaUser className="text-gray-400" />
@@ -72,7 +63,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ================= Referral Code Section ================= */}
       <div className="bg-[#241d3b] rounded-xl p-6 shadow-lg mt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -113,7 +103,6 @@ export default function ProfilePage() {
           win paid contests 🎉
         </p>
       </div>
-      {/* ========================================================== */}
     </div>
   );
 }

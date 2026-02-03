@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar";
-import ContestImg from "../../assets/quiz.jpg";
+import ContestImg from "../../assets/ContestImg.jpg";
 import { useContest } from "../../hooks/useContest";
 import api from "../../api/axios";
 
