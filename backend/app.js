@@ -15,6 +15,7 @@ import paymentRoutes from './src/routes/paymentRoutes.js'
 import walletRoutes from './src/routes/userWalletRoutes.js'
 import webhookRoutes from './src/routes/webhookRoutes.js'
 import admincontestRoutes from './src/routes/adminContestRoutes.js'
+import adminReportRoutes from './src/routes/adminReportRoutes.js'
 import { contestStatusCron } from "./src/utils/contestStatusCron.js";
 import path from "path";
 
@@ -59,6 +60,7 @@ app.use("/api/admin/questions", questionRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/admin/contest", admincontestRoutes);
+app.use("/api/admin/reports", adminReportRoutes);
 app.use("/certificates",express.static(path.join(process.cwd(), "uploads/certificates")));
 
 export default app;
