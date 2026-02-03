@@ -10,6 +10,7 @@ import notificationModel from '../models/notificationModel.js'
 import { getIo } from "../config/socket.js";
 import { generateCertificate } from "../utils/generateCertificate.js";
 import path from "path"
+import { processReferralReward } from "./referralRewardService.js";
 
 export const createContestService = async (payload) => {
   const users = await UserModel.find({}, "_id");
@@ -358,21 +359,20 @@ export const getContestQuizPlayService = async ({ contestId }) => {
   };
 };
 
-
 export const completeContestAndRewardService = async (contestId) => {
   const contest = await contestModel.findById(contestId);
   if (!contest) return { status: "NOT_FOUND" };
   if (contest.status !== "COMPLETED")
     return { status: "NOT_COMPLETED" };
 
-  // already rewarded check (idempotent)
+  
   const alreadyRanked = await contestResultModel.findOne({
     contestId,
     rank: { $exists: true },
   });
   if (alreadyRanked) return { status: "ALREADY_PROCESSED" };
 
-  //  fetch all results
+
   const results = await contestResultModel.find({ contestId }).populate("userId", "name").sort({ score: -1, timeTaken: 1, createdAt: 1 });
 
   if (!results.length) return { status: "NO_PARTICIPANTS" };
@@ -413,6 +413,12 @@ export const completeContestAndRewardService = async (contestId) => {
 
     r.rewardAmount = amount;
     r.rewardCredited = true;
+
+    await processReferralReward({
+      winnerUserId:r.userId._id,
+      contest,
+      rank:r.rank,
+    })
     
     //  GENERATE CERTIFICATE PDF
     const certificatePath = await generateCertificate({
@@ -421,7 +427,7 @@ export const completeContestAndRewardService = async (contestId) => {
       rank: r.rank,
     });
 
-    //  SAVE CERTIFICATE INFO
+    //  SAVE CERTIFICATE 
     r.certificateIssued = true;
     r.certificateUrl = `/certificates/${path.basename(certificatePath)}`;
     await r.save();

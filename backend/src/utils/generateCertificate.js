@@ -19,9 +19,7 @@ export const generateCertificate = ({ name, contestTitle, rank }) => {
 
     doc.pipe(stream);
 
-    /* =========================
-       BORDER
-    ========================= */
+    
     doc
       .lineWidth(4)
       .rect(20, 20, doc.page.width - 40, doc.page.height - 40)
@@ -32,9 +30,6 @@ export const generateCertificate = ({ name, contestTitle, rank }) => {
       .rect(30, 30, doc.page.width - 60, doc.page.height - 60)
       .stroke("#000");
 
-    /* =========================
-       HEADER
-    ========================= */
     doc
       .fontSize(12)
       .fillColor("#999")
@@ -52,9 +47,6 @@ export const generateCertificate = ({ name, contestTitle, rank }) => {
       .fontSize(34)
       .text("ACHIEVEMENT", { align: "center" });
 
-    /* =========================
-       BODY
-    ========================= */
     doc.moveDown(1.5);
 
     doc
@@ -93,25 +85,19 @@ export const generateCertificate = ({ name, contestTitle, rank }) => {
       .font("Times-Roman")
       .text(`in the contest "${contestTitle}"`, { align: "center" });
 
-    /* =========================
-       FOOTER
-    ========================= */
     const bottomY = doc.page.height - 130;
 
-    // Issued by
     doc
       .fontSize(11)
       .fillColor("#666")
       .text("Issued By :", 120, bottomY - 20);
 
-    // QUIZEEE TEAM
     doc
       .fontSize(12)
       .fillColor("#333")
       .font("Times-Bold")
       .text("QUIZEE TEAM", 120, bottomY + 8);
 
-    // Date
     doc
       .fontSize(12)
       .font("Times-Roman")
@@ -121,9 +107,6 @@ export const generateCertificate = ({ name, contestTitle, rank }) => {
         bottomY + 8
       );
 
-    /* =========================
-       WINNER BADGE (FIXED)
-    ========================= */
     const badgeX = doc.page.width - 120;
     const badgeY = 110;
     const badgeRadius = 40;

@@ -7,10 +7,11 @@ import OTP from "../models/otpModel.js";
 import { genarateOtp } from "../utils/OtpHelper.js";
 import { sendOTPEmail } from "../utils/emailService.js";
 import walletModel from "../models/walletModel.js";
+import { generateReferralCode } from "../utils/generateRefferalCode.js";
 
 const MAX_ATTEMPTS = 5;
 
-const signup = async ({ name, email, password, referredBy }) => {
+const signup = async ({ name, email, password, referralCode }) => {
   if (!name || !email || !password) {
     throw new Error("All fields are required");
   }
@@ -23,6 +24,24 @@ const signup = async ({ name, email, password, referredBy }) => {
   if (exists) {
     throw new Error("User already exists");
   }
+
+  let referredBy = null;
+
+  if (referralCode) {
+    const refUser = await userModel.findOne({ referralCode });
+
+    if (!refUser) {
+      throw new Error("Invalid referral code");
+    }
+
+    if (refUser.email === email) {
+      throw new Error("You cannot refer yourself");
+    }
+
+    referredBy = refUser._id;
+  }
+
+
   await OTP.deleteMany({ email, purpose: "signup" });
   const otp = genarateOtp();
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
@@ -35,7 +54,7 @@ const signup = async ({ name, email, password, referredBy }) => {
     data: {
       name,
       password,
-      referredBy: referredBy || null,
+      referredBy,
     },
   });
 
@@ -73,6 +92,7 @@ const verifyOtp = async ({ email, otp, purpose }) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
+    const referralCode=await generateReferralCode();
 
     user = await userModel.create({
       name,
@@ -80,6 +100,7 @@ const verifyOtp = async ({ email, otp, purpose }) => {
       password: hash,
       role: "user",
       referredBy,
+      referralCode,
       isVerified: true,
     });
 
@@ -180,6 +201,7 @@ const refresh = async (token) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      referralCode: user.referralCode,
     },
     accessToken: tokens.accessToken,
   };

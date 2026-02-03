@@ -20,12 +20,11 @@ export default function ContestLeaderboard() {
         setContestStatus(res.data.status);
 
         if (res.data.status === "COMPLETED") {
-          // leaderboard
+        
           api
             .get(`/user/contest/${contestId}/leaderboard`)
             .then((res) => setData(res.data || []));
 
-          // logged-in user result
           api
             .get(`/user/contest/${contestId}/result`)
             .then((res) => setMyResult(res.data))
@@ -95,7 +94,6 @@ export default function ContestLeaderboard() {
           contestStatus === "COMPLETED" &&
           data.length > 0 && (
             <>
-              {/* PODIUM */}
               <div className="flex justify-center items-end gap-6 mb-12">
                 {renderPodium(topThree, 2)}
                 {renderPodium(topThree, 1, true)}
