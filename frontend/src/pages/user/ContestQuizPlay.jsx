@@ -210,6 +210,7 @@ export default function ContestQuizPlay() {
               <span className="font-semibold text-red-700">
                 Entry fee is NON-REFUNDABLE
               </span>
+              Right-click is disabled
             </span>
 
             <span className="mx-8 text-gray-800">
