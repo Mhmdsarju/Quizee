@@ -1,13 +1,28 @@
 import { useSelector } from "react-redux";
-import {FaUser,FaEnvelope,FaGift,FaCopy,} from "react-icons/fa";
-import { useState } from "react";
+import { FaUser, FaEnvelope, FaGift, FaCopy, FaTrophy, FaStar, } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import EditProfileModal from "./EditProfileModal";
+import api from "../../api/axios";
 
 export default function ProfilePage() {
   const [openEdit, setOpenEdit] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [rankData, setRankData] = useState(null);
 
   const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const fetchRank = async () => {
+      try {
+        const res = await api.get("/user/rank");
+        setRankData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch rank", err);
+      }
+    };
+
+    fetchRank();
+  }, []);
 
   if (!user) {
     return (
@@ -45,7 +60,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3">
+          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3 border">
             <FaUser className="text-gray-400" />
             <div>
               <p className="text-gray-400 text-xs">Name</p>
@@ -53,7 +68,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3">
+          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3 border">
             <FaEnvelope className="text-gray-400" />
             <div>
               <p className="text-gray-400 text-xs">Email</p>
@@ -80,16 +95,12 @@ export default function ProfilePage() {
               onClick={() => {
                 navigator.clipboard.writeText(user.referralCode);
                 setCopied(true);
-
-                setTimeout(() => {
-                  setCopied(false);
-                }, 2000);
+                setTimeout(() => setCopied(false), 2000);
               }}
               className={`flex items-center gap-2 text-xs px-3 py-2 rounded-md transition
-                ${
-                  copied
-                    ? "bg-green-500 text-white"
-                    : "bg-quiz-main text-blue-quiz hover:opacity-90"
+                ${copied
+                  ? "bg-green-500 text-white"
+                  : "bg-quiz-main text-blue-quiz hover:opacity-90"
                 }`}
             >
               <FaCopy />
@@ -102,6 +113,37 @@ export default function ProfilePage() {
           Invite your friends using this referral code and earn rewards when they
           win paid contests 🎉
         </p>
+      </div>
+
+      <div className="bg-[#241d3b] rounded-xl p-6 shadow-lg mt-6 border border-black hover:shadow-2xl">
+        <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+          <FaTrophy className="text-yellow-400" /> Performance
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3 border ">
+            <FaTrophy className="text-yellow-400" />
+            <div>
+              <p className="text-gray-400 text-xs">Global Rank</p>
+              <p className="text-white text-lg font-semibold">
+                {rankData
+                  ? `# ${rankData.rank} `
+                  : "—"}
+              </p>
+            </div>
+          </div>
+
+
+          <div className="flex items-center gap-3 bg-[#1b1630] rounded-md px-4 py-3 border">
+            <FaStar className="text-purple-400" />
+            <div>
+              <p className="text-gray-400 text-xs">Total Score</p>
+              <p className="text-white text-lg font-semibold">
+                {rankData?.totalScore ?? "—"}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

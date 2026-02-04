@@ -1,7 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import userModel from "../models/userModel.js";
-import { getQuizPlay, getUserQuizById, getUserQuizzes, submitQuiz, validateQuestion } from "../controllers/user/userquizController.js";
+import { getMyRank, getQuizPlay, getUserQuizById, getUserQuizzes, submitQuiz, validateQuestion } from "../controllers/user/userquizController.js";
 import authController from "../controllers/authController.js";
 import { getContestLeaderboardHandler, getContestQuizPlayHandler, getContestStatusHandler,  getUserContestResultHandler,  getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
 import { getUserNotificationHandler, UserNotificationMarkAllAsReadHandler, UserNotificationMarkAsReadHandler } from "../controllers/user/userNotificationController.js";
@@ -40,5 +40,7 @@ router.get("/notifications",protect,getUserNotificationHandler)
 router.patch("/notifications/:id/read",protect,UserNotificationMarkAsReadHandler)
 router.patch("/notifications/read-all",protect,UserNotificationMarkAllAsReadHandler)
 router.get("/contest/:id/result",protect,getUserContestResultHandler);
+router.get("/rank",protect,getMyRank);
+
 
 export default router;

@@ -278,19 +278,55 @@ const resetPassword = async ({ email, password }) => {
 };
 
 export const googleLogin = async (user) => {
-  const tokens = genarateToken(user);
+  let dbUser = await userModel.findOne({ email: user.email });
+
+  if (!dbUser) {
+    const referralCode = await generateReferralCode();
+
+    dbUser = await userModel.create({
+      name: user.name,
+      email: user.email,
+      role: "user",
+      referralCode,
+      isVerified: true,
+      totalScore: 0,
+    });
+
+    await walletModel.create({
+      user: dbUser._id,
+      balance: 0,
+    });
+  }
+
+  if (!dbUser.referralCode) {
+    dbUser.referralCode = await generateReferralCode();
+    await dbUser.save();
+  }
+
+  const walletExists = await walletModel.findOne({ user: dbUser._id });
+  if (!walletExists) {
+    await walletModel.create({
+      user: dbUser._id,
+      balance: 0,
+    });
+  }
+
+  const tokens = genarateToken(dbUser);
 
   return {
     user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      _id: dbUser._id,
+      name: dbUser.name,
+      email: dbUser.email,
+      role: dbUser.role,
+      referralCode: dbUser.referralCode,
+      totalScore: dbUser.totalScore,
     },
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
   };
 };
+
 
 
 export const changePasswordService = async (userId, oldPassword, newPassword) => {

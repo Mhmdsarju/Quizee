@@ -1,6 +1,6 @@
 import { statusCode } from "../../constant/constants.js";
 import questionModel from "../../models/questionModel.js";
-import { getQuizPlayService, getUserQuizByIdService, getUserQuizService, submitQuizService } from "../../services/quizService.js";
+import { getQuizPlayService, getUserQuizByIdService, getUserQuizService, getUserRankService, submitQuizService } from "../../services/quizService.js";
 
 
 
@@ -125,3 +125,14 @@ export const validateQuestion = async (req, res) => {
   res.json({ valid: true });
 };
 
+export const getMyRank = async (req, res) => {
+  const userId = req.user.id;
+
+  const rankData = await getUserRankService(userId);
+
+  if (!rankData) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json(rankData);
+};
