@@ -54,7 +54,6 @@ export default function TransactionManagement() {
     }
   };
 
-  // Badge color logic for reasons
   const getReasonBadge = (reason) => {
     const styles = {
       add_money: "bg-green-100 text-green-700 border-green-200",
@@ -167,9 +166,7 @@ export default function TransactionManagement() {
                             <span className={`text-base font-black ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
                               {isIncome ? "+" : "-"} ₹{t.amount.toLocaleString()}
                             </span>
-                            <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">
-                              via wallet
-                            </span>
+                            
                           </div>
                         </td>
                       </tr>
@@ -180,7 +177,6 @@ export default function TransactionManagement() {
             </div>
           )}
 
-          {/* PAGINATION */}
           <div className="p-5 border-t border-slate-50 bg-slate-50/30">
             <Pagination
               page={page}
@@ -194,7 +190,6 @@ export default function TransactionManagement() {
   );
 }
 
-/* ================= COMPONENT: STAT CARD ================= */
 
 const StatCard = ({ title, value, icon, color }) => {
   const themes = {
@@ -212,7 +207,6 @@ const StatCard = ({ title, value, icon, color }) => {
         <p className="text-white/70 text-xs font-bold uppercase tracking-wider">{title}</p>
         <h2 className="text-3xl font-black italic tracking-tight">₹ {(value || 0).toLocaleString()}</h2>
       </div>
-      {/* Decorative glass circle */}
       <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
     </div>
   );
