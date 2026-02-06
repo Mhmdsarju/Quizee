@@ -163,6 +163,23 @@ export default function ContestQuizPlay() {
 
   const submitQuiz = async () => {
     if (submittedRef.current) return;
+    if (timeLeft <= 0) {
+      submittedRef.current = true;
+
+      Swal.fire({
+        icon: "info",
+        title: "Contest Ended",
+        text: "Contest time has ended. Your answers were auto submitted.",
+        confirmButtonText: "OK",
+        allowOutsideClick: false,
+      }).then(() => {
+        navigate(`/user/contest/${contestId}/leaderboard`, {
+          replace: true,
+        });
+      });
+
+      return;
+    }
     submittedRef.current = true;
 
     try {
