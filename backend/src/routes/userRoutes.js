@@ -6,6 +6,7 @@ import authController from "../controllers/authController.js";
 import { getContestLeaderboardHandler, getContestQuizPlayHandler, getContestStatusHandler,  getUserContestResultHandler,  getUserContestsHandler, joinContestHandler, submitContestQuizHandler } from "../controllers/user/userContestController.js";
 import { getUserNotificationHandler, UserNotificationMarkAllAsReadHandler, UserNotificationMarkAsReadHandler } from "../controllers/user/userNotificationController.js";
 import { getQuizHistory, getUserContestHistoryHandler } from "../controllers/user/userhistoryController.js";
+import { sendExistingCertificateController } from "../controllers/user/certificateController.js";
 
 
 const router = express.Router();
@@ -41,6 +42,8 @@ router.patch("/notifications/:id/read",protect,UserNotificationMarkAsReadHandler
 router.patch("/notifications/read-all",protect,UserNotificationMarkAllAsReadHandler)
 router.get("/contest/:id/result",protect,getUserContestResultHandler);
 router.get("/rank",protect,getMyRank);
+router.post("/send-certificate",protect,sendExistingCertificateController);
+
 
 
 export default router;

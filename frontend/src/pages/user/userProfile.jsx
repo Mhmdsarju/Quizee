@@ -110,7 +110,7 @@ export default function ProfilePage() {
         </div>
 
         <p className="text-[11px] text-gray-400 mt-3">
-          Invite your friends using this referral code and earn rewards when they
+          Invite your friends using this referral code and earn ₹50 when they
           win paid contests 🎉
         </p>
       </div>

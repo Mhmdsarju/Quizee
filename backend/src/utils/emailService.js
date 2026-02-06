@@ -13,9 +13,9 @@ export const sendOTPEmail = async (email, otp) => {
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL,
+    from: `"QUIZEE" <${process.env.EMAIL}>`,
     to: email,
-    subject: "Email Verification OTP",
+    subject: "Email Verification OTP From Quizee",
     text: `Your OTP is ${otp}. This OTP is valid for 60 seconds.`
   });
 };

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
 import Swal from "sweetalert2";
+import { quizGuard } from "../QuizGuard";
+
 
 export default function ContestQuizPlay() {
   const { id: contestId } = useParams();
@@ -16,6 +18,15 @@ export default function ContestQuizPlay() {
 
   const submittedRef = useRef(false);
   const forceSubmitRef = useRef(false);
+
+  useEffect(() => {
+  quizGuard.ongoing = true;
+
+  return () => {
+    quizGuard.ongoing = false;
+  };
+}, []);
+
 
   useEffect(() => {
     api

@@ -1,8 +1,9 @@
 import api from "../../../api/axios";
 import Swal from "sweetalert2";
-import ContestImg from "../../../assets/ContestImg.jpg"
+import ContestImg from "../../../assets/ContestImg.jpg";
+
 export default function ContestCard({ contest, onUpdate, onEdit }) {
-  const {_id,title,quiz,entryFee,status,startTime,endTime,isBlocked,image} = contest;
+  const {_id,title,quiz,entryFee,status,startTime,endTime,isBlocked,image,prizeConfig,} = contest;
 
   const now = new Date();
   let displayStatus = status;
@@ -42,11 +43,11 @@ export default function ContestCard({ contest, onUpdate, onEdit }) {
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden border">
-
+  
       <div className="relative h-36">
         <img
-          src={image ||ContestImg}
-          alt="quiz"
+          src={image || ContestImg}
+          alt="contest"
           className="w-full h-full object-cover"
         />
 
@@ -58,22 +59,36 @@ export default function ContestCard({ contest, onUpdate, onEdit }) {
       </div>
 
       <div className="p-4 space-y-1">
-        <h3 className="font-semibold text-lg line-clamp-1">{title}</h3>
+        <h3 className="font-semibold text-lg line-clamp-1">
+          {title}
+        </h3>
 
         <p className="text-sm text-gray-500">
-           {quiz?.title || "No Quiz"}
+          {quiz?.title || "No Quiz"}
         </p>
 
         <p className="text-sm font-medium">
           Entry Fee: ₹{entryFee}
         </p>
 
-        <p className="text-xs text-gray-400">
+        {prizeConfig && (
+          <div className="mt-1 text-sm">
+            <p className="text-xs text-gray-500 font-medium mb-1">
+               Prizes :
+            </p>
+            <div className="flex gap-3">
+              <span>🥇 ₹{prizeConfig.first}</span>
+              <span>🥈 ₹{prizeConfig.second}</span>
+              <span>🥉 ₹{prizeConfig.third}</span>
+            </div>
+          </div>
+        )}
+
+        <p className="text-xs text-gray-400 mt-2">
           {new Date(startTime).toLocaleString()} –{" "}
           {new Date(endTime).toLocaleString()}
         </p>
 
-        {/* Actions */}
         <div className="flex gap-2 pt-3">
           {displayStatus === "UPCOMING" && !isBlocked && (
             <button

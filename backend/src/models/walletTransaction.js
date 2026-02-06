@@ -7,6 +7,9 @@ const walletTransactionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    contestTitle: {
+      type: String,
+    },
     type: {
       type: String,
       enum: ["credit", "debit"],

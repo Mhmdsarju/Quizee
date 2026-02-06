@@ -14,20 +14,22 @@ export const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
-    
-    const user=await userModel.findById(decoded.id)
 
-    if(!user){
-      return res.status(statusCode.UNAUTHORIZED).json({message:"User not found"});
-    }
-   
-    if(user.isBlocked){
-      return res.status(statusCode.FORBIDDEN).json({message:"User is Blocked by Admin"});
+    const user = await userModel.findById(decoded.id)
+
+    if (!user) {
+      return res.status(statusCode.UNAUTHORIZED).json({ message: "User not found" });
     }
 
-    req.user={
-      id:user._id,
-      role:user.role
+    if (user.isBlocked) {
+      return res.status(statusCode.FORBIDDEN).json({ message: "User is Blocked by Admin" });
+    }
+
+    req.user = {
+      id: user._id,
+      role: user.role,
+      email: decoded.email,
+      name: decoded.name,
     };
 
     next();

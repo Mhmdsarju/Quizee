@@ -8,16 +8,30 @@ export default function AddQuestionModal({ quizId, onClose, onSuccess }) {
   const [correctAnswer, setCorrectAnswer] = useState(0);
 
   const handleSubmit = async () => {
-    if (!question || options.some((o) => !o)) {
-      return Swal.fire("Error", "Fill all fields", "error");
-    }
+  if (!question || options.some((o) => !o)) {
+    return Swal.fire("Error", "Fill all fields", "error");
+  }
 
-    await api.post("/admin/questions", {quizId,question,options,correctAnswer,});
+  try {
+    await api.post("/admin/questions", {
+      quizId,
+      question,
+      options,
+      correctAnswer,
+    });
 
     Swal.fire("Success", "Question added", "success");
     onSuccess();
     onClose();
-  };
+  } catch (error) {
+    if (error.response) {
+      Swal.fire("Error", error.response.data.message, "error");
+    } else {
+      Swal.fire("Error", "Server not reachable", "error");
+    }
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">

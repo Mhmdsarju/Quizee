@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar";
 import ContestImg from "../../assets/ContestImg.jpg";
 import { useContest } from "../../hooks/useContest";
-import api from "../../api/axios";
 
 export default function ContestPage() {
   const [search, setSearch] = useState("");
@@ -14,63 +12,14 @@ export default function ContestPage() {
 
   const navigate = useNavigate();
 
-  const { data: contestRes, isLoading } = useContest({search,sort,page,});
+  const { data: contestRes, isLoading } = useContest({
+    search,
+    sort,
+    page,
+  });
 
   const contests = contestRes?.data || [];
   const pagination = contestRes?.pagination;
-
-  const handleJoin = async (contest) => {
-  const res = await Swal.fire({
-    title: "Register & Play?",
-    text: `₹${contest.entryFee} will be deducted from your wallet`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Pay & Play",
-  });
-
-  if (!res.isConfirmed) return;
-
-  try {
-    const { data } = await api.post(
-      `/user/contest/${contest._id}/join`
-    );
-
-    Swal.fire({
-      title: "Success",
-      text: data.message,
-      icon: "success",
-      timer: 1200,
-      showConfirmButton: false,
-    });
-
-    navigate(`/user/contest/${data.contestId}/intro`);
-  } catch (err) {
-    const message = err.response?.data?.message || "";
-
-    if (message.toLowerCase().includes("insufficient")) {
-      const res = await Swal.fire({
-        title: "Insufficient Wallet Balance",
-        text: "Add money to continue",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Add Funds",
-      });
-
-      if (res.isConfirmed) {
-        navigate("/user/wallet", {
-          state: { from: "contest" },
-        });
-      }
-    } else {
-      Swal.fire(
-        "Oops",
-        message || "Unable to join contest",
-        "error"
-      );
-    }
-  }
-};
-
 
   const getStatusInfo = (contest) => {
     const now = new Date();
@@ -103,7 +52,8 @@ export default function ContestPage() {
             placeholder="Search contests..."
           />
 
-          <select value={sort}
+          <select
+            value={sort}
             onChange={(e) => {
               setPage(1);
               setSort(e.target.value);
@@ -155,15 +105,15 @@ export default function ContestPage() {
                     </div>
                   </div>
 
-                  <div className="p-3 flex-1 text-sm  space-y-2">
+                  <div className="p-3 flex-1 text-sm space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-700">Entry Fee :</span>
-                      <span className="font-semibold  text-black">
+                      <span className="font-semibold text-black">
                         ₹{contest.entryFee}
                       </span>
                     </div>
 
-                    <div className="text-xs ">
+                    <div className="text-xs">
                       {new Date(contest.startTime).toLocaleString()} –{" "}
                       {new Date(contest.endTime).toLocaleString()}
                     </div>
@@ -183,7 +133,11 @@ export default function ContestPage() {
                       </button>
                     ) : status.label === "LIVE" ? (
                       <button
-                        onClick={() => handleJoin(contest)}
+                        onClick={() =>
+                          navigate(
+                            `/user/contest/${contest._id}/intro`
+                          )
+                        }
                         className="w-full py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700"
                       >
                         Register & Play

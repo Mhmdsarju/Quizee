@@ -177,17 +177,41 @@ export const getContestQuizPlayHandler = async (req, res) => {
 };
 
 export const getContestStatusHandler = async (req, res) => {
-  const contest = await contestModel.findById(req.params.id).select("isBlocked status");
+  try {
+    const contestId = req.params.id;
+    const userId = req.user.id;
 
-  if (!contest) {
-    return res.status(404).json({ message: "Contest Not Found" })
+    const contest = await contestModel.findById(contestId).select(
+      "title entryFee startTime endTime status isBlocked prizeConfig"
+    );
+
+    if (!contest) {
+      return res
+        .status(404)
+        .json({ message: "Contest Not Found" });
+    }
+
+    const hasJoined = await contestResultModel.exists({
+      contestId,
+      userId,
+    });
+
+    res.json({
+      _id: contest._id,
+      title: contest.title,
+      entryFee: contest.entryFee,
+      startTime: contest.startTime,
+      endTime: contest.endTime,
+      status: contest.status,
+      isBlocked: contest.isBlocked,
+      prizeConfig: contest.prizeConfig, 
+      hasJoined: !!hasJoined,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  res.json({
-    isBlocked: contest.isBlocked,
-    status: contest.status,
-  });
 };
+
 
 export const getUserContestResultHandler = async (req, res) => {
   const result = await contestResultModel.findOne({

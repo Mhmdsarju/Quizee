@@ -28,7 +28,6 @@ export const contestStatusCron = () => {
       contest.status = "COMPLETED";
       await contest.save();
 
-      // 🔥 THIS IS THE MISSING PIECE
       await completeContestAndRewardService(contest._id);
 
       console.log(

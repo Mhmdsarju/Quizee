@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 import ContestImg from "../assets/ContestImg.jpg";
 import { useContest } from "../hooks/useContest";
-import api from "../api/axios";
 
 const ContestCarousel = () => {
   const navigate = useNavigate();
@@ -35,37 +33,6 @@ const ContestCarousel = () => {
     return { label: "COMPLETED", color: "bg-gray-200 text-gray-700" };
   };
 
-  const handleJoin = async (contest) => {
-    const res = await Swal.fire({
-      title: "Register & Play?",
-      text: `₹${contest.entryFee} will be deducted from your wallet`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Pay & Play",
-    });
-
-    if (!res.isConfirmed) return;
-
-    try {
-      const { data } = await api.post(
-        `/user/contest/${contest._id}/join`
-      );
-
-      Swal.fire({
-        title: "Success",
-        text: data.message,
-        icon: "success",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-
-      navigate(`/user/contest/${data.contestId}/intro`);
-    } catch (err) {
-      const message = err.response?.data?.message || "";
-      Swal.fire("Oops", message || "Unable to join contest", "error");
-    }
-  };
-
   return (
     <div className="px-4">
       <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2">
@@ -93,7 +60,10 @@ const ContestCarousel = () => {
 
               <div className="p-4 flex flex-col gap-2">
                 <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">
-                 <span className="text-xs text-gray-500">ContestName :</span>  {contest.title}
+                  <span className="text-xs text-gray-500">
+                    ContestName :
+                  </span>{" "}
+                  {contest.title}
                 </h4>
 
                 <p className="text-xs text-gray-500">
@@ -101,23 +71,44 @@ const ContestCarousel = () => {
                 </p>
 
                 {contest.hasJoined ? (
-                  <button onClick={() => navigate( `/user/contest/${contest._id}/leaderboard`)}
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/user/contest/${contest._id}/leaderboard`
+                      )
+                    }
                     className="mt-auto bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg transition"
                   >
                     View Result
                   </button>
                 ) : status.label === "LIVE" ? (
                   <button
-                    onClick={() => handleJoin(contest)}
+                    onClick={() =>
+                      navigate(
+                        `/user/contest/${contest._id}/intro`
+                      )
+                    }
                     className="mt-auto bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 rounded-lg transition"
                   >
                     Register & Play
                   </button>
+                ) : status.label === "UPCOMING" ? (
+                  <button
+                    disabled
+                    className="mt-auto bg-gray-400 text-white text-sm font-medium py-2 rounded-lg cursor-not-allowed"
+                  >
+                    Not Started
+                  </button>
                 ) : (
-                  <button onClick={() => navigate( `/user/contest/${contest._id}/leaderboard`)}
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/user/contest/${contest._id}/leaderboard`
+                      )
+                    }
                     className="mt-auto bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium py-2 rounded-lg transition"
                   >
-                    View
+                    View Leaderboard
                   </button>
                 )}
               </div>

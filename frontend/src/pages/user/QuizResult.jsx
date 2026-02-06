@@ -118,7 +118,6 @@ export default function QuizResult() {
         </div>
       </div>
 
-      {/* ANSWERS MODAL */}
       {showAnswers && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-[#020617] w-full max-w-2xl rounded-2xl p-6 text-white max-h-[80vh] overflow-y-auto">

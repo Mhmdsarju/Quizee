@@ -27,6 +27,7 @@ import ContestQuizPlay from "../pages/user/ContestQuizPlay";
 import ContestIntro from "../pages/user/ContestIntro";
 
 
+
 const UserRoutes = () => {
   return (
     <Routes>
@@ -36,7 +37,7 @@ const UserRoutes = () => {
 
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-      <Route path="/verify-otp" element={<PublicRoute><VerifyOtp /></PublicRoute>} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/forgot-password/verify-otp" element={<ForgotOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />

@@ -3,11 +3,7 @@ import walletModel from "../models/walletModel.js";
 import walletTransactionModel from "../models/walletTransaction.js";
 import notificationModel from "../models/notificationModel.js";
 
-export const processReferralReward = async ({
-  winnerUserId,
-  contest,
-  rank,
-}) => {
+export const processReferralReward = async ({winnerUserId,contest,rank,}) => {
   
   if (rank > 3) return;
 
@@ -17,15 +13,12 @@ export const processReferralReward = async ({
   const winner = await UserModel.findById(winnerUserId);
   if (!winner) return;
 
-  // must be referred
   if (!winner.referredBy) return;
 
-  // one time only
   if (winner.referralRewardGiven) return;
 
   const REFERRAL_REWARD_AMOUNT = 50;
 
-  // credit referrer's wallet
   const wallet = await walletModel.findOneAndUpdate(
     { user: winner.referredBy },
     { $inc: { balance: REFERRAL_REWARD_AMOUNT } },
@@ -41,11 +34,9 @@ export const processReferralReward = async ({
     balanceAfter: wallet.balance,
   });
 
-  // mark as rewarded
   winner.referralRewardGiven = true;
   await winner.save();
 
-  // notify referrer
   await notificationModel.create({
     userId: winner.referredBy,
     title: "🎉 Referral Reward Earned",

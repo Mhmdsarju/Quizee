@@ -34,12 +34,20 @@ export const createContestService = async (payload) => {
   const contest = await contestModel.create({
     ...payload,
     image: payload.image || null,
+
+    prizeConfig: {
+      first: payload.prizeFirst ?? 100,
+      second: payload.prizeSecond ?? 50,
+      third: payload.prizeThird ?? 25,
+    },
+
     questionsSnapshot: questions.map((q) => ({
       question: q.question,
       options: q.options,
       correctAnswer: q.correctAnswer,
     })),
   });
+
 
   const notifications = users.map(user => ({
     userId: user._id,
@@ -164,6 +172,7 @@ export const joinContestService = async ({ contestId, userId }) => {
     reason: "contest_fee",
     reference: contestId.toString(),
     balanceAfter: wallet.balance,
+    contestTitle:contest.title,
   });
 
   await contestParticipantsModel.create({
@@ -235,6 +244,9 @@ export const editContestService = async (contestId, payload) => {
     "startTime",
     "endTime",
     "image",
+    "prizeFirst",
+  "prizeSecond",
+  "prizeThird",
   ];
 
   allowed.forEach((f) => {
@@ -257,12 +269,9 @@ export const endContestService = async (contestId) => {
 
   return { status: "SUCCESS" };
 };
-export const submitContestQuizService = async ({
-  contestId,
-  userId,
-  answers,
-  timeTaken,
-}) => {
+
+
+export const submitContestQuizService = async ({ contestId, userId, answers, timeTaken, }) => {
   try {
     const contest = await contestModel.findById(contestId);
 
@@ -365,7 +374,7 @@ export const completeContestAndRewardService = async (contestId) => {
   if (contest.status !== "COMPLETED")
     return { status: "NOT_COMPLETED" };
 
-  
+
   const alreadyRanked = await contestResultModel.findOne({
     contestId,
     rank: { $exists: true },
@@ -377,21 +386,18 @@ export const completeContestAndRewardService = async (contestId) => {
 
   if (!results.length) return { status: "NO_PARTICIPANTS" };
 
-  // Rank assign
   let rank = 1;
   for (const r of results) {
     r.rank = rank++;
     await r.save();
   }
 
-  // Reward config
   const CASH_REWARDS = {
-    1: 100,
-    2: 50,
-    3: 25,
+    1: contest.prizeConfig.first,
+    2: contest.prizeConfig.second,
+    3: contest.prizeConfig.third,
   };
 
-  // Top 3 reward credit
   for (const r of results.slice(0, 3)) {
     const amount = CASH_REWARDS[r.rank];
     if (!amount) continue;
@@ -409,17 +415,19 @@ export const completeContestAndRewardService = async (contestId) => {
       reason: "contest_reward",
       reference: contestId.toString(),
       balanceAfter: wallet.balance,
+      contestTitle: contest.title,
+
     });
 
     r.rewardAmount = amount;
     r.rewardCredited = true;
 
     await processReferralReward({
-      winnerUserId:r.userId._id,
+      winnerUserId: r.userId._id,
       contest,
-      rank:r.rank,
+      rank: r.rank,
     })
-    
+
     //  GENERATE CERTIFICATE PDF
     const certificatePath = await generateCertificate({
       name: r.userId.name,

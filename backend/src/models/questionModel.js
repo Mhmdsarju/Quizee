@@ -26,6 +26,10 @@ const questionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+questionSchema.index(
+  { quizId: 1, question: 1 },
+  { unique: true }
+);
 
 const questionModel = mongoose.model("Question", questionSchema);
 export default questionModel;

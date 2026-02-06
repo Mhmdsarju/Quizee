@@ -16,7 +16,6 @@ export default function ContestForm({
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
-
   const {
     register,
     handleSubmit,
@@ -28,6 +27,9 @@ export default function ContestForm({
       title: "",
       quiz: "",
       entryFee: 0,
+      prizeFirst: 100,
+      prizeSecond: 50,
+      prizeThird: 25,
       startTime: "",
       endTime: "",
     },
@@ -45,8 +47,6 @@ export default function ContestForm({
       .catch(() => setQuizzes([]));
   }, []);
 
-
-
   useEffect(() => {
     if (!initialData) return;
 
@@ -54,6 +54,9 @@ export default function ContestForm({
       title: initialData.title || "",
       quiz: initialData.quiz?._id || "",
       entryFee: initialData.entryFee || 0,
+      prizeFirst: initialData.prizeConfig?.first ?? 100,
+      prizeSecond: initialData.prizeConfig?.second ?? 50,
+      prizeThird: initialData.prizeConfig?.third ?? 25,
       startTime: initialData.startTime?.slice(0, 16) || "",
       endTime: initialData.endTime?.slice(0, 16) || "",
     });
@@ -68,16 +71,15 @@ export default function ContestForm({
     }
   }, [initialData, reset]);
 
-
   const onSubmit = async (values) => {
     if (!isEdit && !selectedQuiz) {
       return Swal.fire("Error", "Please select a quiz", "error");
     }
+
     if (!isEdit) {
       const start = new Date(values.startTime);
       const end = new Date(values.endTime);
-      const durationMinutes =
-        (end - start) / (1000 * 60);
+      const durationMinutes = (end - start) / (1000 * 60);
 
       if (durationMinutes < selectedQuiz.timeLimit) {
         return Swal.fire(
@@ -93,6 +95,10 @@ export default function ContestForm({
       formData.append("title", values.title);
       formData.append("startTime", values.startTime);
       formData.append("endTime", values.endTime);
+
+      formData.append("prizeFirst", values.prizeFirst);
+      formData.append("prizeSecond", values.prizeSecond);
+      formData.append("prizeThird", values.prizeThird);
 
       if (!isEdit) {
         formData.append("quiz", values.quiz);
@@ -130,7 +136,6 @@ export default function ContestForm({
       );
     }
   };
-
 
   return (
     <form
@@ -172,9 +177,7 @@ export default function ContestForm({
         <input
           type="file"
           accept="image/*"
-          onChange={(e) =>
-            setImageFile(e.target.files[0])
-          }
+          onChange={(e) => setImageFile(e.target.files[0])}
           className="w-full border rounded-lg p-2"
         />
       </div>
@@ -210,6 +213,7 @@ export default function ContestForm({
           </select>
         )}
       </div>
+
       <div>
         <label className="text-sm font-medium text-gray-600">
           Entry Fee (₹)
@@ -229,26 +233,83 @@ export default function ContestForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
+          <label className="text-sm font-medium text-gray-600">
+            Start Time
+          </label>
           <input
             type="datetime-local"
             {...register("startTime")}
-            className="border rounded-lg p-2 w-full"
+            className="mt-1 border rounded-lg p-2 w-full"
           />
           {errors.startTime && (
-            <p className="text-red-500 text-sm">
+            <p className="text-red-500 text-sm mt-1">
               {errors.startTime.message}
             </p>
           )}
         </div>
+
         <div>
+          <label className="text-sm font-medium text-gray-600">
+            End Time
+          </label>
           <input
             type="datetime-local"
             {...register("endTime")}
-            className="border rounded-lg p-2 w-full"
+            className="mt-1 border rounded-lg p-2 w-full"
           />
           {errors.endTime && (
-            <p className="text-red-500 text-sm">
+            <p className="text-red-500 text-sm mt-1">
               {errors.endTime.message}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className="text-sm font-medium text-gray-600">
+            1st Prize (₹)
+          </label>
+          <input
+            type="number"
+            {...register("prizeFirst", { valueAsNumber: true })}
+            className="mt-1 w-full border rounded-lg p-2"
+          />
+          {errors.prizeFirst && (
+            <p className="text-red-500 text-sm">
+              {errors.prizeFirst.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-600">
+            2nd Prize (₹)
+          </label>
+          <input
+            type="number"
+            {...register("prizeSecond", { valueAsNumber: true })}
+            className="mt-1 w-full border rounded-lg p-2"
+          />
+          {errors.prizeSecond && (
+            <p className="text-red-500 text-sm">
+              {errors.prizeSecond.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-gray-600">
+            3rd Prize (₹)
+          </label>
+          <input
+            type="number"
+            {...register("prizeThird", { valueAsNumber: true })}
+            className="mt-1 w-full border rounded-lg p-2"
+          />
+          {errors.prizeThird && (
+            <p className="text-red-500 text-sm">
+              {errors.prizeThird.message}
             </p>
           )}
         </div>
