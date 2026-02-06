@@ -1,9 +1,13 @@
+import { useSelector } from "react-redux";
 import ContestCarousel from "../../components/ContestCarousel";
+import ContestPreviewCarousel from "../../components/ContestPreviewCarousel";
 import HeroBanner from "../../components/HeroBanner";
 import QuizCarousel from "../../components/QuizCarousel";
+import QuizPreviewCarousel from "../../components/QuizPreviewCarousel";
 import Smallbanner from "../../components/Smallbanner";
 
 const Home = () => {
+   const token=useSelector((state)=>state.auth.accessToken);
   return (
     <div className="min-h-screen container m-auto my-14">
       
@@ -13,7 +17,7 @@ const Home = () => {
 
       <section>
         <h2 className="my-8">Recently Published Contests</h2>
-        <ContestCarousel />
+        {token ? <ContestCarousel /> : <ContestPreviewCarousel />}
       </section>
 
       <section className="my-8">
@@ -22,7 +26,7 @@ const Home = () => {
 
       <section >
         <h2 className="my-8">Recently Published Quizzes</h2>
-        <QuizCarousel />
+       {token ? <QuizCarousel /> : <QuizPreviewCarousel />}
       </section>
 
     </div>
