@@ -5,23 +5,14 @@ import Swal from "sweetalert2";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contestSchema } from "../../schema/contestSchema";
 
-export default function ContestForm({
-  initialData,
-  onClose,
-  onSuccess,
-}) {
+export default function ContestForm({ initialData, onClose, onSuccess, }) {
   const isEdit = !!initialData;
 
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting }, } = useForm({
     resolver: zodResolver(contestSchema),
     defaultValues: {
       title: "",
@@ -167,19 +158,11 @@ export default function ContestForm({
         </label>
 
         {isEdit && initialData?.image && (
-          <img
-            src={initialData.image}
-            alt="contest"
-            className="h-32 rounded-lg mb-2 object-cover"
-          />
+          <img src={initialData.image} alt="contest" className="h-32 rounded-lg mb-2 object-cover" />
         )}
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImageFile(e.target.files[0])}
-          className="w-full border rounded-lg p-2"
-        />
+        <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="w-full border rounded-lg p-2" />
+
       </div>
 
       <div>

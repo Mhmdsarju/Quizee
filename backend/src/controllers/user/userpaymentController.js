@@ -3,6 +3,7 @@ import crypto from "crypto";
 import dotenv from "dotenv";
 import { creditWallet } from "../../services/walletService.js";
 import walletTransactionModel from "../../models/walletTransaction.js";
+import { statusCode } from "../../constant/constants.js";
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ const razorpay = new Razorpay({
 export const createOrder = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(statusCode.UNAUTHORIZED).json({ message: "Unauthorized" });
     }
 
     const { amount } = req.body;
@@ -30,14 +31,14 @@ export const createOrder = async (req, res) => {
     res.json(order);
   } catch (err) {
     console.error("Create order error:", err.message);
-    res.status(500).json({ message: "Create order failed" });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Create order failed" });
   }
 };
 
 export const verifyPayment = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(statusCode.UNAUTHORIZED).json({ message: "Unauthorized" });
     }
 
     const {
@@ -72,6 +73,6 @@ export const verifyPayment = async (req, res) => {
     res.json({ message: "Wallet credited successfully" });
   } catch (err) {
     console.error("Verify payment error:", err);
-    res.status(500).json({ message: "Payment verification error" });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Payment verification error" });
   }
 };

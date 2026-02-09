@@ -28,7 +28,7 @@ export const sendExistingCertificateController = async (req, res) => {
 
     res.json({ message: "Certificate sent to email" });
   } catch (err) {
-    console.error("MAIL ERROR 👉", err);
+    console.error("MAIL ERROR ", err);
     res.status(500).json({ message: "Failed to send certificate" });
   }
 };

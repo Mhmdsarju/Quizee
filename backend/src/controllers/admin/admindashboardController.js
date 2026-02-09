@@ -1,6 +1,7 @@
 import userModel from "../../models/userModel.js";
 import quizModel from "../../models/quizModel.js";
 import contestModel from "../../models/contestModel.js"
+import { statusCode } from "../../constant/constants.js";
 
 
 
@@ -29,13 +30,13 @@ export const getDashboardStats = async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    res.status(200).json({
+    res.status(statusCode.OK).json({
       totalUsers,
       activeQuizzes,
       activeContests,
       chartData: last7Days,
     });
   } catch (error) {
-    res.status(500).json({ message: "Dashboard stats error", error });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Dashboard stats error", error });
   }
 };

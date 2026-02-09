@@ -50,16 +50,28 @@ export const addQuestion = async (req, res) => {
 
 
 export const getQuestionsByQuiz = async (req, res) => {
-  const questions = await getQuestionsByQuizService(req.params.quizId);
-  res.json(questions);
+  try {
+    const questions = await getQuestionsByQuizService(req.params.quizId);
+    res.json(questions);
+  } catch (err) {
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  }
 };
 
 export const updateQuestion = async (req, res) => {
-  const updated = await updateQuestionService(req.params.id, req.body);
-  res.json(updated);
+  try {
+    const updated = await updateQuestionService(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  }
 };
 
 export const deleteQuestion = async (req, res) => {
-  await deleteQuestionService(req.params.id);
-  res.json({ message: "Question deleted" });
+  try {
+    await deleteQuestionService(req.params.id);
+    res.json({ message: "Question deleted" });
+  } catch (err) {
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  }
 };

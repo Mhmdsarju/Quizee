@@ -13,13 +13,7 @@ export default function AddQuestionModal({ quizId, onClose, onSuccess }) {
   }
 
   try {
-    await api.post("/admin/questions", {
-      quizId,
-      question,
-      options,
-      correctAnswer,
-    });
-
+    await api.post("/admin/questions", {quizId,question,options,correctAnswer,});
     Swal.fire("Success", "Question added", "success");
     onSuccess();
     onClose();

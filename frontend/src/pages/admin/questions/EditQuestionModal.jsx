@@ -8,11 +8,7 @@ export default function EditQuestionModal({ question, onClose, onSuccess }) {
   const [correctAnswer, setCorrectAnswer] = useState(question.correctAnswer);
 
   const handleUpdate = async () => {
-    await api.put(`/admin/questions/${question._id}`, {
-      question: qText,
-      options,
-      correctAnswer,
-    });
+    await api.put(`/admin/questions/${question._id}`, {question: qText,options,correctAnswer,});
 
     Swal.fire("Updated", "Question updated", "success");
     onSuccess();

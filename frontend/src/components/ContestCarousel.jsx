@@ -5,11 +5,7 @@ import { useContest } from "../hooks/useContest";
 const ContestCarousel = () => {
   const navigate = useNavigate();
 
-  const { data, isLoading } = useContest({
-    search: "",
-    sort: "latest",
-    page: 1,
-  });
+  const { data, isLoading } = useContest({ search: "",sort: "latest",page: 1});
 
   if (isLoading) {
     return (

@@ -8,12 +8,7 @@ const QuizCarousel = () => {
   const navigate = useNavigate();
   const token = useSelector((s) => s.auth.accessToken);
 
-  const { data, isLoading } = useQuizzes({
-    category: "",
-    sort: "latest",
-    page: 1,
-    search: "",
-  });
+  const { data, isLoading } = useQuizzes({category: "",sort: "latest",page: 1,search: ""});
 
   const { data: attemptedQuizIds = [] } = useAttemptedQuizIds(token);
 

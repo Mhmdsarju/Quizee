@@ -1,15 +1,10 @@
 import walletTransactionModel from "../../models/walletTransaction.js";
 import { paginateAndSearch } from "../../utils/paginateAndSearch.js";
 import { generatePDF } from "../../utils/genarateReportPDF.js";
-
+import { statusCode } from "../../constant/constants.js";
 
 const INCOME_REASONS = ["add_money", "contest_fee", "referral_reward"];
-const EXPENSE_REASONS = [
-  "reward",
-  "contest_reward",
-  "refund",
-  "admin_adjustment",
-];
+const EXPENSE_REASONS = ["reward","contest_reward","refund","admin_adjustment"];
 
 
 export const getDashboardSummary = async (req, res) => {
@@ -41,7 +36,7 @@ export const getDashboardSummary = async (req, res) => {
       netProfit: income - expense,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -72,7 +67,7 @@ export const getMonthlyReport = async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 export const getDailyReport = async (req, res) => {
@@ -100,7 +95,7 @@ export const getDailyReport = async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -144,7 +139,7 @@ export const getCustomDateReport = async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -222,7 +217,7 @@ export const downloadDailyReportPDF = async (req, res) => {
 
     generatePDF({
       title: "Daily Quiz Participation Report",
-      rows: data, // 👈 user-level rows
+      rows: data, 
       summary,
       res,
     });
@@ -230,7 +225,7 @@ export const downloadDailyReportPDF = async (req, res) => {
     return;
   } catch (err) {
     if (!res.headersSent) {
-      res.status(500).json({ message: err.message });
+      res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
     }
   }
 };
@@ -324,7 +319,7 @@ export const downloadMonthlyReportPDF = async (req, res) => {
     });
   } catch (err) {
     if (!res.headersSent) {
-      res.status(500).json({ message: err.message });
+      res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
     }
   }
 };
@@ -423,14 +418,10 @@ export const downloadCustomReportPDF = async (req, res) => {
     });
   } catch (err) {
     if (!res.headersSent) {
-      res.status(500).json({ message: err.message });
+      res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
     }
   }
 };
-
-
-
-/* ================= REASON WISE ================= */
 
 export const getReasonWiseReport = async (req, res) => {
   try {
@@ -441,11 +432,9 @@ export const getReasonWiseReport = async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
-
-/* ================= ADMIN TRANSACTIONS ================= */
 
 export const getTransactions = async (req, res) => {
   try {
@@ -473,6 +462,6 @@ export const getTransactions = async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };

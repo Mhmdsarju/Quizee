@@ -1,8 +1,8 @@
 
+import { statusCode } from "../../constant/constants.js";
 import contestModel from "../../models/contestModel.js";
 import contestResultModel from "../../models/contestResultModel.js";
 import { getContestLeaderboardService, getContestQuizPlayService, getUserContestsService, joinContestService, submitContestQuizService, } from "../../services/contestService.js";
-import { getUserQuizHistoryService } from "../../services/historyService.js";
 
 export const getUserContestsHandler = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ export const getUserContestsHandler = async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -31,12 +31,12 @@ export const joinContestHandler = async (req, res) => {
 
     switch (result.status) {
       case "NOT_STARTED":
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
           message: "Contest not started yet",
         });
 
       case "COMPLETED":
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
           message: "Contest already completed",
         });
 
@@ -48,7 +48,7 @@ export const joinContestHandler = async (req, res) => {
         });
 
       case "INSUFFICIENT_BALANCE":
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
           message: "Insufficient wallet balance",
         });
 
@@ -60,7 +60,7 @@ export const joinContestHandler = async (req, res) => {
         });
     }
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -71,7 +71,7 @@ export const submitContestQuizHandler = async (req, res) => {
     const { answers, timeTaken } = req.body;
 
     if (!Array.isArray(answers)) {
-      return res.status(400).json({
+      return res.status(statusCode.BAD_REQUEST).json({
         message: "Answers array is required",
       });
     }
@@ -84,18 +84,18 @@ export const submitContestQuizHandler = async (req, res) => {
     });
 
     if (result.status === "ALREADY_SUBMITTED") {
-      return res.status(400).json({
+      return res.status(statusCode.BAD_REQUEST).json({
         message: "You have already submitted this contest",
       });
     }
     if (result.status === "INVALID_ANSWERS") {
-      return res.status(400).json({
+      return res.status(statusCode.BAD_REQUEST).json({
         message: "Please answer all questions before submitting",
       });
     }
 
     if (result.status === "NO_QUESTIONS") {
-      return res.status(400).json({
+      return res.status(statusCode.BAD_REQUEST).json({
         message: "No questions found for this contest",
       });
     }
@@ -108,7 +108,7 @@ export const submitContestQuizHandler = async (req, res) => {
       percentage: result.result.percentage,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -123,7 +123,7 @@ export const getContestLeaderboardHandler = async (req, res) => {
 
     res.json(leaderboard);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -160,7 +160,7 @@ export const getContestQuizPlayHandler = async (req, res) => {
 
       case "NO_QUESTIONS":
         return res
-          .status(400)
+          .status(statusCode.BAD_REQUEST)
           .json({ message: "No questions available" });
 
       case "SUCCESS":
@@ -171,7 +171,7 @@ export const getContestQuizPlayHandler = async (req, res) => {
     }
   } catch (err) {
     res
-      .status(500)
+      .status(statusCode.INTERNAL_SERVER_ERROR)
       .json({ message: err.message });
   }
 };
@@ -208,7 +208,7 @@ export const getContestStatusHandler = async (req, res) => {
       hasJoined: !!hasJoined,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 

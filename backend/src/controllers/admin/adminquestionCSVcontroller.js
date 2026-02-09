@@ -1,16 +1,18 @@
 import csv from "csv-parser";
 import { Readable } from "stream";
 import questionModel from "../../models/questionModel.js";
+import { statusCode } from "../../constant/constants.js";
+
 
 export const uploadQuestionsCSV = async (req, res) => {
   const { quizId } = req.body;
 
   if (!quizId) {
-    return res.status(400).json({ message: "quizId required" });
+    return res.status(statusCode.BAD_REQUEST).json({ message: "quizId required" });
   }
 
   if (!req.file) {
-    return res.status(400).json({ message: "CSV file required" });
+    return res.status(statusCode.BAD_REQUEST).json({ message: "CSV file required" });
   }
 
   const questions = [];
@@ -34,7 +36,7 @@ export const uploadQuestionsCSV = async (req, res) => {
       ) {
         hasError = true;
         stream.destroy();
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
           message: "Invalid CSV format",
           expectedFormat:
             "question, optionA, optionB, optionC, optionD, correctAnswer",
@@ -46,7 +48,7 @@ export const uploadQuestionsCSV = async (req, res) => {
       if (![0, 1, 2, 3].includes(correctIndex)) {
         hasError = true;
         stream.destroy();
-        return res.status(400).json({
+        return res.status(statusCode.BAD_REQUEST).json({
           message: "correctAnswer must be between 0 and 3",
         });
       }
@@ -81,21 +83,21 @@ export const uploadQuestionsCSV = async (req, res) => {
       );
 
       if (filteredQuestions.length === 0) {
-        return res.status(409).json({
+        return res.status(statusCode.CONFLICT).json({
           message: "All questions already exist",
         });
       }
 
       await questionModel.insertMany(filteredQuestions);
 
-      res.status(201).json({
+      res.status(statusCode.CREATED).json({
         message: "CSV uploaded successfully",
         totalInserted: filteredQuestions.length,
         skippedDuplicates: questions.length - filteredQuestions.length,
       });
     })
 .on("error", (err) => {
-      return res.status(400).json({
+      return res.status(statusCode.BAD_REQUEST).json({
         message: "CSV parsing failed",
         error: err.message,
       });
