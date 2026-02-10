@@ -1,29 +1,26 @@
+import asyncHandler from "express-async-handler";
 import {addQuestionService,getQuestionsByQuizService,updateQuestionService,deleteQuestionService,} from "../../services/questionService.js";
 import { statusCode } from "../../constant/constants.js";
 import questionModel from "../../models/questionModel.js";
+import AppError from "../../utils/AppError.js";
 
+export const addQuestion = asyncHandler(async (req, res) => {
+  const { quizId, question, options, correctAnswer } = req.body;
 
-export const addQuestion = async (req, res) => {
+  if (!quizId || !question || options?.length !== 4) {
+    throw new AppError("Invalid data", statusCode.BAD_REQUEST);
+  }
+
+  const exists = await questionModel.findOne({
+    quizId,
+    question: question.trim(),
+  });
+
+  if (exists) {
+    throw new AppError("Question already exists", statusCode.CONFLICT);
+  }
+
   try {
-    const { quizId, question, options, correctAnswer } = req.body;
-
-    if (!quizId || !question || options?.length !== 4) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .json({ message: "Invalid data" });
-    }
-
-    const exists = await questionModel.findOne({
-      quizId,
-      question: question.trim(),
-    });
-
-    if (exists) {
-      return res
-        .status(statusCode.CONFLICT)
-        .json({ message: "Question already exists" });
-    }
-
     const q = await addQuestionService({
       quizId,
       question: question.trim(),
@@ -32,46 +29,36 @@ export const addQuestion = async (req, res) => {
     });
 
     res.status(statusCode.CREATED).json(q);
-  } catch (error) {
-    console.error("Add Question Error:", error);
-
-    if (error.code === 11000) {
-      return res
-        .status(statusCode.CONFLICT)
-        .json({ message: "Question already exists" });
+  } catch (err) {
+    if (err.code === 11000) {
+      throw new AppError("Question already exists", statusCode.CONFLICT);
     }
-
-    res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong" });
+    throw err;
   }
-};
+});
 
+export const getQuestionsByQuiz = asyncHandler(async (req, res) => {
+  const questions = await getQuestionsByQuizService(req.params.quizId);
+  res.json(questions);
+});
 
+export const updateQuestion = asyncHandler(async (req, res) => {
+  const updated = await updateQuestionService(req.params.id, req.body);
 
-export const getQuestionsByQuiz = async (req, res) => {
-  try {
-    const questions = await getQuestionsByQuizService(req.params.quizId);
-    res.json(questions);
-  } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  if (!updated) {
+    throw new AppError("Question not found", statusCode.NOT_FOUND);
   }
-};
 
-export const updateQuestion = async (req, res) => {
-  try {
-    const updated = await updateQuestionService(req.params.id, req.body);
-    res.json(updated);
-  } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
-  }
-};
+  res.json(updated);
+});
 
-export const deleteQuestion = async (req, res) => {
-  try {
-    await deleteQuestionService(req.params.id);
-    res.json({ message: "Question deleted" });
-  } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+export const deleteQuestion = asyncHandler(async (req, res) => {
+  const deleted = await deleteQuestionService(req.params.id);
+
+  if (!deleted) {
+    throw new AppError("Question not found", statusCode.NOT_FOUND);
   }
-};
+
+  res.json({ message: "Question deleted" });
+});
+

@@ -159,7 +159,7 @@ export default function ContestLeaderboard() {
           contestStatus === "COMPLETED" &&
           myResult &&
           myResult.rank <= 3 && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-10 text-center">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-10 text-center mt-5">
               <h2 className="text-lg font-semibold text-green-700">
                 Congratulations! You are a Winner
               </h2>

@@ -98,12 +98,22 @@ export const getAdminContestsService = async ({ search, page, limit }) => {
   return { ...result, data: dataWithCount };
 };
 
-export const getUserContestsService = async ({ search, page, limit, userId, sort = "newest" }) => {
+export const getUserContestsService = async ({ search, page, limit, userId, sort = "newest" ,status}) => {
   let sortQuery = { createdAt: -1 };
 
   if (sort === "oldest") sortQuery = { createdAt: 1 };
   if (sort === "feeLow") sortQuery = { entryFee: 1 };
   if (sort === "feeHigh") sortQuery = { entryFee: -1 };
+
+   const filter = {
+    isBlocked: false,
+  };
+
+   if (status && status !== "ALL") {
+    filter.status = status; // LIVE / UPCOMING / COMPLETED
+  } else {
+    filter.status = { $in: ["UPCOMING", "LIVE", "COMPLETED"] };
+  }
 
   const result = await paginateAndSearch({
     model: contestModel,
@@ -112,10 +122,7 @@ export const getUserContestsService = async ({ search, page, limit, userId, sort
     page,
     limit,
     populate: { path: "quiz", select: "title timeLimit" },
-    filter: {
-      isBlocked: false,
-      status: { $in: ["UPCOMING", "LIVE", "COMPLETED"] },
-    },
+    filter,
     sort: sortQuery,
   });
 

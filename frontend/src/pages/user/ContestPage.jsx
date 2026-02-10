@@ -9,6 +9,8 @@ export default function ContestPage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
 
   const navigate = useNavigate();
 
@@ -16,6 +18,7 @@ export default function ContestPage() {
     search,
     sort,
     page,
+    status: statusFilter,
   });
 
   const contests = contestRes?.data || [];
@@ -51,6 +54,21 @@ export default function ContestPage() {
             }}
             placeholder="Search contests..."
           />
+
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setPage(1);
+              setStatusFilter(e.target.value);
+            }}
+            className="border rounded-lg px-3 py-2 text-sm bg-white"
+          >
+            <option value="ALL">All</option>
+            <option value="LIVE">Live</option>
+            <option value="UPCOMING">Upcoming</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+
 
           <select
             value={sort}

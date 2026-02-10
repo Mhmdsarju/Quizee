@@ -35,7 +35,7 @@ const CsvQuestionUpload = ({ quizId, onSuccess }) => {
 
       await Swal.fire(
         "Success",
-        `${res.data.totalQuestions} questions uploaded`,
+        `questions uploaded`,
         "success"
       );
 

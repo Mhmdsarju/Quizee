@@ -1,105 +1,112 @@
+import asyncHandler from "express-async-handler";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import questionModel from "../../models/questionModel.js";
 import { statusCode } from "../../constant/constants.js";
+import AppError from "../../utils/AppError.js";
 
-
-export const uploadQuestionsCSV = async (req, res) => {
+export const uploadQuestionsCSV = asyncHandler(async (req, res) => {
   const { quizId } = req.body;
 
   if (!quizId) {
-    return res.status(statusCode.BAD_REQUEST).json({ message: "quizId required" });
+    throw new AppError("quizId required", statusCode.BAD_REQUEST);
   }
 
   if (!req.file) {
-    return res.status(statusCode.BAD_REQUEST).json({ message: "CSV file required" });
+    throw new AppError("CSV file required", statusCode.BAD_REQUEST);
   }
 
   const questions = [];
-  const stream = Readable.from(req.file.buffer);
 
-  let hasError = false;
+  await new Promise((resolve, reject) => {
+    const stream = Readable.from(req.file.buffer);
 
-  stream
-    .pipe(csv())
-    .on("data", (row) => {
-      if (hasError) return;
+    stream
+      .pipe(csv())
+      .on("data", (row) => {
+        // validation
+        if (
+          !row.question ||
+          !row.optionA ||
+          !row.optionB ||
+          !row.optionC ||
+          !row.optionD ||
+          row.correctAnswer === undefined
+        ) {
+          stream.destroy();
+          return reject(
+            new AppError(
+              "Invalid CSV format. Expected: question, optionA, optionB, optionC, optionD, correctAnswer",
+              statusCode.BAD_REQUEST
+            )
+          );
+        }
 
-      // validation
-      if (
-        !row.question ||
-        !row.optionA ||
-        !row.optionB ||
-        !row.optionC ||
-        !row.optionD ||
-        row.correctAnswer === undefined
-      ) {
-        hasError = true;
-        stream.destroy();
-        return res.status(statusCode.BAD_REQUEST).json({
-          message: "Invalid CSV format",
-          expectedFormat:
-            "question, optionA, optionB, optionC, optionD, correctAnswer",
-        });
-      }
+        const correctIndex = Number(row.correctAnswer);
 
-      const correctIndex = Number(row.correctAnswer);
+        if (![0, 1, 2, 3].includes(correctIndex)) {
+          stream.destroy();
+          return reject(
+            new AppError(
+              "correctAnswer must be between 0 and 3",
+              statusCode.BAD_REQUEST
+            )
+          );
+        }
 
-      if (![0, 1, 2, 3].includes(correctIndex)) {
-        hasError = true;
-        stream.destroy();
-        return res.status(statusCode.BAD_REQUEST).json({
-          message: "correctAnswer must be between 0 and 3",
-        });
-      }
-
-      questions.push({
-        quizId,
-        question: row.question,
-        options: [
-          row.optionA,
-          row.optionB,
-          row.optionC,
-          row.optionD,
-        ],
-        correctAnswer: correctIndex,
-      });
-    })
-    .on("end", async () => {
-      if (hasError) return;
-
-      const existing = await questionModel.find(
-        {
+        questions.push({
           quizId,
-          question: { $in: questions.map(q => q.question) },
-        },
-        { question: 1 }
-      );
-
-      const existingSet = new Set(existing.map(q => q.question));
-
-      const filteredQuestions = questions.filter(
-        q => !existingSet.has(q.question)
-      );
-
-      if (filteredQuestions.length === 0) {
-        return res.status(statusCode.CONFLICT).json({
-          message: "All questions already exist",
+          question: row.question,
+          options: [
+            row.optionA,
+            row.optionB,
+            row.optionC,
+            row.optionD,
+          ],
+          correctAnswer: correctIndex,
         });
-      }
+      })
+      .on("end", resolve)
+      .on("error", (err) =>
+        reject(
+          new AppError(
+            `CSV parsing failed: ${err.message}`,
+            statusCode.BAD_REQUEST
+          )
+        )
+      );
+  });
 
-      await questionModel.insertMany(filteredQuestions);
+  if (questions.length === 0) {
+    throw new AppError("No valid questions found in CSV", statusCode.BAD_REQUEST);
+  }
 
-      res.status(statusCode.CREATED).json({
-        message: "CSV uploaded successfully",
-        totalInserted: filteredQuestions.length,
-        skippedDuplicates: questions.length - filteredQuestions.length,
-      });
-    })
-.on("error", (err) => {
-      return res.status(statusCode.BAD_REQUEST).json({
-        message: "CSV parsing failed",
-        error: err.message,
-      });
-    });
-};
+  const existing = await questionModel.find(
+    {
+      quizId,
+      question: { $in: questions.map((q) => q.question) },
+    },
+    { question: 1 }
+  );
+
+  const existingSet = new Set(existing.map((q) => q.question));
+
+  const filteredQuestions = questions.filter(
+    (q) => !existingSet.has(q.question)
+  );
+
+  if (filteredQuestions.length === 0) {
+    throw new AppError(
+      "All questions already exist",
+      statusCode.CONFLICT
+    );
+  }
+
+  await questionModel.insertMany(filteredQuestions);
+
+  res.status(statusCode.CREATED).json({
+    message: "CSV uploaded successfully",
+    totalInserted: filteredQuestions.length,
+    skippedDuplicates: questions.length - filteredQuestions.length,
+  });
+});

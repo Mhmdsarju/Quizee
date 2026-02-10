@@ -1,99 +1,104 @@
+import asyncHandler from "express-async-handler";
 import {createQuizService,getAllQuizService,getQuizByIdService,QuizStatusService,updateQuizService,} from "../../services/quizService.js";
 import { statusCode } from "../../constant/constants.js";
 import cloudinary from "../../config/cloudinary.js";
 import quizModel from "../../models/quizModel.js";
+import AppError from "../../utils/AppError.js";
 
-export const createQuiz = async (req, res) => {
-  try {
-    const { title, description, category, timeLimit } = req.body;
+export const createQuiz = asyncHandler(async (req, res) => {
+  const { title, description, category, timeLimit } = req.body;
 
-    let imageUrl = null;
+  let imageUrl = null;
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "quiz-app/quizzes",
-      });
-      imageUrl = result.secure_url;
-    }
-
-    const quiz = await createQuizService({title,description,category,timeLimit,image: imageUrl});
-
-    const populatedQuiz = await quizModel.findById(quiz._id).populate("category", "name");
-    res.status(statusCode.CREATED).json({ quiz: populatedQuiz });
-  } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  if (req.file) {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "quiz-app/quizzes",
+    });
+    imageUrl = result.secure_url;
   }
-};
 
-export const getAllQuiz = async (req, res) => {
-  try {
-    const { search = "", page = 1, limit = 10 } = req.query;
+  const quiz = await createQuizService({
+    title,
+    description,
+    category,
+    timeLimit,
+    image: imageUrl,
+  });
 
-    const result = await getAllQuizService({search,page,limit,});
+  const populatedQuiz = await quizModel
+    .findById(quiz._id)
+    .populate("category", "name");
 
-    res.json(result);
-  } catch (err) {
-    console.error("ADMIN QUIZ ERROR:", err);
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch quizzes" });
+  res.status(statusCode.CREATED).json({ quiz: populatedQuiz });
+});
+
+export const getAllQuiz = asyncHandler(async (req, res) => {
+  const { search = "", page = 1, limit = 10 } = req.query;
+
+  const result = await getAllQuizService({
+    search,
+    page: Number(page),
+    limit: Number(limit),
+  });
+
+  res.json(result);
+});
+
+export const getQuizById = asyncHandler(async (req, res) => {
+  const quiz = await getQuizByIdService(req.params.id);
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", statusCode.NOT_FOUND);
   }
-};
 
-export const getQuizById = async (req, res) => {
-  try {
-    const quiz = await getQuizByIdService(req.params.id);
-    if (!quiz)
-      return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
-    res.json(quiz);
-  } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  res.json(quiz);
+});
+
+export const updateQuiz = asyncHandler(async (req, res) => {
+  const { title, description, category, timeLimit } = req.body;
+
+  let imageUrl;
+
+  if (req.file) {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "quiz-app/quizzes",
+    });
+    imageUrl = result.secure_url;
   }
-};
 
-export const updateQuiz = async (req, res) => {
-  try {
-    const { title, description, category, timeLimit } = req.body;
+  const data = {
+    title,
+    description,
+    category,
+    timeLimit,
+  };
 
-    let imageUrl;
-
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "quiz-app/quizzes",
-      });
-      imageUrl = result.secure_url;
-    }
-
-    const data = {title,description,category,timeLimit,};
-
-    if (imageUrl) {
-      data.image = imageUrl;
-    }
-
-    const quiz = await updateQuizService(req.params.id, data);
-
-    if (!quiz)
-      return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
-
-    const populatedQuiz = await quizModel.findById(quiz._id).populate("category", "name");
-    res.json({ quiz: populatedQuiz });
-  } catch (err) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
+  if (imageUrl) {
+    data.image = imageUrl;
   }
-};
 
+  const quiz = await updateQuizService(req.params.id, data);
 
-export const updateQuizStatus = async (req, res) => {
-  try {
-    const quiz = await QuizStatusService(req.params.id);
-
-    if (!quiz) return res.status(statusCode.NOT_FOUND).json({ message: "Quiz not found" });
-
-    res.json({message: quiz.isActive ? "Quiz enabled" : "Quiz blocked",quiz,});
-
-  } catch (err) {
-
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: err.message });
-
+  if (!quiz) {
+    throw new AppError("Quiz not found", statusCode.NOT_FOUND);
   }
-};
 
+  const populatedQuiz = await quizModel
+    .findById(quiz._id)
+    .populate("category", "name");
 
+  res.json({ quiz: populatedQuiz });
+});
+
+export const updateQuizStatus = asyncHandler(async (req, res) => {
+  const quiz = await QuizStatusService(req.params.id);
+
+  if (!quiz) {
+    throw new AppError("Quiz not found", statusCode.NOT_FOUND);
+  }
+
+  res.json({
+    message: quiz.isActive ? "Quiz enabled" : "Quiz blocked",
+    quiz,
+  });
+});

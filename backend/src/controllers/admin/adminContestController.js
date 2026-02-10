@@ -68,10 +68,7 @@ export const toggleBlockContestHandler = asyncHandler(async (req, res) => {
   }
 
   if (result.status === "COMPLETED") {
-    throw new AppError(
-      "Completed contest cannot be blocked",
-      statusCode.BAD_REQUEST
-    );
+    throw new AppError("Completed contest cannot be blocked",statusCode.BAD_REQUEST);
   }
 
   res.json({
