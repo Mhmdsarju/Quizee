@@ -31,7 +31,8 @@ contestStatusCron();
 
 const app = express();
 
-const allowedOrigins = [process.env.FRONTEND_URL,process.env.ADMIN_URL,];
+const allowedOrigins = ["https://www.quizee.online",
+    "https://quizee.online"];
 
 
 app.use(
