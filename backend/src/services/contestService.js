@@ -8,10 +8,14 @@ import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 import UserModel from "../models/userModel.js"
 import notificationModel from '../models/notificationModel.js'
 import { getIo } from "../config/socket.js";
+import { generateCertificate } from "../utils/generateCertificate.js";
+import path from "path"
+import { processReferralReward } from "./referralRewardService.js";
 
 export const createContestService = async (payload) => {
   const users = await UserModel.find({}, "_id");
-   const contestExists = await contestModel.exists({
+
+  const contestExists = await contestModel.exists({
     title: new RegExp(`^${payload.title.trim()}$`, "i"),
   });
 
@@ -30,12 +34,20 @@ export const createContestService = async (payload) => {
   const contest = await contestModel.create({
     ...payload,
     image: payload.image || null,
+
+    prizeConfig: {
+      first: payload.prizeFirst ?? 100,
+      second: payload.prizeSecond ?? 50,
+      third: payload.prizeThird ?? 25,
+    },
+
     questionsSnapshot: questions.map((q) => ({
       question: q.question,
       options: q.options,
       correctAnswer: q.correctAnswer,
     })),
   });
+
 
   const notifications = users.map(user => ({
     userId: user._id,
@@ -86,12 +98,22 @@ export const getAdminContestsService = async ({ search, page, limit }) => {
   return { ...result, data: dataWithCount };
 };
 
-export const getUserContestsService = async ({search,page,limit,userId,sort = "newest"}) => {
+export const getUserContestsService = async ({ search, page, limit, userId, sort = "newest" ,status}) => {
   let sortQuery = { createdAt: -1 };
 
   if (sort === "oldest") sortQuery = { createdAt: 1 };
   if (sort === "feeLow") sortQuery = { entryFee: 1 };
   if (sort === "feeHigh") sortQuery = { entryFee: -1 };
+
+   const filter = {
+    isBlocked: false,
+  };
+
+   if (status && status !== "ALL") {
+    filter.status = status; // LIVE / UPCOMING / COMPLETED
+  } else {
+    filter.status = { $in: ["UPCOMING", "LIVE", "COMPLETED"] };
+  }
 
   const result = await paginateAndSearch({
     model: contestModel,
@@ -100,10 +122,7 @@ export const getUserContestsService = async ({search,page,limit,userId,sort = "n
     page,
     limit,
     populate: { path: "quiz", select: "title timeLimit" },
-    filter: {
-      isBlocked: false,
-      status: { $in: ["UPCOMING", "LIVE", "COMPLETED"] },
-    },
+    filter,
     sort: sortQuery,
   });
 
@@ -160,6 +179,7 @@ export const joinContestService = async ({ contestId, userId }) => {
     reason: "contest_fee",
     reference: contestId.toString(),
     balanceAfter: wallet.balance,
+    contestTitle:contest.title,
   });
 
   await contestParticipantsModel.create({
@@ -231,6 +251,9 @@ export const editContestService = async (contestId, payload) => {
     "startTime",
     "endTime",
     "image",
+    "prizeFirst",
+  "prizeSecond",
+  "prizeThird",
   ];
 
   allowed.forEach((f) => {
@@ -253,12 +276,9 @@ export const endContestService = async (contestId) => {
 
   return { status: "SUCCESS" };
 };
-export const submitContestQuizService = async ({
-  contestId,
-  userId,
-  answers,
-  timeTaken,
-}) => {
+
+
+export const submitContestQuizService = async ({ contestId, userId, answers, timeTaken, }) => {
   try {
     const contest = await contestModel.findById(contestId);
 
@@ -266,19 +286,19 @@ export const submitContestQuizService = async ({
       return { status: "CONTEST_NOT_FOUND" };
     }
 
+    if (contest.status === "COMPLETED") {
+      return { status: "CONTEST_COMPLETED" };
+    }
     const questions = contest.questionsSnapshot;
 
-    // SAFETY CHECK 1
     if (!Array.isArray(questions) || questions.length === 0) {
       return { status: "NO_QUESTIONS" };
     }
 
-    //  SAFETY CHECK 2 (MOST IMPORTANT)
     if (!Array.isArray(answers) || answers.length !== questions.length) {
       return { status: "INVALID_ANSWERS" };
     }
 
-    // SAFETY CHECK 3 (duplicate submit)
     const already = await contestResultModel.findOne({
       contestId,
       userId,
@@ -312,7 +332,6 @@ export const submitContestQuizService = async ({
 
     return { status: "SUCCESS", result };
   } catch (err) {
-    // 🔥 IMPORTANT: catch duplicate key
     if (err.code === 11000) {
       return { status: "ALREADY_SUBMITTED" };
     }
@@ -326,7 +345,7 @@ export const getContestLeaderboardService = async ({ contestId }) => {
   return await contestResultModel
     .find({ contestId })
     .populate("userId", "name")
-    .sort({ score: -1, timeTaken: 1, createdAt: 1 });
+    .sort({ rank: 1 });
 };
 
 
@@ -355,3 +374,89 @@ export const getContestQuizPlayService = async ({ contestId }) => {
     questions: contest.questionsSnapshot,
   };
 };
+
+export const completeContestAndRewardService = async (contestId) => {
+  const contest = await contestModel.findById(contestId);
+  if (!contest) return { status: "NOT_FOUND" };
+  if (contest.status !== "COMPLETED")
+    return { status: "NOT_COMPLETED" };
+
+
+  const alreadyRanked = await contestResultModel.findOne({
+    contestId,
+    rank: { $exists: true },
+  });
+  if (alreadyRanked) return { status: "ALREADY_PROCESSED" };
+
+
+  const results = await contestResultModel.find({ contestId }).populate("userId", "name").sort({ score: -1, timeTaken: 1, createdAt: 1 });
+
+  if (!results.length) return { status: "NO_PARTICIPANTS" };
+
+  let rank = 1;
+  for (const r of results) {
+    r.rank = rank++;
+    await r.save();
+  }
+
+  const CASH_REWARDS = {
+    1: contest.prizeConfig.first,
+    2: contest.prizeConfig.second,
+    3: contest.prizeConfig.third,
+  };
+
+  for (const r of results.slice(0, 3)) {
+    const amount = CASH_REWARDS[r.rank];
+    if (!amount) continue;
+
+    const wallet = await walletModel.findOneAndUpdate(
+      { user: r.userId },
+      { $inc: { balance: amount } },
+      { new: true, upsert: true }
+    );
+
+    await walletTransactionModel.create({
+      user: r.userId,
+      type: "credit",
+      amount,
+      reason: "contest_reward",
+      reference: contestId.toString(),
+      balanceAfter: wallet.balance,
+      contestTitle: contest.title,
+
+    });
+
+    r.rewardAmount = amount;
+    r.rewardCredited = true;
+
+    await processReferralReward({
+      winnerUserId: r.userId._id,
+      contest,
+      rank: r.rank,
+    })
+
+    //  GENERATE CERTIFICATE PDF
+    const certificatePath = await generateCertificate({
+      name: r.userId.name,
+      contestTitle: contest.title,
+      rank: r.rank,
+    });
+
+    //  SAVE CERTIFICATE 
+    r.certificateIssued = true;
+    r.certificateUrl = `/certificates/${path.basename(certificatePath)}`;
+    await r.save();
+
+    // optional notification
+    await notificationModel.create({
+      userId: r.userId,
+      title: "🎉 Contest Reward Credited",
+      message: `You won ₹${amount} in  ${contest.title}`,
+      contestId,
+    });
+  }
+
+  return { status: "SUCCESS" };
+};
+
+

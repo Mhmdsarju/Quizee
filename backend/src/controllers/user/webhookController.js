@@ -1,55 +1,70 @@
+import asyncHandler from "express-async-handler";
 import crypto from "crypto";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import { creditWallet } from "../../services/walletService.js";
 import walletTransactionModel from "../../models/walletTransaction.js";
+import AppError from "../../utils/AppError.js";
+import { statusCode } from "../../constant/constants.js";
 
 dotenv.config();
 
+export const razorpayWebhook = asyncHandler(async (req, res) => {
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-export const razorpayWebhook = async (req, res) => {
-  try {
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-    const signature = req.headers["x-razorpay-signature"];
+  if (!webhookSecret) {
+    throw new AppError(
+      "Webhook secret not configured",
+      statusCode.INTERNAL_SERVER_ERROR
+    );
+  }
 
-    const expectedSignature = crypto
-      .createHmac("sha256", webhookSecret)
-      .update(req.body)
-      .digest("hex");
+  const signature = req.headers["x-razorpay-signature"];
 
-    if (signature !== expectedSignature) {
-      return res.status(400).json({ message: "Invalid webhook signature" });
+  if (!signature) {
+    throw new AppError(
+      "Missing webhook signature",
+      statusCode.BAD_REQUEST
+    );
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", webhookSecret)
+    .update(req.body) 
+    .digest("hex");
+
+  if (signature !== expectedSignature) {
+    throw new AppError(
+      "Invalid webhook signature",
+      statusCode.BAD_REQUEST
+    );
+  }
+
+  const event = JSON.parse(req.body.toString());
+
+  if (event.event === "payment.captured") {
+    const payment = event.payload.payment.entity;
+
+    const paymentId = payment.id;
+    const amount = payment.amount / 100; 
+    const userId = payment.notes?.userId;
+
+    if (!userId) {
+      return res.json({ status: "ok" });
     }
 
-    const event = JSON.parse(req.body.toString());
+    const exists = await walletTransactionModel.findOne({
+      reference: paymentId,
+    });
 
-    if (event.event === "payment.captured") {
-      const payment = event.payload.payment.entity;
-
-      const paymentId = payment.id;
-      const amount = payment.amount / 100;
-      const userId = payment.notes?.userId;
-
-      if (!userId) {
-        return res.json({ status: "ok" });
-      }
-
-      const exists = await walletTransactionModel.findOne({
+    if (!exists) {
+      await creditWallet({
+        userId,
+        amount,
+        reason: "add_money",
         reference: paymentId,
       });
-
-      if (!exists) {
-        await creditWallet({
-          userId,
-          amount,
-          reason: "add_money",
-          reference: paymentId,
-        });
-      }
     }
-
-    res.json({ status: "ok" });
-  } catch (err) {
-    console.error("Webhook error:", err.message);
-    res.status(500).json({ message: "Webhook error" });
   }
-};
+
+  res.json({ status: "ok" });
+});

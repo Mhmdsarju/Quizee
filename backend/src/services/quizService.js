@@ -4,7 +4,7 @@ import { paginateAndSearch } from "../utils/paginateAndSearch.js";
 import quizAttemptModel from "../models/quizAttemptModel.js";
 import contestModel from "../models/contestModel.js";
 import contestParticipantsModel from "../models/contestParticipantsModel.js";
-
+import userModel from "../models/userModel.js";
 
 
 export const createQuizService = async (data) => {
@@ -191,6 +191,9 @@ export const submitQuizService = async (quizId, userId, answers) => {
   await quizModel.findByIdAndUpdate(quizId, {
     $inc: { attempts: 1 },
   });
+  await userModel.findByIdAndUpdate(userId,{
+    $inc:{totalScore:score},
+  })
 
   return {
     score,
@@ -256,5 +259,26 @@ export const getQuizPlayService = async ({
       category: quiz.category,
     },
     questions,
+  };
+};
+
+
+export const getUserRankService = async (userId) => {
+  const users = await userModel
+    .find({ role: "user" })
+    .sort({ totalScore: -1 })
+    .select("_id totalScore name");
+
+
+  const index = users.findIndex(
+    (u) => u._id.toString() === userId.toString()
+  );
+
+  if (index === -1) return null;
+
+  return {
+    rank: index + 1,
+    totalUsers: users.length,
+    totalScore: users[index].totalScore,
   };
 };

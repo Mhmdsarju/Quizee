@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import { useNotifications } from "../../hooks/useNotifications";
 import { FaCheck, FaCheckDouble } from "react-icons/fa";
+import { markAllNotificationsRead, markNotificationRead } from "../../api/notificationApi";
 
 
 export default function UserNotifications({ isOpen, onClose }) {
@@ -16,13 +17,13 @@ export default function UserNotifications({ isOpen, onClose }) {
     queryClient.setQueryData(["notifications"],(old=[])=>
     old.map((n)=>n._id === id ? {...n,isRead:true}:n)
   )
-  await api.patch(`/user/notifications/${id}/read`);
+  await markNotificationRead(id);
   };
 
   const markAll = async (id) => {
     queryClient.setQueryData(["notifications"],(old=[])=>
     old.map((n)=>({...n,isRead:true})))
-    await api.patch("/user/notifications/read-all");
+    await markAllNotificationsRead();
   };
 
   
@@ -32,10 +33,7 @@ export default function UserNotifications({ isOpen, onClose }) {
 
   return (
     <>
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/30 z-40"
-      />
+      <div onClick={onClose} className="fixed inset-0 bg-black/30 z-40" />
 
       <div className="fixed top-16 right-4 z-50 w-80 bg-white rounded-xl shadow-2xl flex flex-col">
         
@@ -44,11 +42,7 @@ export default function UserNotifications({ isOpen, onClose }) {
 
           <div className="flex gap-2">
             {unreadNotifications.length > 0 && (
-              <button
-                onClick={markAll}
-                title="Mark all as read"
-                className="text-green-600 text-sm"
-              >
+              <button onClick={markAll} title="Mark all as read" className="text-green-600 text-sm">
                 <FaCheckDouble size={14} />
               </button>
             )}
@@ -57,9 +51,7 @@ export default function UserNotifications({ isOpen, onClose }) {
         </div>
 
         <div className="max-h-[70vh] overflow-y-auto">
-          {isLoading && (
-            <p className="text-center py-6 text-sm">Loading...</p>
-          )}
+          {isLoading && ( <p className="text-center py-6 text-sm">Loading...</p> )}
 
           {!isLoading && unreadNotifications.length === 0 && (
             <p className="text-center py-6 text-sm text-gray-500">
@@ -68,10 +60,7 @@ export default function UserNotifications({ isOpen, onClose }) {
           )}
 
           {unreadNotifications.map((n) => (
-            <div
-              key={n._id}
-              className="px-4 py-3 border-b flex gap-3 hover:bg-gray-50"
-            >
+            <div key={n._id} className="px-4 py-3 border-b flex gap-3 hover:bg-gray-50" >
               <div className="flex-1">
                 <h4 className="text-sm font-medium">{n.title}</h4>
                 <p className="text-xs text-gray-600">

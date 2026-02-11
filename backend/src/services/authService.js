@@ -7,10 +7,11 @@ import OTP from "../models/otpModel.js";
 import { genarateOtp } from "../utils/OtpHelper.js";
 import { sendOTPEmail } from "../utils/emailService.js";
 import walletModel from "../models/walletModel.js";
+import { generateReferralCode } from "../utils/generateRefferalCode.js";
 
 const MAX_ATTEMPTS = 5;
 
-const signup = async ({ name, email, password, referredBy }) => {
+const signup = async ({ name, email, password, referralCode }) => {
   if (!name || !email || !password) {
     throw new Error("All fields are required");
   }
@@ -23,6 +24,24 @@ const signup = async ({ name, email, password, referredBy }) => {
   if (exists) {
     throw new Error("User already exists");
   }
+
+  let referredBy = null;
+
+  if (referralCode) {
+    const refUser = await userModel.findOne({ referralCode });
+
+    if (!refUser) {
+      throw new Error("Invalid referral code");
+    }
+
+    if (refUser.email === email) {
+      throw new Error("You cannot refer yourself");
+    }
+
+    referredBy = refUser._id;
+  }
+
+
   await OTP.deleteMany({ email, purpose: "signup" });
   const otp = genarateOtp();
   const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
@@ -35,7 +54,7 @@ const signup = async ({ name, email, password, referredBy }) => {
     data: {
       name,
       password,
-      referredBy: referredBy || null,
+      referredBy,
     },
   });
 
@@ -73,6 +92,7 @@ const verifyOtp = async ({ email, otp, purpose }) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
+    const referralCode=await generateReferralCode();
 
     user = await userModel.create({
       name,
@@ -80,6 +100,7 @@ const verifyOtp = async ({ email, otp, purpose }) => {
       password: hash,
       role: "user",
       referredBy,
+      referralCode,
       isVerified: true,
     });
 
@@ -180,6 +201,7 @@ const refresh = async (token) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      referralCode: user.referralCode,
     },
     accessToken: tokens.accessToken,
   };
@@ -256,19 +278,55 @@ const resetPassword = async ({ email, password }) => {
 };
 
 export const googleLogin = async (user) => {
-  const tokens = genarateToken(user);
+  let dbUser = await userModel.findOne({ email: user.email });
+
+  if (!dbUser) {
+    const referralCode = await generateReferralCode();
+
+    dbUser = await userModel.create({
+      name: user.name,
+      email: user.email,
+      role: "user",
+      referralCode,
+      isVerified: true,
+      totalScore: 0,
+    });
+
+    await walletModel.create({
+      user: dbUser._id,
+      balance: 0,
+    });
+  }
+
+  if (!dbUser.referralCode) {
+    dbUser.referralCode = await generateReferralCode();
+    await dbUser.save();
+  }
+
+  const walletExists = await walletModel.findOne({ user: dbUser._id });
+  if (!walletExists) {
+    await walletModel.create({
+      user: dbUser._id,
+      balance: 0,
+    });
+  }
+
+  const tokens = genarateToken(dbUser);
 
   return {
     user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      _id: dbUser._id,
+      name: dbUser.name,
+      email: dbUser.email,
+      role: dbUser.role,
+      referralCode: dbUser.referralCode,
+      totalScore: dbUser.totalScore,
     },
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
   };
 };
+
 
 
 export const changePasswordService = async (userId, oldPassword, newPassword) => {

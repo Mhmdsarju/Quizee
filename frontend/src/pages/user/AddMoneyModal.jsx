@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
 import api from "../../api/axios";
+import { createOrder} from "../../api/paymentApi";
+
 
 export default function AddMoneyModal({ onClose, onSuccess }) {
   const [amount, setAmount] = useState("");
@@ -21,10 +23,7 @@ export default function AddMoneyModal({ onClose, onSuccess }) {
         didOpen: () => Swal.showLoading(),
       });
 
-      const { data: order } = await api.post(
-        "/payment/create-order",
-        { amount }
-      );
+      const { data: order } = await createOrder(amount)
 
       Swal.close();
 

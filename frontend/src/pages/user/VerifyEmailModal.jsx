@@ -1,9 +1,9 @@
 import { useState } from "react";
-import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/authSlice";
 import Loader from "../../components/Loader";
+import { otpVerify, resendOtpApi } from "../../api/authApi";
 
 export default function VerifyEmailModal({ email, name, onClose }) {
   const dispatch = useDispatch();
@@ -17,11 +17,7 @@ export default function VerifyEmailModal({ email, name, onClose }) {
 
     try {
       setVerifying(true);
-      const res = await api.post("/auth/verify-otp", {
-        email,
-        otp,
-        purpose: "email-change",
-      });
+      const res = await otpVerify({email,otp,purpose: "email-change",});
 
       dispatch(updateUser(res.data.user));
 
@@ -49,10 +45,7 @@ export default function VerifyEmailModal({ email, name, onClose }) {
     try {
       setResending(true);
 
-      await api.post("/auth/resend-otp", {
-        email,
-        purpose: "email-change",
-      });
+  await resendOtpApi({email,purpose: "email-change"});
 
       Swal.fire("OTP Sent", "A new OTP has been sent", "success");
     } catch (err) {

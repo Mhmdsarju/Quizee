@@ -32,27 +32,32 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-   profileImage: {
-      type: String,
-      default: null,
-    },
     isBlocked: {
       type: Boolean,
       default: false
     },
-
+    referralCode: {
+      type: String,
+      unique: true,
+      index: true
+    },
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null
     },
-    isVerified:{
-      type:Boolean,
-      default:false
+    referralRewardGiven: {
+      type: Boolean,
+      default: false
     },
-    refreshTokenVersion:{
-      type:Number,
-      default:0
+
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
+    refreshTokenVersion: {
+      type: Number,
+      default: 0
     }
   },
   {
@@ -60,5 +65,5 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const userModel= mongoose.model("User",userSchema)
+const userModel = mongoose.model("User", userSchema)
 export default userModel;

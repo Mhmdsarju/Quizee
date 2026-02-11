@@ -5,6 +5,12 @@ import logo from "../assets/logo1.png";
 import { logoutApi } from "../api/authApi";
 import { logout } from "../redux/authSlice";
 import { FaBars } from "react-icons/fa";
+import { MdDashboard, MdOutlineDashboard } from "react-icons/md";
+import { FaUsers } from "react-icons/fa";
+import { BiCategory } from "react-icons/bi";
+import { SiQuizlet } from "react-icons/si";
+import { PiExamThin } from "react-icons/pi";
+import { GrTransaction } from "react-icons/gr";
 
 export default function AdminSidebar() {
   const dispatch = useDispatch();
@@ -60,22 +66,22 @@ export default function AdminSidebar() {
 
           <nav className="mt-4 space-y-1">
             <NavLink to="/dashboard" className={linkClass} onClick={() => setOpen(false)}>
-              Dashboard
+             <div className="flex items-center gap-2"><MdOutlineDashboard/>  <h1 className="text-center">Dashboard</h1></div>
             </NavLink>
             <NavLink to="/users" className={linkClass} onClick={() => setOpen(false)}>
-              Users
+             <div className="flex items-center gap-2"><FaUsers className="text-lg"/> <h1>Users</h1></div>
             </NavLink>
             <NavLink to="/categories" className={linkClass} onClick={() => setOpen(false)}>
-              Categories
+               <div className="flex items-center gap-2"><BiCategory className="text-lg"/> <h1>Categories</h1></div>
             </NavLink>
             <NavLink to="/quizzes" className={linkClass} onClick={() => setOpen(false)}>
-              Quizzes
+               <div className="flex items-center gap-2"><SiQuizlet className="text-lg"/> <h1>Quizzes</h1></div>
             </NavLink>
             <NavLink to="/contests" className={linkClass} onClick={() => setOpen(false)}>
-              Contests
+              <div className="flex items-center gap-2"><PiExamThin className="text-lg"/> <h1>Contests</h1></div>
             </NavLink>
             <NavLink to="/transactions" className={linkClass} onClick={() => setOpen(false)}>
-              Transactions
+             <div className="flex items-center gap-2"><GrTransaction className="text-lg"/> <h1>Transaction</h1></div>
             </NavLink>
           </nav>
         </div>

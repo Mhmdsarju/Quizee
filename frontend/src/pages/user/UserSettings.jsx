@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { changePassword } from "../../api/authApi";
+
 
 export default function UserSettings() {
   const [open, setOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function UserSettings() {
     }
 
     try {
-      await api.patch("/user/change-password", {oldPassword,newPassword,});
+      await changePassword({oldPassword,newPassword,});
 
       Swal.fire("Success", "Password updated successfully", "success");
       setOpen(false);

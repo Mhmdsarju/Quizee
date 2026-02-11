@@ -27,7 +27,7 @@ export default function GoogleSuccess() {
 
   return (
     <div className="h-screen flex items-center justify-center text-gray-400">
-      Logging in with Google...
+      Logging in with Google.....
     </div>
   );
 }

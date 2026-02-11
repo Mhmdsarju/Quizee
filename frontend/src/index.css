@@ -4,5 +4,16 @@
 
 body {
   font-size: 16px;   
-  font-family: "Darumadrop One", cursive;
+  
+  background-color: #F0E7D5; 
+  background-image: url("/bg-img.png");
+  background-repeat: repeat;
+  background-size: 560px 560px;
+}
+.user-app{
+font-family: "Darumadrop One", cursive;
+}
+
+.admin-app {
+  font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif;
 }

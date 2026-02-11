@@ -7,13 +7,13 @@ const contestSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique:true,
+      unique: true,
     },
 
     quiz: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
-      required: true, 
+      required: true,
     },
 
     entryFee: {
@@ -23,15 +23,15 @@ const contestSchema = new mongoose.Schema(
     },
 
     questionsSnapshot: [
-    {
-      question: String,
-      options: [String],
-      correctAnswer: Number,
-    }
-  ],
+      {
+        question: String,
+        options: [String],
+        correctAnswer: Number,
+      }
+    ],
     maxParticipants: {
       type: Number,
-      default: null, 
+      default: null,
     },
 
     startTime: {
@@ -55,16 +55,31 @@ const contestSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-   
+
     image: {
-      type: String, 
-      default: null,  
+      type: String,
+      default: null,
     },
+    prizeConfig: {
+      first: {
+        type: Number,
+        default: 100,
+      },
+      second: {
+        type: Number,
+        default: 50,
+      },
+      third: {
+        type: Number,
+        default: 25,
+      },
+    },
+
   },
   { timestamps: true }
 );
 
 
 
-const contestModel = mongoose.model("Contest",contestSchema);
+const contestModel = mongoose.model("Contest", contestSchema);
 export default contestModel;

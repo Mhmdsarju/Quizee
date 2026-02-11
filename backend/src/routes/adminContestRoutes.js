@@ -1,5 +1,5 @@
 import express from "express";
-import { createContestHandler, getAdminContestsHandler, editContestHandler, toggleBlockContestHandler, endContestHandler, } from "../controllers/admin/adminContestController.js";
+import { createContestHandler, getAdminContestsHandler, editContestHandler, toggleBlockContestHandler, endContestHandler, completeContestRewardHandler, } from "../controllers/admin/adminContestController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import upload from "../config/upload.js";
 
@@ -14,5 +14,7 @@ router.patch("/:id",protect,adminOnly,upload.single("image"),editContestHandler)
 router.patch("/:id/block",protect,adminOnly,toggleBlockContestHandler);
 
 router.patch("/:id/end",protect,adminOnly,endContestHandler);
+
+router.post("/:id/complete-reward",protect,adminOnly,completeContestRewardHandler);
 
 export default router;

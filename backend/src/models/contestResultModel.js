@@ -29,6 +29,24 @@ const contestResultSchema = new mongoose.Schema(
     timeTaken: Number,
 
     rank: Number,
+
+    rewardAmount: {
+      type: Number,
+      default: 0,
+    },
+    rewardCredited: {
+      type: Boolean,
+      default: false,
+    },
+
+    certificateIssued: {
+      type: Boolean,
+      default: false,
+    },
+    certificateUrl: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

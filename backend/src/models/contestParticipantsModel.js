@@ -15,8 +15,6 @@ const contestParticipationSchema = new mongoose.Schema({
   },
   score: Number,
   submittedAt: Date,
-  rank: Number,
-  prize: Number,
 });
 
 

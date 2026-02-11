@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {signupApi,loginApi,refreshApi,otpVerify,verifyForgotOtpApi,forgotPasswordApi,resetPasswordApi,resendForgotOtpApi,} from "../api/authApi";
+import { signupApi, loginApi, refreshApi, otpVerify, verifyForgotOtpApi, forgotPasswordApi, resetPasswordApi, resendForgotOtpApi, } from "../api/authApi";
 import api from "../api/axios";
 
 export const signupUser = createAsyncThunk(
@@ -149,6 +149,7 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.loading = false;
       state.error = null;
+      state.authChecked = true;
     },
     updateUser: (state, action) => {
       state.user = action.payload;
@@ -170,7 +171,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
-        state.authChecked = true; 
+        state.authChecked = true;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -181,6 +182,7 @@ const authSlice = createSlice({
         } else {
           state.error = action.payload?.message;
         }
+        state.authChecked = true;
       })
       .addCase(signupUser.pending, (state) => {
         state.loading = true;
@@ -224,13 +226,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.accessToken = action.payload.accessToken;
         state.user = action.payload.user;
-        state.authChecked = true; 
+        state.authChecked = true;
         state.hasTriedRefresh = true;
       })
       .addCase(refreshToken.rejected, (state) => {
         state.loading = false;
         state.authChecked = true;
-        state.hasTriedRefresh = true; 
+        state.hasTriedRefresh = true;
+        state.accessToken = null;
+        state.user = null;
       })
 
       .addCase(forgotPassword.pending, (state) => {
@@ -279,5 +283,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, updateUser, setCredentials,setAuthChecked } = authSlice.actions;
+export const { logout, updateUser, setCredentials, setAuthChecked } = authSlice.actions;
 export default authSlice.reducer;
