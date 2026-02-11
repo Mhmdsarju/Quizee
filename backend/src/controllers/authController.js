@@ -2,6 +2,17 @@ import asyncHandler from "express-async-handler";
 import authService, { changePasswordService } from "../services/authService.js";
 import { statusCode } from "../constant/constants.js";
 import AppError from "../utils/AppError.js";
+import dotenv from "dotenv";
+
+dotenv.config()
+const FRONTEND_URL = process.env.FRONTEND_URL
+
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: process.env.NODE_ENV === "production",
+  domain: process.env.NODE_ENV === "production" ? ".quizee.online" : "localhost",
+};
 
 const signup = asyncHandler(async (req, res) => {
   const result = await authService.signup(req.body);
@@ -13,16 +24,11 @@ export const googleCallback = async (req, res) => {
     const { user, accessToken, refreshToken } =
       await authService.googleLogin(req.user);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      domain: ".localhost",
-    });
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    res.redirect(`http://localhost:5173/google-success?token=${accessToken}`);
+    res.redirect(`${FRONTEND_URL}/google-success?token=${accessToken}`);
   } catch {
-    res.redirect("http://localhost:5173/login");
+    res.redirect(`${FRONTEND_URL}/login`);
   }
 };
 
@@ -30,12 +36,7 @@ const verifyotp = asyncHandler(async (req, res) => {
   const { user, accessToken, refreshToken } =
     await authService.verifyOtp(req.body);
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-    domain: ".localhost",
-  });
+  res.cookie("refreshToken", refreshToken, cookieOptions);
 
   res.json({ user, accessToken });
 });
@@ -49,12 +50,7 @@ const login = asyncHandler(async (req, res) => {
   const { user, accessToken, refreshToken } =
     await authService.login(req.body);
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-    domain: ".localhost",
-  });
+  res.cookie("refreshToken", refreshToken, cookieOptions);
 
   res.json({ user, accessToken });
 });
@@ -104,12 +100,8 @@ const resendForgotOtp = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-    domain: ".localhost",
-  });
+  
+  res.cookie("refreshToken", "", {...cookieOptions,expires: new Date(0),});
 
   res.json({ message: "Logged out successfully" });
 });

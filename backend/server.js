@@ -11,7 +11,7 @@ const server = http.createServer(app);
 initSocket(server);
 
 server.listen(PORT, () => {
-  logger.info(`Server running on http://localhost:${PORT}`);
+  logger.info(`Server running`);
 });
 
 // Graceful shutdown

@@ -31,7 +31,7 @@ contestStatusCron();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173","http://admin.localhost:5173"];
+const allowedOrigins = [process.env.FRONTEND_URL,process.env.ADMIN_URL,];
 
 
 app.use(
