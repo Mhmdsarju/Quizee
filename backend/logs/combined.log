@@ -5565,3 +5565,119 @@
 {"level":"info","message":"Socket connected: Suc04JGrcMdojgoqAAAD","timestamp":"2026-02-11T16:42:06.749Z"}
 {"level":"info","message":"Socket connected: _czVGIyCI1KUVezjAAAF","timestamp":"2026-02-11T16:42:06.759Z"}
 {"level":"info","message":"Socket connected: xauIsH9N7bql64HMAAAH","timestamp":"2026-02-11T16:42:06.770Z"}
+{"level":"info","message":"Socket disconnected: Suc04JGrcMdojgoqAAAD | reason: transport close","timestamp":"2026-02-11T16:45:46.853Z"}
+{"level":"info","message":"Socket connected: MMrLm87P0w-rZNGJAAAJ","timestamp":"2026-02-11T16:45:47.801Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:47 +0000] \"POST /api/auth/refresh HTTP/1.1\" 200 434 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:47.953Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:47 +0000] \"OPTIONS /api/user/notifications HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:47.979Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:47 +0000] \"OPTIONS /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:47.981Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:47 +0000] \"OPTIONS /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:47.987Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:47 +0000] \"OPTIONS /api/user/quiz-history HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:47.988Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:48 +0000] \"GET /api/user/notifications HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:48.139Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:48 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:48.221Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:48 +0000] \"GET /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:48.739Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:49 +0000] \"GET /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:49.336Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:49 +0000] \"OPTIONS /api/user/quizzes?category=&sort=newest&page=1&search= HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:49.444Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:49 +0000] \"OPTIONS /api/admin/categories HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:49.445Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:49 +0000] \"GET /api/user/notifications HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:49.615Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:49 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:49.682Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:49 +0000] \"GET /api/admin/categories HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:49.684Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:50 +0000] \"GET /api/user/quizzes?category=&sort=newest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:50.411Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:51 +0000] \"OPTIONS /api/user/contest?search=&sort=newest&page=1&status=ALL HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:51.063Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:51 +0000] \"GET /api/user/contest?search=&sort=newest&page=1&status=ALL HTTP/1.1\" 200 8967 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:51.511Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:52 +0000] \"GET /api/admin/categories HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:52.664Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:52 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:52.670Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:52 +0000] \"GET /api/user/quizzes?category=&sort=newest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:52.831Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"OPTIONS /api/user/notifications HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.038Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"OPTIONS /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.048Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"OPTIONS /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.053Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"OPTIONS /api/user/quiz-history HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.061Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"GET /api/user/notifications HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.210Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.288Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:53 +0000] \"GET /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:53.509Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:45:54 +0000] \"GET /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:45:54.048Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T16:52:05.920Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T16:52:05.925Z"}
+{"level":"info","message":"Socket connected: t9AScWMZ6dn7TTVCAAAB","timestamp":"2026-02-11T16:52:06.526Z"}
+{"level":"info","message":"Socket connected: oGsxOO0u7URKsNwNAAAD","timestamp":"2026-02-11T16:52:08.790Z"}
+{"level":"info","message":"Socket connected: vZ8gNpOblh8buH3_AAAF","timestamp":"2026-02-11T16:52:14.476Z"}
+{"level":"info","message":"Socket connected: cOd5D8DbOjv8LVqpAAAH","timestamp":"2026-02-11T16:52:30.995Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"POST /api/auth/refresh HTTP/1.1\" 200 434 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.084Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"OPTIONS /api/user/notifications HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.113Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"OPTIONS /api/user/quiz-history HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.116Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"OPTIONS /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.118Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"OPTIONS /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.123Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"GET /api/user/notifications HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.280Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.331Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"GET /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.547Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:52:31 +0000] \"GET /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:52:31.968Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:57 +0000] \"OPTIONS /api/user/notifications HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:57.974Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:57 +0000] \"OPTIONS /api/user/quizzes?category=&sort=newest&page=1&search= HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:57.979Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:57 +0000] \"OPTIONS /api/admin/categories HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:57.982Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:57 +0000] \"OPTIONS /api/user/quiz-history HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:57.983Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:58 +0000] \"GET /api/user/notifications HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:58.149Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:58 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:58.213Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:58 +0000] \"GET /api/admin/categories HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:58.214Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:59 +0000] \"GET /api/user/quizzes?category=&sort=newest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:59.109Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:53:59 +0000] \"OPTIONS /api/user/contest?search=&sort=newest&page=1&status=ALL HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:53:59.681Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:00 +0000] \"GET /api/user/contest?search=&sort=newest&page=1&status=ALL HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:00.088Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:00 +0000] \"OPTIONS /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:00.847Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:00 +0000] \"OPTIONS /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:00.847Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:00 +0000] \"GET /api/user/notifications HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:00.985Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:01 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:01.050Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:01 +0000] \"GET /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:01.175Z"}
+{"level":"info","message":"::1 - - [11/Feb/2026:16:54:01 +0000] \"GET /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T16:54:01.600Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:07.703Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:07.708Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:08.656Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:08.660Z"}
+{"level":"info","message":"Socket connected: iEX038X6XCQML-nkAAAB","timestamp":"2026-02-11T17:02:08.713Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:10.075Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:10.079Z"}
+{"level":"info","message":"Socket connected: 4Z8yUQzsquYYL8RuAAAB","timestamp":"2026-02-11T17:02:10.702Z"}
+{"level":"info","message":"Socket connected: Mh99nKSTZN47uKpaAAAD","timestamp":"2026-02-11T17:02:10.730Z"}
+{"level":"info","message":"Socket connected: 35p3XUNRUj0PN4WWAAAF","timestamp":"2026-02-11T17:02:12.714Z"}
+{"level":"info","message":"Socket connected: FquMf7lXAL3Ig_ivAAAH","timestamp":"2026-02-11T17:02:12.723Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:18.234Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:18.237Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:20.412Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:20.416Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:21.710Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:21.716Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:25.140Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:25.143Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:26.975Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:26.978Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:27.796Z"}
+{"level":"info","message":"Server running","timestamp":"2026-02-11T17:02:27.801Z"}
+{"level":"info","message":"Socket connected: QxzxUKgQCjs-PSeHAAAB","timestamp":"2026-02-11T17:02:30.715Z"}
+{"level":"info","message":"Socket connected: qk6SiEekyGX070_8AAAD","timestamp":"2026-02-11T17:02:32.705Z"}
+{"level":"info","message":"Socket connected: 8de46SzZuATufKSNAAAF","timestamp":"2026-02-11T17:02:33.706Z"}
+{"level":"info","message":"Socket connected: Kt_Rac0lqugwuD6NAAAH","timestamp":"2026-02-11T17:02:33.718Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:40.072Z"}
+{"level":"info","message":"Server running ","timestamp":"2026-02-11T17:02:40.076Z"}
+{"level":"info","message":"Socket connected: Mv3W0my9ArrgSq5iAAAB","timestamp":"2026-02-11T17:02:40.714Z"}
+{"level":"info","message":"Socket connected: xgmOlX2B3u8YOUBaAAAD","timestamp":"2026-02-11T17:02:40.722Z"}
+{"level":"info","message":"Socket connected: XwHimZWjRkOqGCbUAAAF","timestamp":"2026-02-11T17:02:40.736Z"}
+{"level":"info","message":"Socket connected: keqM_-0__5XsROsNAAAH","timestamp":"2026-02-11T17:02:41.698Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:43.917Z"}
+{"level":"info","message":"Server running $","timestamp":"2026-02-11T17:02:43.923Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:02:53.371Z"}
+{"level":"info","message":"Server running 5005","timestamp":"2026-02-11T17:02:53.375Z"}
+{"level":"info","message":"Socket connected: oAXIRYWROujiIWPkAAAB","timestamp":"2026-02-11T17:02:55.713Z"}
+{"level":"info","message":"Socket connected: tW0nNXLMwxE3BSYmAAAD","timestamp":"2026-02-11T17:02:57.699Z"}
+{"level":"info","message":"Socket connected: -3ZS1yYfaE3BmuryAAAF","timestamp":"2026-02-11T17:02:57.713Z"}
+{"level":"info","message":"Socket connected: B0zaO4YFckHTquPlAAAH","timestamp":"2026-02-11T17:02:58.697Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:03:10.972Z"}
+{"level":"info","message":"Server running 5005","timestamp":"2026-02-11T17:03:10.975Z"}
+{"level":"info","message":"Socket connected: bRHq_LJhbBVTevBVAAAB","timestamp":"2026-02-11T17:03:12.707Z"}
+{"level":"info","message":"Socket connected: NntLItsXdjx53U3WAAAD","timestamp":"2026-02-11T17:03:13.696Z"}
+{"level":"info","message":"Socket connected: vm_MC6rdS4Q1Rwx-AAAF","timestamp":"2026-02-11T17:03:13.710Z"}
+{"level":"info","message":"Socket connected: -TEwXmgyJjIjIHgzAAAH","timestamp":"2026-02-11T17:03:13.722Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:03:24.042Z"}
+{"level":"info","message":"Server running 5009","timestamp":"2026-02-11T17:03:24.046Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T17:03:37.093Z"}
+{"level":"info","message":"Server running 5005","timestamp":"2026-02-11T17:03:37.097Z"}
+{"level":"info","message":"Socket connected: wg_Oat-B8xDyQpqgAAAB","timestamp":"2026-02-11T17:03:37.708Z"}
+{"level":"info","message":"Socket connected: RqFxAR1p09ucJesIAAAD","timestamp":"2026-02-11T17:03:37.719Z"}
+{"level":"info","message":"Socket connected: GKMyKZOmVkz5jr6zAAAF","timestamp":"2026-02-11T17:03:41.709Z"}
+{"level":"info","message":"Socket connected: ESe1mQD9_YbKjPdBAAAH","timestamp":"2026-02-11T17:03:42.696Z"}

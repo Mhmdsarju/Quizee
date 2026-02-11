@@ -3,15 +3,17 @@ import mongoose from "mongoose";
 import app from "./app.js";
 import { initSocket, closeSocket } from "./src/config/socket.js";
 import { logger } from "./src/utils/logger.js";
+import dotenv from "dotenv"
+dotenv.config();
 
-const PORT = 5005;
+const PORT = process.env.PORT || 5005;
 
 const server = http.createServer(app);
 
 initSocket(server);
 
 server.listen(PORT, () => {
-  logger.info(`Server running`);
+  logger.info(`Server running ${PORT}`);
 });
 
 // Graceful shutdown
