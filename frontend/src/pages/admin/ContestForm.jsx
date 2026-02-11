@@ -5,14 +5,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { contestSchema } from "../../schema/contestSchema";
 import { createContest, fetchAdminQuizzes, updateContest } from "../../api/adminContestApi";
 
-export default function ContestForm({ initialData, onClose, onSuccess, }) {
+export default function ContestForm({ initialData, onClose, onSuccess }) {
   const isEdit = !!initialData;
 
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting }, } = useForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
     resolver: zodResolver(contestSchema),
     defaultValues: {
       title: "",
@@ -26,6 +31,7 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
     },
   });
 
+  // Fetch quizzes
   useEffect(() => {
     fetchAdminQuizzes()
       .then(({ data }) => {
@@ -37,6 +43,7 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
       .catch(() => setQuizzes([]));
   }, []);
 
+  // Edit mode reset
   useEffect(() => {
     if (!initialData) return;
 
@@ -47,8 +54,13 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
       prizeFirst: initialData.prizeConfig?.first ?? 100,
       prizeSecond: initialData.prizeConfig?.second ?? 50,
       prizeThird: initialData.prizeConfig?.third ?? 25,
-      startTime: initialData.startTime?.slice(0, 16) || "",
-      endTime: initialData.endTime?.slice(0, 16) || "",
+       startTime: initialData.startTime
+        ? new Date(initialData.startTime).toISOString().slice(0, 16) 
+        : "",
+
+      endTime: initialData.endTime
+        ? new Date(initialData.endTime).toISOString().slice(0, 16) 
+        : "",
     });
 
     if (initialData.quiz) {
@@ -82,9 +94,17 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
 
     try {
       const formData = new FormData();
+
       formData.append("title", values.title);
-      formData.append("startTime", values.startTime);
-      formData.append("endTime", values.endTime);
+      formData.append(
+        "startTime",
+        new Date(values.startTime).toISOString()
+      );
+
+      formData.append(
+        "endTime",
+        new Date(values.endTime).toISOString()
+      );
 
       formData.append("prizeFirst", values.prizeFirst);
       formData.append("prizeSecond", values.prizeSecond);
@@ -99,8 +119,9 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         formData.append("image", imageFile);
       }
 
-      const res = isEdit ? await updateContest(initialData._id, formData) : await createContest(formData);
-
+      const res = isEdit
+        ? await updateContest(initialData._id, formData)
+        : await createContest(formData);
 
       Swal.fire(
         isEdit ? "Updated" : "Created",
@@ -127,6 +148,7 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         {isEdit ? "Edit Contest" : "Create Contest"}
       </h2>
 
+      {/* Title */}
       <div>
         <label className="text-sm font-medium text-gray-600">
           Contest Title
@@ -142,23 +164,31 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         )}
       </div>
 
+      {/* Image */}
       <div>
         <label className="text-sm font-medium text-gray-600">
           Contest Image (optional)
         </label>
 
         {isEdit && initialData?.image && (
-          <img src={initialData.image} alt="contest" className="h-32 rounded-lg mb-2 object-cover" />
+          <img
+            src={initialData.image}
+            alt="contest"
+            className="h-32 rounded-lg mb-2 object-cover"
+          />
         )}
 
-        <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="w-full border rounded-lg p-2" />
-
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files[0])}
+          className="w-full border rounded-lg p-2"
+        />
       </div>
 
+      {/* Quiz */}
       <div>
-        <label className="text-sm font-medium text-gray-600">
-          Quiz
-        </label>
+        <label className="text-sm font-medium text-gray-600">Quiz</label>
 
         {isEdit ? (
           <input
@@ -187,6 +217,7 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         )}
       </div>
 
+      {/* Entry Fee */}
       <div>
         <label className="text-sm font-medium text-gray-600">
           Entry Fee (₹)
@@ -204,6 +235,7 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         )}
       </div>
 
+      {/* Time */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium text-gray-600">
@@ -238,56 +270,14 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         </div>
       </div>
 
+      {/* Prize */}
       <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label className="text-sm font-medium text-gray-600">
-            1st Prize (₹)
-          </label>
-          <input
-            type="number"
-            {...register("prizeFirst", { valueAsNumber: true })}
-            className="mt-1 w-full border rounded-lg p-2"
-          />
-          {errors.prizeFirst && (
-            <p className="text-red-500 text-sm">
-              {errors.prizeFirst.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-gray-600">
-            2nd Prize (₹)
-          </label>
-          <input
-            type="number"
-            {...register("prizeSecond", { valueAsNumber: true })}
-            className="mt-1 w-full border rounded-lg p-2"
-          />
-          {errors.prizeSecond && (
-            <p className="text-red-500 text-sm">
-              {errors.prizeSecond.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-gray-600">
-            3rd Prize (₹)
-          </label>
-          <input
-            type="number"
-            {...register("prizeThird", { valueAsNumber: true })}
-            className="mt-1 w-full border rounded-lg p-2"
-          />
-          {errors.prizeThird && (
-            <p className="text-red-500 text-sm">
-              {errors.prizeThird.message}
-            </p>
-          )}
-        </div>
+        <input type="number" {...register("prizeFirst")} className="border p-2 rounded-lg" />
+        <input type="number" {...register("prizeSecond")} className="border p-2 rounded-lg" />
+        <input type="number" {...register("prizeThird")} className="border p-2 rounded-lg" />
       </div>
 
+      {/* Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t">
         <button
           type="button"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Trophy, Wallet, Clock, Filter } from "lucide-react"; 
+import { Calendar, Trophy, Wallet, Clock, Filter } from "lucide-react";
 import Pagination from "../../components/Pagination";
 import SearchBar from "../../components/SearchBar";
 import ContestImg from "../../assets/ContestImg.jpg";
@@ -41,7 +41,7 @@ export default function ContestPage() {
   return (
     <div className="min-h-screen  py-6 px-4 ">
       <div className="max-w-7xl mx-auto">
-        
+
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Contests</h1>
@@ -50,35 +50,35 @@ export default function ContestPage() {
 
           <div className="flex flex-col md:flex-row gap-3">
             <div className="w-full md:w-80">
-                <SearchBar
-                    value={search}
-                    onChange={(val) => { setPage(1); setSearch(val); }}
-                    placeholder="Search contests..."
-                />
+              <SearchBar
+                value={search}
+                onChange={(val) => { setPage(1); setSearch(val); }}
+                placeholder="Search contests..."
+              />
             </div>
-            
-            <div className="flex gap-2">
-                <select
-                    value={statusFilter}
-                    onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
-                    className="flex-1 md:w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                >
-                    <option value="ALL">All Status</option>
-                    <option value="LIVE">Live</option>
-                    <option value="UPCOMING">Upcoming</option>
-                    <option value="COMPLETED">Completed</option>
-                </select>
 
-                <select
-                    value={sort}
-                    onChange={(e) => { setPage(1); setSort(e.target.value); }}
-                    className="flex-1 md:w-44 border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="feeLow">Fee: Low to High</option>
-                    <option value="feeHigh">Fee: High to Low</option>
-                </select>
+            <div className="flex gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+                className="flex-1 md:w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              >
+                <option value="ALL">All Status</option>
+                <option value="LIVE">Live</option>
+                <option value="UPCOMING">Upcoming</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+
+              <select
+                value={sort}
+                onChange={(e) => { setPage(1); setSort(e.target.value); }}
+                className="flex-1 md:w-44 border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="feeLow">Fee: Low to High</option>
+                <option value="feeHigh">Fee: High to Low</option>
+              </select>
             </div>
           </div>
         </div>
@@ -110,10 +110,10 @@ export default function ContestPage() {
                       className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500 border border-black"
                     />
                     <div className="absolute top-4 right-4">
-                        <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-md ${status.color}`}>
-                            <span className={`w-2 h-2 rounded-full ${status.dot}`}></span>
-                            {status.label}
-                        </span>
+                      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-md ${status.color}`}>
+                        <span className={`w-2 h-2 rounded-full ${status.dot}`}></span>
+                        {status.label}
+                      </span>
                     </div>
                   </div>
 
@@ -123,21 +123,27 @@ export default function ContestPage() {
                     </h3>
 
                     <div className="space-y-4 mb-6">
-                        <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl">
-                            <div className="flex items-center gap-2 text-gray-600">
-                                <Wallet size={18} className="text-indigo-500" />
-                                <span className="text-sm font-medium">Entry Fee</span>
-                            </div>
-                            <span className="text-lg font-bold text-gray-900">₹{contest.entryFee}</span>
+                      <div className="flex items-center justify-between bg-gray-50 p-3 rounded-2xl">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Wallet size={18} className="text-indigo-500" />
+                          <span className="text-sm font-medium">Entry Fee</span>
                         </div>
+                        <span className="text-lg font-bold text-gray-900">₹{contest.entryFee}</span>
+                      </div>
 
-                        <div className="flex items-start gap-3 px-1">
-                            <Calendar size={18} className="text-gray-400 mt-0.5" />
-                            <div className="text-xs text-gray-500 leading-relaxed">
-                                <p className="font-semibold text-gray-700">Starts: {new Date(contest.startTime).toLocaleString()}</p>
-                                <p>Ends: {new Date(contest.endTime).toLocaleString()}</p>
-                            </div>
+                      <div className="flex items-start gap-3 px-1">
+                        <Calendar size={18} className="text-gray-400 mt-0.5" />
+                        <div className="text-xs text-gray-500 leading-relaxed">
+                          <p className="font-semibold text-gray-700">
+                            Starts: {new Date(contest.startTime).toUTCString()}
+                          </p>
+
+                          <p>
+                            Ends: {new Date(contest.endTime).toUTCString()}
+                          </p>
+
                         </div>
+                      </div>
                     </div>
 
                     <div className="mt-auto">
@@ -158,7 +164,10 @@ export default function ContestPage() {
                       ) : status.label === "UPCOMING" ? (
                         <div className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-blue-50 text-blue-700 border border-blue-100">
                           <Clock size={16} />
-                          <span className="text-sm font-bold">Starts @ {new Date(contest.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                          <span className="text-sm font-bold">
+                            Starts @ {new Date(contest.startTime).toISOString().slice(11, 16)} UTC
+                          </span>
+
                         </div>
                       ) : (
                         <button
