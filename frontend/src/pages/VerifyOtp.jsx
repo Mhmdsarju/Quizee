@@ -94,7 +94,7 @@ export default function VerifyOtp() {
         </h2>
 
         <p className="text-sm text-center text-quiz-main mt-1">
-          OTP sent to <span className="font-medium">{email}</span>
+          OTP sent to : <span className="font-medium">{email}</span>
         </p>
 
         <div
