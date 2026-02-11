@@ -4,7 +4,7 @@ import SearchBar from "../../components/SearchBar";
 import Pagination from "../../components/Pagination";
 import AddContestModal from "./AddContestModal";
 import ContestCard from "./rows/ContestCard";
-import EditContestModal from "./EditContestmodal";
+import EditContestModal from "./EditContestModal";
 
 export default function ContestManagement() {
   const {data,loading,pagination,search,setSearch,page,setPage,} = useAdminList({
