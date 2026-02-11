@@ -1,17 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import api from "../../api/axios";
+import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../components/Loader";
 import Swal from "sweetalert2";
 import { quizGuard } from "../QuizGuard";
+import {getQuizPlay,submitQuiz,validateQuestion,} from "../../api/quizApi";
 
 export default function QuizPlay() {
   const { quizId } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  const contestId = searchParams.get("contest");
-  const isContest = Boolean(contestId);
 
   const [questions, setQuestions] = useState([]);
   const [quiz, setQuiz] = useState(null);
@@ -23,7 +19,6 @@ export default function QuizPlay() {
   const submittedRef = useRef(false);
   const forceSubmitRef = useRef(false);
 
-  // Quiz Guard 
   useEffect(() => {
     quizGuard.ongoing = true;
     return () => {
@@ -34,28 +29,26 @@ export default function QuizPlay() {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = isContest
-          ? await api.get(`/user/contest/${contestId}/play`)
-          : await api.get(`/user/quiz/${quizId}/play`);
-
+        const res = await getQuizPlay(quizId);
         setQuestions(res.data.questions);
         setQuiz(res.data.quiz);
         setTimeLeft(res.data.quiz.timeLimit * 60);
       } catch {
         Swal.fire("Error", "Unable to load quiz", "error");
+        navigate("/user/quiz", { replace: true });
       } finally {
         setLoading(false);
       }
     };
 
     fetchQuiz();
-  }, [quizId]);
+  }, [quizId, navigate]);
 
   useEffect(() => {
     if (!quiz || submittedRef.current) return;
 
     if (timeLeft <= 0) {
-      submitQuiz();
+      submitQuizHandler();
       return;
     }
 
@@ -66,7 +59,6 @@ export default function QuizPlay() {
     return () => clearInterval(timer);
   }, [timeLeft, quiz]);
 
-  // Prevent Refresh 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (!quizGuard.ongoing) return;
@@ -79,7 +71,6 @@ export default function QuizPlay() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // TAB CHANGE 
   useEffect(() => {
     const onVisibilityChange = () => {
       if (document.hidden && !submittedRef.current) {
@@ -88,12 +79,12 @@ export default function QuizPlay() {
         Swal.fire({
           icon: "warning",
           title: "Tab Change Detected",
-          text: "You switched tabs. As per quiz rules, the quiz cannot be continued and will be submitted automatically.",
+          text: "You switched tabs. Quiz will be submitted automatically.",
           confirmButtonText: "OK",
           allowOutsideClick: false,
           allowEscapeKey: false,
         }).then(() => {
-          submitQuiz();
+          submitQuizHandler();
         });
       }
     };
@@ -103,7 +94,6 @@ export default function QuizPlay() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  // WINDOW CHANGE 
   useEffect(() => {
     const onBlur = () => {
       if (submittedRef.current) return;
@@ -113,12 +103,12 @@ export default function QuizPlay() {
       Swal.fire({
         icon: "warning",
         title: "Window Change Detected",
-        text: "You changed the window. Quiz cannot be continued and will be submitted automatically.",
+        text: "Quiz will be submitted automatically.",
         confirmButtonText: "OK",
         allowOutsideClick: false,
         allowEscapeKey: false,
       }).then(() => {
-        submitQuiz();
+        submitQuizHandler();
       });
     };
 
@@ -126,14 +116,14 @@ export default function QuizPlay() {
     return () => window.removeEventListener("blur", onBlur);
   }, []);
 
-  // Disable Right Click 
+  /* -------------------- DISABLE RIGHT CLICK -------------------- */
   useEffect(() => {
     const disable = (e) => e.preventDefault();
     document.addEventListener("contextmenu", disable);
     return () => document.removeEventListener("contextmenu", disable);
   }, []);
 
-  // Disable DevTools Shortcuts 
+  /* -------------------- DISABLE DEVTOOLS -------------------- */
   useEffect(() => {
     const handleKey = (e) => {
       if (
@@ -149,25 +139,22 @@ export default function QuizPlay() {
     return () => document.removeEventListener("keydown", handleKey);
   }, []);
 
-  // Helpers 
   const selectOption = (index) => {
     const qid = questions[current]._id;
     setAnswers((prev) => ({ ...prev, [qid]: index }));
   };
 
   const validateCurrentQuestion = async () => {
-    if (isContest || submittedRef.current) return true;
+    if (submittedRef.current) return true;
 
     try {
-      await api.post(`/user/quiz/${quizId}/validate-question`, {
-        questionId: questions[current]._id,
-      });
+      await validateQuestion(quizId, questions[current]._id);
       return true;
     } catch {
       Swal.fire({
         icon: "warning",
         title: "Quiz Updated",
-        text: "This quiz is updated by admin. Please retry.",
+        text: "This quiz was updated by admin. Please retry.",
       }).then(() => {
         quizGuard.ongoing = false;
         navigate(`/user/quiz/${quizId}`, { replace: true });
@@ -187,7 +174,7 @@ export default function QuizPlay() {
     }
   };
 
-  const submitQuiz = async () => {
+  const submitQuizHandler = async () => {
     if (submittedRef.current) return;
 
     submittedRef.current = true;
@@ -199,22 +186,12 @@ export default function QuizPlay() {
     }
 
     try {
-      const res = await api.post(`/user/quiz/${quizId}/submit`, { answers });
+      const res = await submitQuiz(quizId, { answers });
 
-      if (isContest) {
-        await api.post(`/user/contest/${contestId}/submit`, {
-          score: res.data.score,
-          total: res.data.total,
-          percentage: res.data.percentage,
-        });
-
-        navigate(`/user/contest/${contestId}/leaderboard`, { replace: true });
-      } else {
-        navigate(`/user/quiz/${quizId}/result`, {
-          state: res.data,
-          replace: true,
-        });
-      }
+      navigate(`/user/quiz/${quizId}/result`, {
+        state: res.data,
+        replace: true,
+      });
     } catch {
       Swal.fire("Error", "Submit failed", "error");
       submittedRef.current = false;
@@ -232,41 +209,22 @@ export default function QuizPlay() {
   const hasAnswered = answers[q._id] !== undefined;
 
   return (
-
-    <div className="min-h-screen flex items-center justify-center  from-slate-900 via-slate-800 to-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-3xl bg-slate-800 text-white rounded-2xl shadow-2xl p-8 space-y-6">
-        <div className="w-full overflow-hidden bg-yellow-100 border-b border-yellow-300 rounded-sm">
-          <div className="whitespace-nowrap animate-marquee py-2">
-            <span className="mx-8 font-semibold text-red-700">
-              ⚠️ Quiz Rules:
-            </span>
-            <span className="mx-8 text-gray-800">
-              Do not switch tabs after the quiz started&ensp;•&ensp;Refreshing not allowed &ensp; •&ensp; Right-click disabled &ensp;• &ensp;If the rules has been <span className="text-red-400">violated</span> the quiz will automatically submit !!!
-            </span>
-            <span className="mx-8 text-gray-800">
-              Do not switch tabs after the quiz started&ensp;•&ensp;Refreshing not allowed &ensp; •&ensp; Right-click disabled &ensp;• &ensp;If the rules has been <span className="text-red-400">violated</span> the quiz will automatically submit !!!
-            </span>
-          </div>
-        </div>
 
         <div className="flex items-center justify-between border-b border-slate-700 pb-4">
           <h2 className="text-xl font-semibold">{quiz.title}</h2>
-
-          <div className="flex items-center gap-2 bg-red-600 px-4 py-1 rounded-full text-sm font-semibold">
+          <div className="bg-red-600 px-4 py-1 rounded-full text-sm font-semibold">
             ⏱ {minutes}:{seconds.toString().padStart(2, "0")}
           </div>
         </div>
-        <div className="flex justify-between text-sm text-slate-300">
-          <span>
-            Question {current + 1} / {questions.length}
-          </span>
-          <span>
-            Answered: {Object.keys(answers).length}
-          </span>
+
+        <div className="text-sm text-slate-300">
+          Question {current + 1} / {questions.length}
         </div>
 
         <div className="bg-slate-900 p-6 rounded-xl">
-          <h3 className="text-lg font-medium leading-relaxed">
+          <h3 className="text-lg">
             {current + 1}. {q.question}
           </h3>
         </div>
@@ -279,37 +237,31 @@ export default function QuizPlay() {
               <button
                 key={i}
                 onClick={() => selectOption(i)}
-                className={`w-full text-left px-5 py-3 rounded-xl border transition-all duration-200
-                ${selected
-                    ? "bg-green-600 border-green-600 text-white"
-                    : "bg-slate-900 border-slate-600 hover:bg-slate-700"
-                  }
-              `}
+                className={`w-full text-left px-5 py-3 rounded-xl border
+                  ${
+                    selected
+                      ? "bg-green-600 border-green-600"
+                      : "bg-slate-900 border-slate-600 hover:bg-slate-700"
+                  }`}
               >
-                <span className="font-semibold mr-2">
-                  {String.fromCharCode(65 + i)}.
-                </span>
+                <b className="mr-2">{String.fromCharCode(65 + i)}.</b>
                 {opt}
               </button>
             );
           })}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-slate-700">
-          <span className="text-sm text-slate-400">
-            Select an option to continue
-          </span>
-
+        <div className="flex justify-end pt-4 border-t border-slate-700">
           {current === questions.length - 1 ? (
             <button
-              onClick={submitQuiz}
+              onClick={submitQuizHandler}
               disabled={!hasAnswered}
-              className={`px-8 py-2 rounded-xl font-semibold transition
-              ${hasAnswered
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-slate-600 opacity-60 cursor-not-allowed"
-                }
-            `}
+              className={`px-8 py-2 rounded-xl font-semibold
+                ${
+                  hasAnswered
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-slate-600 opacity-60 cursor-not-allowed"
+                }`}
             >
               Submit Quiz
             </button>
@@ -317,12 +269,12 @@ export default function QuizPlay() {
             <button
               onClick={next}
               disabled={!hasAnswered}
-              className={`px-8 py-2 rounded-xl font-semibold transition
-              ${hasAnswered
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-slate-600 opacity-60 cursor-not-allowed"
-                }
-            `}
+              className={`px-8 py-2 rounded-xl font-semibold
+                ${
+                  hasAnswered
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-slate-600 opacity-60 cursor-not-allowed"
+                }`}
             >
               Next →
             </button>
@@ -331,6 +283,4 @@ export default function QuizPlay() {
       </div>
     </div>
   );
-
-
 }

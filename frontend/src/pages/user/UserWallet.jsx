@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "../../api/axios";
 import AddMoneyModal from "./AddMoneyModal";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import Pagination from "../../components/Pagination";
+import { getWalletBalance, getWalletTransactions } from "../../api/walletApi";
 
 export default function UserWallet() {
   const [balance, setBalance] = useState(0);
@@ -25,18 +25,12 @@ export default function UserWallet() {
   }, [page]);
 
   const fetchWallet = async () => {
-    const res = await axios.get("/wallet");
+    const res =  await getWalletBalance();
     setBalance(res.data.balance);
   };
 
   const fetchTransactions = async () => {
-    const res = await axios.get("/wallet/transactions", {
-      params: {
-        page,
-        limit: 5,
-      },
-    });
-
+    const res = await getWalletTransactions({page,limit: 5,});
     setTransactions(res.data.data);
     setPagination(res.data.pagination);
   };

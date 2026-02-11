@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { FaUser, FaEnvelope, FaGift, FaCopy, FaTrophy, FaStar, } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import EditProfileModal from "./EditProfileModal";
-import api from "../../api/axios";
+import { fetchUserRank } from "../../api/profileApi";
 
 export default function ProfilePage() {
   const [openEdit, setOpenEdit] = useState(false);
@@ -14,7 +14,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchRank = async () => {
       try {
-        const res = await api.get("/user/rank");
+        const res = await fetchUserRank();
         setRankData(res.data);
       } catch (err) {
         console.error("Failed to fetch rank", err);

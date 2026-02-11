@@ -1,6 +1,6 @@
-import api from "../../../api/axios";
 import Swal from "sweetalert2";
 import ContestImg from "../../../assets/ContestImg.jpg";
+import { toggleContestBlock } from "../../../api/adminContestApi";
 
 export default function ContestCard({ contest, onUpdate, onEdit }) {
   const {_id,title,quiz,entryFee,status,startTime,endTime,isBlocked,image,prizeConfig,} = contest;
@@ -35,7 +35,7 @@ export default function ContestCard({ contest, onUpdate, onEdit }) {
 
     if (!res.isConfirmed) return;
 
-    const { data } = await api.patch(`/admin/contest/${_id}/block`);
+    const { data } = await toggleContestBlock(_id);
     onUpdate(data.contest);
 
     Swal.fire("Success", data.message, "success");

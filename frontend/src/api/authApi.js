@@ -10,3 +10,5 @@ export const forgotPasswordApi = (data) =>api.post("/auth/forgot-password", data
 export const verifyForgotOtpApi = (data) =>api.post("/auth/forgot-password/verify-otp", data);
 export const resetPasswordApi = (data) =>api.post("/auth/reset-password", data);
 export const resendForgotOtpApi = (data) =>api.post("/auth/forgot-password/resend-otp", data);
+export const changePassword = (payload) =>api.patch("/user/change-password", payload);
+export const sendOtpApi = (data) =>api.post("/auth/send-otp", data);

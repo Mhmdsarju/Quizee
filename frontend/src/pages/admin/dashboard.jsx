@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import api from "../../api/axios";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend, CartesianGrid } from "recharts";
+import { Users, Gamepad2, Trophy, TrendingUp, TrendingDown, Wallet, Download, Calendar, Filter } from "lucide-react";
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Legend, CartesianGrid
-} from "recharts";
-import { 
-  Users, Gamepad2, Trophy, TrendingUp, TrendingDown, 
-  Wallet, Download, Calendar, Filter, RefreshCw 
-} from "lucide-react";
+  fetchDashboardStats, fetchSummaryReport, fetchReasonWiseReport, fetchMonthlyReport, fetchDailyReport,
+  fetchCustomReport,
+} from "../../api/adminReportApi";
+
 
 const DASH_COLORS = ["#6366F1", "#10B981", "#F59E0B"];
 const PIE_COLORS = {
@@ -32,9 +30,11 @@ export default function AdminDashboard() {
   const [appliedRange, setAppliedRange] = useState(null);
 
   useEffect(() => {
-    loadDashboardStats();
-    loadSummaryAndPie();
-  }, []);
+  loadDashboardStats();
+  loadSummaryAndPie();
+  loadChartData(); 
+}, []);
+
 
   useEffect(() => {
     if (view !== "custom") {
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
 
   const loadDashboardStats = async () => {
     try {
-      const res = await api.get("/admin/dashboard-stats");
+      const res = await fetchDashboardStats();
       setStats(res.data);
     } catch {
       setError("Failed to load dashboard stats");
@@ -64,16 +64,10 @@ export default function AdminDashboard() {
 
   const loadSummaryAndPie = async (range = null) => {
     try {
-      let summaryUrl = "/admin/reports/summary";
-      let reasonUrl = "/admin/reports/reason-wise";
-      if (range) {
-        const query = `?from=${range.from}&to=${range.to}`;
-        summaryUrl += query;
-        reasonUrl += query;
-      }
+      const query = range ? `?from=${range.from}&to=${range.to}` : "";
       const [summaryRes, reasonRes] = await Promise.all([
-        api.get(summaryUrl),
-        api.get(reasonUrl),
+        fetchSummaryReport(query),
+        fetchReasonWiseReport(query),
       ]);
       setSummary(summaryRes.data);
       setReasons(reasonRes.data);
@@ -83,25 +77,31 @@ export default function AdminDashboard() {
   };
 
   const loadChartData = async () => {
-    let url = "";
-    if (view === "monthly") url = "/admin/reports/monthly";
-    if (view === "daily") url = "/admin/reports/daily";
-    if (view === "custom" && appliedRange) {
-      url = `/admin/reports/custom?from=${appliedRange.from}&to=${appliedRange.to}`;
-    }
-    if (!url) return;
-
     try {
-      const res = await api.get(url);
-      setChartData(res.data.map((d) => ({
-        label: typeof d._id === "string" ? d._id : `${d._id.month}/${d._id.year}`,
-        income: d.income,
-        expense: d.expense,
-      })));
+      let res;
+
+      if (view === "monthly") res = await fetchMonthlyReport();
+      else if (view === "daily") res = await fetchDailyReport();
+      else if (view === "custom" && appliedRange)
+        res = await fetchCustomReport(appliedRange.from, appliedRange.to);
+
+      if (!res) return; 
+
+      setChartData(
+        res.data.map((d) => ({
+          label:
+            typeof d._id === "string"
+              ? d._id
+              : `${d._id.month}/${d._id.year}`,
+          income: d.income,
+          expense: d.expense,
+        }))
+      );
     } catch (err) {
       console.error("Error loading chart data", err);
     }
   };
+
 
   const applyCustomRange = () => {
     if (fromDate && toDate) setAppliedRange({ from: fromDate, to: toDate });
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen  p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        
+
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h1>
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                         <Cell key={i} fill={DASH_COLORS[i]} stroke="none" />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                     />
                   </PieChart>
@@ -242,9 +242,9 @@ export default function AdminDashboard() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                    <Tooltip 
-                       cursor={{ fill: '#f8fafc' }}
-                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    <Tooltip
+                      cursor={{ fill: '#f8fafc' }}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
                     <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} name="Income" />
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
                       <Cell key={i} fill={PIE_COLORS[r._id] || "#94a3b8"} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     formatter={(v) => `₹ ${v.toLocaleString()}`}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                   />
@@ -276,11 +276,11 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {reasons.map((r, i) => (
                 <div key={i} className="flex flex-col p-4 bg-slate-50 rounded-xl border border-slate-100">
-                   <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: PIE_COLORS[r._id] || "#94a3b8" }} />
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{r._id.replace('_', ' ')}</span>
-                   </div>
-                   <span className="text-xl font-bold text-slate-800">₹ {r.totalAmount.toLocaleString()}</span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: PIE_COLORS[r._id] || "#94a3b8" }} />
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{r._id.replace('_', ' ')}</span>
+                  </div>
+                  <span className="text-xl font-bold text-slate-800">₹ {r.totalAmount.toLocaleString()}</span>
                 </div>
               ))}
             </div>
@@ -316,7 +316,7 @@ const StatCard = ({ title, value, icon, color }) => (
   </div>
 );
 
-const GradientStat = ({ title, value, type, color }) => {
+const GradientStat = ({ title, value, type }) => {
   const isUp = type === "up" || type === "profit";
   return (
     <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-slate-300 transition-colors">

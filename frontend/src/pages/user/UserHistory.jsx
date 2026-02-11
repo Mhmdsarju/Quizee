@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import SearchBar from "../../components/SearchBar";
 import Pagination from "../../components/Pagination";
-import {
-  useQuizHistory,
-  useContestHistory,
-} from "../../hooks/useUserHistory";
-import api from "../../api/axios";
+import {useQuizHistory,useContestHistory,} from "../../hooks/useUserHistory";
 import Swal from "sweetalert2";
+import { sendCertificate } from "../../api/contestApi";
+
 
 export default function UserHistory() {
   const [activeTab, setActiveTab] = useState("quiz");
@@ -55,9 +53,7 @@ export default function UserHistory() {
         },
       });
 
-      await api.post("/user/send-certificate", {
-        certificateUrl,
-      });
+      await sendCertificate(certificateUrl);
 
       Swal.fire({
         icon: "success",

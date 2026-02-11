@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import Swal from "sweetalert2";
+import { getContestStatus, joinContest } from "../../api/contestApi";
+
 
 export default function ContestIntro() {
   const { contestId } = useParams();
@@ -15,9 +16,7 @@ export default function ContestIntro() {
   useEffect(() => {
     const fetchContest = async () => {
       try {
-        const res = await api.get(
-          `/user/contest/${contestId}/status`
-        );
+        const res = await getContestStatus(contestId);
         setContest(res.data);
       } catch (err) {
         Swal.fire({
@@ -60,9 +59,7 @@ export default function ContestIntro() {
     try {
       setJoining(true);
 
-      await api.post(
-        `/user/contest/${contestId}/join`
-      );
+      await joinContest(contestId);
 
       Swal.fire({
         title: "Payment Successful",
@@ -70,8 +67,6 @@ export default function ContestIntro() {
         timer: 1000,
         showConfirmButton: false,
       });
-
-      // 🔥 DIRECT TO QUIZ PLAY PAGE
       navigate(`/user/contest/${contestId}/play`);
     } catch (err) {
       const message =

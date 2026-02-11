@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { quizGuard } from "../QuizGuard";
+import { getContestQuiz, submitContestQuiz } from "../../api/contestApi";
+
 
 
 export default function ContestQuizPlay() {
@@ -29,9 +30,7 @@ export default function ContestQuizPlay() {
 
 
   useEffect(() => {
-    api
-      .get(`/user/contest/${contestId}/play`)
-      .then((res) => {
+    getContestQuiz(contestId).then((res) => {
         setQuiz(res.data.quiz);
         setQuestions(res.data.questions);
         setTimeLeft(res.data.quiz.timeLimit * 60);
@@ -187,10 +186,7 @@ export default function ContestQuizPlay() {
         answers[i] !== undefined ? answers[i] : -1
       );
 
-      await api.post(`/user/contest/${contestId}/submit`, {
-        answers: answersArray,
-        timeTaken: quiz.timeLimit * 60 - timeLeft,
-      });
+      await submitContestQuiz(contestId, {answers: answersArray,timeTaken: quiz.timeLimit * 60 - timeLeft,});
 
       navigate(`/user/contest/${contestId}/leaderboard`, {
         replace: true,

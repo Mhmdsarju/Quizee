@@ -1,9 +1,11 @@
 import { useState } from "react";
-import api from "../../api/axios";
 import VerifyEmailModal from "./VerifyEmailModal";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/authSlice";
 import Swal from "sweetalert2";
+import { updateProfile } from "../../api/profileApi";
+import { sendOtpApi } from "../../api/authApi";
+
 
 export default function EditProfileModal({ user, onClose }) {
   const dispatch = useDispatch();
@@ -17,7 +19,7 @@ export default function EditProfileModal({ user, onClose }) {
     try {
       setLoading(true); 
       if (email === user.email) {
-        const res = await api.patch("/user/profile", { name });
+        const res = await updateProfile({ name });
 
         dispatch(updateUser(res.data.user));
 
@@ -33,11 +35,7 @@ export default function EditProfileModal({ user, onClose }) {
         return;
       }
 
-      await api.post("/auth/send-otp", {
-        email,
-        purpose: "email-change",
-      });
-
+      await sendOtpApi({email,purpose: "email-change",});
       setOpenOtp(true);
 
     } catch (err) {

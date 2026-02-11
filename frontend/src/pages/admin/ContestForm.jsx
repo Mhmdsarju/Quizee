@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contestSchema } from "../../schema/contestSchema";
+import { createContest, fetchAdminQuizzes, updateContest } from "../../api/adminContestApi";
 
 export default function ContestForm({ initialData, onClose, onSuccess, }) {
   const isEdit = !!initialData;
@@ -27,8 +27,7 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
   });
 
   useEffect(() => {
-    api
-      .get("/admin/quiz", { params: { limit: 100 } })
+    fetchAdminQuizzes()
       .then(({ data }) => {
         const validQuizzes = (data.data || []).filter(
           (q) => q.questionCount > 0
@@ -100,17 +99,8 @@ export default function ContestForm({ initialData, onClose, onSuccess, }) {
         formData.append("image", imageFile);
       }
 
-      const res = isEdit
-        ? await api.patch(
-          `/admin/contest/${initialData._id}`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        )
-        : await api.post(
-          "/admin/contest",
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      const res = isEdit ? await updateContest(initialData._id, formData) : await createContest(formData);
+
 
       Swal.fire(
         isEdit ? "Updated" : "Created",

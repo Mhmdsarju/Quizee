@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import { useNotifications } from "../../hooks/useNotifications";
 import { FaCheck, FaCheckDouble } from "react-icons/fa";
+import { markAllNotificationsRead, markNotificationRead } from "../../api/notificationApi";
 
 
 export default function UserNotifications({ isOpen, onClose }) {
@@ -16,13 +17,13 @@ export default function UserNotifications({ isOpen, onClose }) {
     queryClient.setQueryData(["notifications"],(old=[])=>
     old.map((n)=>n._id === id ? {...n,isRead:true}:n)
   )
-  await api.patch(`/user/notifications/${id}/read`);
+  await markNotificationRead(id);
   };
 
   const markAll = async (id) => {
     queryClient.setQueryData(["notifications"],(old=[])=>
     old.map((n)=>({...n,isRead:true})))
-    await api.patch("/user/notifications/read-all");
+    await markAllNotificationsRead();
   };
 
   

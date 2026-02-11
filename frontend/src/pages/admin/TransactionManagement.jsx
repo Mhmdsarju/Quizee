@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import api from "../../api/axios";
 import Pagination from "../../components/Pagination";
 import { ArrowUpCircle, ArrowDownCircle, Wallet, Search, Calendar, User as UserIcon, ArrowRightLeft,Filter,RefreshCw} from "lucide-react";
+import { fetchTransactions, fetchTransactionSummary } from "../../api/adminTransactionApi";
 
 export default function TransactionManagement() {
   const [summary, setSummary] = useState({});
@@ -10,7 +10,7 @@ export default function TransactionManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  
 
   useEffect(() => {
     loadSummary();
@@ -21,28 +21,28 @@ export default function TransactionManagement() {
   }, [page]);
 
   const loadSummary = async () => {
-    try {
-      const res = await api.get("/admin/reports/summary");
-      setSummary(res.data);
-    } catch {
-      setError("Failed to load summary stats");
-    }
-  };
+  try {
+    const res = await fetchTransactionSummary();
+    setSummary(res.data);
+  } catch {
+    setError("Failed to load summary stats");
+  }
+};
+
 
   const loadTransactions = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get("/admin/reports/transactions", {
-        params: { page, limit: 10 },
-      });
-      setTransactions(res.data.data);
-      setTotalPages(res.data.pagination.totalPages);
-    } catch {
-      setError("Failed to load transactions");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const res = await fetchTransactions(page, 10);
+    setTransactions(res.data.data);
+    setTotalPages(res.data.pagination.totalPages);
+  } catch {
+    setError("Failed to load transactions");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const getReasonBadge = (reason) => {
     const styles = {
