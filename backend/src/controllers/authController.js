@@ -6,6 +6,14 @@ import dotenv from "dotenv";
 
 dotenv.config()
 const FRONTEND_URL = process.env.FRONTEND_URL
+
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: process.env.NODE_ENV === "production",
+  domain: process.env.NODE_ENV === "production" ? ".quizee.online" : "localhost",
+};
+
 const signup = asyncHandler(async (req, res) => {
   const result = await authService.signup(req.body);
   res.status(statusCode.CREATED).json(result);
@@ -16,12 +24,8 @@ export const googleCallback = async (req, res) => {
     const { user, accessToken, refreshToken } =
       await authService.googleLogin(req.user);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      domain: process.env.COOKIE_DOMAIN,
-    });
+    res.cookie("refreshToken", refreshToken, cookieOptions);
+
 
     res.redirect(`${FRONTEND_URL}/google-success?token=${accessToken}`);
   } catch {
@@ -33,12 +37,8 @@ const verifyotp = asyncHandler(async (req, res) => {
   const { user, accessToken, refreshToken } =
     await authService.verifyOtp(req.body);
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    domain: process.env.COOKIE_DOMAIN,
-  });
+  res.cookie("refreshToken", refreshToken, cookieOptions);
+
 
   res.json({ user, accessToken });
 });
@@ -52,12 +52,8 @@ const login = asyncHandler(async (req, res) => {
   const { user, accessToken, refreshToken } =
     await authService.login(req.body);
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    domain: process.env.COOKIE_DOMAIN,
-  });
+  res.cookie("refreshToken", refreshToken, cookieOptions);
+
 
   res.json({ user, accessToken });
 });
@@ -107,13 +103,8 @@ const resendForgotOtp = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    domain: process.env.COOKIE_DOMAIN,
-  });
 
+  res.cookie("refreshToken", "", {...cookieOptions,expires: new Date(0),});
   res.json({ message: "Logged out successfully" });
 });
 
