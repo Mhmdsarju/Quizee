@@ -2,7 +2,10 @@ import asyncHandler from "express-async-handler";
 import authService, { changePasswordService } from "../services/authService.js";
 import { statusCode } from "../constant/constants.js";
 import AppError from "../utils/AppError.js";
+import dotenv from "dotenv";
 
+dotenv.config()
+const FRONTEND_URL = process.env.FRONTEND_URL
 const signup = asyncHandler(async (req, res) => {
   const result = await authService.signup(req.body);
   res.status(statusCode.CREATED).json(result);
@@ -16,13 +19,13 @@ export const googleCallback = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false,
-      domain: ".localhost",
+      secure: process.env.NODE_ENV === "production",
+      domain: process.env.COOKIE_DOMAIN,
     });
 
-    res.redirect(`http://localhost:5173/google-success?token=${accessToken}`);
+    res.redirect(`${FRONTEND_URL}/google-success?token=${accessToken}`);
   } catch {
-    res.redirect("http://localhost:5173/login");
+    res.redirect(`${FRONTEND_URL}/login`);
   }
 };
 
@@ -33,8 +36,8 @@ const verifyotp = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
-    domain: ".localhost",
+    secure: process.env.NODE_ENV === "production",
+    domain: process.env.COOKIE_DOMAIN,
   });
 
   res.json({ user, accessToken });
@@ -52,8 +55,8 @@ const login = asyncHandler(async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
-    domain: ".localhost",
+    secure: process.env.NODE_ENV === "production",
+    domain: process.env.COOKIE_DOMAIN,
   });
 
   res.json({ user, accessToken });
@@ -104,11 +107,11 @@ const resendForgotOtp = asyncHandler(async (req, res) => {
 });
 
 const logout = asyncHandler(async (req, res) => {
-  res.clearCookie("refreshToken", {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
-    domain: ".localhost",
+    secure: process.env.NODE_ENV === "production",
+    domain: process.env.COOKIE_DOMAIN,
   });
 
   res.json({ message: "Logged out successfully" });
@@ -132,4 +135,4 @@ const changePassword = asyncHandler(async (req, res) => {
   res.json({ message: "Password changed successfully" });
 });
 
-export default {signup,verifyotp,resendotp,login,refresh,logout,forgotPassword,verifyForgotOtp,resendForgotOtp,resetPassword,sendOtp,googleCallback,changePassword,};
+export default { signup, verifyotp, resendotp, login, refresh, logout, forgotPassword, verifyForgotOtp, resendForgotOtp, resetPassword, sendOtp, googleCallback, changePassword, };

@@ -31,7 +31,7 @@ contestStatusCron();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173","http://admin.localhost:5173"];
+const allowedOrigins = [process.env.FRONTEND_URL,process.env.ADMIN_URL,];
 
 
 app.use(
@@ -65,7 +65,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-// app.use("/api",apiLimiter);
+app.use("/api",apiLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);

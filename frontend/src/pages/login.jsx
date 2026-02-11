@@ -34,7 +34,7 @@ export default function Login() {
     if (role === "admin") {
       navigate("/dashboard", { replace: true });
     } else {
-      window.location.href = "http://localhost:5173/";
+      window.location.href = "/";
     }
   }
 };
@@ -134,7 +134,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                window.location.href = "http://localhost:5005/api/auth/google";
+               window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
               }}
               className="w-full flex items-center justify-center gap-3 bg-white text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
             >
