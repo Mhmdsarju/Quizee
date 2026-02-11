@@ -5776,3 +5776,13 @@
 {"level":"info","message":"::1 - - [11/Feb/2026:18:16:39 +0000] \"GET /api/user/quiz-history HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T18:16:39.706Z"}
 {"level":"info","message":"::1 - - [11/Feb/2026:18:16:39 +0000] \"GET /api/user/contest?search=&sort=latest&page=1 HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T18:16:39.932Z"}
 {"level":"info","message":"::1 - - [11/Feb/2026:18:16:39 +0000] \"GET /api/user/quizzes?category=&sort=latest&page=1&search= HTTP/1.1\" 304 - \"http://localhost:5173/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36\"","timestamp":"2026-02-11T18:16:39.934Z"}
+{"level":"info","message":"Socket.io initialized","timestamp":"2026-02-11T18:37:37.819Z"}
+{"level":"info","message":"Server running 5005","timestamp":"2026-02-11T18:37:37.824Z"}
+{"level":"info","message":"Socket connected: KEW113notrU51xcvAAAB","timestamp":"2026-02-11T18:37:39.560Z"}
+{"level":"info","message":"Socket connected: zGM2B3wgJYv0Es0EAAAD","timestamp":"2026-02-11T18:37:39.572Z"}
+{"level":"info","message":"Socket connected: 5tjj678PDQXStSP1AAAF","timestamp":"2026-02-11T18:37:40.550Z"}
+{"level":"info","message":"Socket connected: EIIuqpI4WZxzMDFiAAAH","timestamp":"2026-02-11T18:37:40.573Z"}
+{"level":"info","message":"Socket disconnected: zGM2B3wgJYv0Es0EAAAD | reason: transport close","timestamp":"2026-02-11T18:44:54.904Z"}
+{"level":"info","message":"Socket disconnected: 5tjj678PDQXStSP1AAAF | reason: transport close","timestamp":"2026-02-11T18:44:57.334Z"}
+{"level":"warn","message":"SIGINT received. Starting graceful shutdown...","timestamp":"2026-02-11T18:45:08.070Z"}
+{"level":"error","message":"Graceful shutdown timed out. Force exiting.","timestamp":"2026-02-11T18:45:18.080Z"}

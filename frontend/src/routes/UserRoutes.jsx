@@ -25,7 +25,7 @@ import GoogleSuccess from "../pages/GoogleSuccess";
 import ContestLeaderboard from "../pages/user/ContestLeaderboard";
 import ContestQuizPlay from "../pages/user/ContestQuizPlay";
 import ContestIntro from "../pages/user/ContestIntro";
-
+import NotFound from "../pages/NotFound";
 
 
 const UserRoutes = () => {
@@ -60,6 +60,9 @@ const UserRoutes = () => {
         <Route path="user/settings" element={<UserSettings />} />
         <Route path="user/history" element={<UserHistory />} />
       </Route>
+
+      <Route path="*" element={<NotFound />} />
+
     </Routes>
   );
 };

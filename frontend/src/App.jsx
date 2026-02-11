@@ -25,8 +25,10 @@ function App() {
     }
 
     if (!accessToken && !hasTriedRefresh) {
-      dispatch(refreshToken());
-    }
+    dispatch(refreshToken());
+  } else {
+    dispatch(setAuthChecked());  
+  }
   }, [dispatch, accessToken, hasTriedRefresh, subdomain]);
   return (
     <BrowserRouter>
