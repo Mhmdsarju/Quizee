@@ -84,10 +84,10 @@ export default function ContestCard({ contest, onUpdate, onEdit }) {
           </div>
         )}
 
-        <p className="text-xs text-gray-400 mt-2">
-          {new Date(startTime).toLocaleString()} –{" "}
-          {new Date(endTime).toLocaleString()}
-        </p>
+       <p className="text-xs text-gray-400 mt-2">
+  {new Date(startTime).toUTCString()} –{" "}
+  {new Date(endTime).toUTCString()}
+</p>
 
         <div className="flex gap-2 pt-3">
           {displayStatus === "UPCOMING" && !isBlocked && (
