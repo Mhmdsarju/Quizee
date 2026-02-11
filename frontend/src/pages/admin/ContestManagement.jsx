@@ -70,7 +70,7 @@ export default function ContestManagement() {
       </div>
 
       {loading ? (
-        <p className="text-center text-gray-400">Loading...</p>
+        <p className="text-center text-gray-400">Loading.....</p>
       ) : contests.length === 0 ? (
         <p className="text-center text-gray-400">No contests found</p>
       ) : (
