@@ -31,7 +31,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
     },
   });
 
-  // Fetch quizzes
   useEffect(() => {
     fetchAdminQuizzes()
       .then(({ data }) => {
@@ -43,7 +42,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
       .catch(() => setQuizzes([]));
   }, []);
 
-  // Edit mode reset
   useEffect(() => {
     if (!initialData) return;
 
@@ -54,13 +52,18 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
       prizeFirst: initialData.prizeConfig?.first ?? 100,
       prizeSecond: initialData.prizeConfig?.second ?? 50,
       prizeThird: initialData.prizeConfig?.third ?? 25,
-       startTime: initialData.startTime
-        ? new Date(initialData.startTime).toISOString().slice(0, 16) 
+      startTime: initialData.startTime
+        ? new Date(initialData.startTime)
+          .toLocaleString("sv-SE", { timeZone: "Asia/Kolkata" })
+          .slice(0, 16)
         : "",
 
       endTime: initialData.endTime
-        ? new Date(initialData.endTime).toISOString().slice(0, 16) 
+        ? new Date(initialData.endTime)
+          .toLocaleString("sv-SE", { timeZone: "Asia/Kolkata" })
+          .slice(0, 16)
         : "",
+
     });
 
     if (initialData.quiz) {
@@ -148,7 +151,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
         {isEdit ? "Edit Contest" : "Create Contest"}
       </h2>
 
-      {/* Title */}
       <div>
         <label className="text-sm font-medium text-gray-600">
           Contest Title
@@ -164,7 +166,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
         )}
       </div>
 
-      {/* Image */}
       <div>
         <label className="text-sm font-medium text-gray-600">
           Contest Image (optional)
@@ -186,7 +187,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
         />
       </div>
 
-      {/* Quiz */}
       <div>
         <label className="text-sm font-medium text-gray-600">Quiz</label>
 
@@ -217,7 +217,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
         )}
       </div>
 
-      {/* Entry Fee */}
       <div>
         <label className="text-sm font-medium text-gray-600">
           Entry Fee (₹)
@@ -235,7 +234,6 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
         )}
       </div>
 
-      {/* Time */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium text-gray-600">
@@ -270,14 +268,12 @@ export default function ContestForm({ initialData, onClose, onSuccess }) {
         </div>
       </div>
 
-      {/* Prize */}
       <div className="grid grid-cols-3 gap-4">
         <input type="number" {...register("prizeFirst")} className="border p-2 rounded-lg" />
         <input type="number" {...register("prizeSecond")} className="border p-2 rounded-lg" />
         <input type="number" {...register("prizeThird")} className="border p-2 rounded-lg" />
       </div>
 
-      {/* Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t">
         <button
           type="button"
